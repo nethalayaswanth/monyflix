@@ -40,6 +40,10 @@ export default function ModalCarousel({
         slidesPerView: clips ? 1 : 2,
         spaceBetween: 10,
       },
+      740: {
+        slidesPerView: clips ? 2 : 3,
+        spaceBetween: 10,
+      },
       1000: {
         slidesPerView: clips ? 3 : 4,
         spaceBetween: 10,

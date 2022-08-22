@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, {css, keyframes } from "styled-components";
 
 export const keyFrameExampleOne = keyframes`
    0%{
@@ -9,7 +9,7 @@ export const keyFrameExampleOne = keyframes`
     }
 `;
 
-export const Shimmer = styled.img`
+const styles = css`
   animation-duration: 1.25s;
   animation-fill-mode: forwards;
   animation-iteration-count: infinite;
@@ -19,11 +19,17 @@ export const Shimmer = styled.img`
   background: darkgray;
   border: none;
   border: 0px;
-  background:  linear-gradient(to right, #c8c8c8 10%, #ffffff 33%, #c8c8c8 60%);
+  background: linear-gradient(to right, #c8c8c8 10%, #ffffff 33%, #c8c8c8 60%);
   background-size: 1000px 100%;
-  height: ${(props) => props.height};
-  width: ${(props) => props.width};
+  height: ${(props) => (props.height ? props.height : "100%")};
+  width: ${(props) => (props.width ? props.width : "100%")};
   position: relative;
 `;
 
+
+export const Shimmer = styled.img`
+${styles}
+`
+
+;
 export default Shimmer;

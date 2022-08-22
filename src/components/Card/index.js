@@ -28,6 +28,7 @@ import {
   isMobile,
 } from "react-device-detect";
 import { useSearchParams } from "react-router-dom";
+import ProgressiveImage from "../ProgressiveImage";
 const Card = forwardRef(({ id, style, movie }, ref) => {
   const [{ activated, expand, enabled, expanded }, dispatch] = useModalState();
 
@@ -79,7 +80,9 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
   const src = movie
     ? `https://image.tmdb.org/t/p/original/${movie?.posterPath}`
     : null;
-
+const placeholderSrc = movie
+  ? `https://image.tmdb.org/t/p/w300/${movie?.posterPath}`
+  : null;
 
   const handleClick = useCallback(async () => {
     if (!isMobile) return;
@@ -112,7 +115,13 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
     >
       {movie !== null && (
         <AspectBox ref={refCb} potrait>
-          {movie && <Image src={src} alt={`${movie?.title}`} />}
+          {movie && (
+            <ProgressiveImage
+              src={src}
+              placeholderSrc={placeholderSrc}
+              alt={`${movie?.title}`}
+            />
+          )}
         </AspectBox>
       )}
     </CardOuter>

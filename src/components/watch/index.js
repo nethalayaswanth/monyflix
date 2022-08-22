@@ -21,7 +21,7 @@ const Watch = () => {
   return (
     <Container>
       <div style={{ height: "100%", width: "100%" }}>
-        <Youtube id={id} light={false} playOnMount={true} full />
+        <Youtube id={id} light={false} play={true} full />
       </div>
     </Container>
   );

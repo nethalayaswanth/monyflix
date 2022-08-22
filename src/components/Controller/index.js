@@ -31,7 +31,7 @@ const Svg = styled(Arrow)`
   width: 9px;
   height:20px;
 
-  @media only screen and (min-width: 820px) {
+  @media only screen and (min-width: 740px) {
     width: 13px;
     height: 29px;
   }

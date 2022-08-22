@@ -15,7 +15,7 @@ import { useGetLatestMovie } from "../../requests/requests";
 import styled, { css } from "styled-components";
 import AspectBox from "../AspectBox";
 import Card from "../Card";
-import Youtube from "../Youtube";
+import {Youtube }from "../Youtube";
 
 import {
   Container,
@@ -25,7 +25,8 @@ import {
   TopGradient,Scroll,
   Down,
 } from "./styles";
-import Shimmer from "../shimmer";
+import useMedia from "../../hooks/useMedia";
+import { useModalState } from "../../contexts/modalContext";
 
 const Landing = () => {
   const { data, loading, error } = useGetLatestMovie();
@@ -61,6 +62,25 @@ const Landing = () => {
     });
   }, []);
 
+
+  const device = useMedia(
+    // Media queries
+    ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"],
+
+    ["desktop", "tablet", "mobile"],
+
+    "desktop"
+  );
+
+  const mobile = device === "mobile";
+  const desktop = device === "desktop"; 
+
+  const [{activated,expand}]=useModalState()
+
+  const play = activated || expand ;
+
+  console.log(activated, expand,play);
+
   return (
     <Container ref={scrollRef}>
       <Picture
@@ -85,7 +105,6 @@ const Landing = () => {
             />
             <img
               className="absolute"
-              style={{ objectFit: "contain" }}
               src={`https://image.tmdb.org/t/p/original/${posterPath}`}
               alt=""
             />
@@ -95,7 +114,7 @@ const Landing = () => {
 
       <div className="absolute">
         <Gradient />
-        <TopGradient/>
+        <TopGradient />
       </div>
       {id && (
         <div className="absolute">
@@ -115,16 +134,16 @@ const Landing = () => {
                 overflow: "hidden",
                 transform: "translate(-50%,-50%)",
                 height: "100%",
-                aspectRatio: 16 / 9,
+                ...(!desktop ? { aspectRatio: 16 / 9 } : { width: "100%" }),
               }}
             >
               <Youtube
                 id={id}
-                playOnMount
+                playOnMount={!play}
                 light={false}
                 interectionOptions={{
-                  rootMargin: "0px 0px 0px 0px",
-                  threshold: 0.9,
+                  rootMargin: "200px 0px 200px 0px",
+                  threshold: 0.7,
                 }}
               />
             </div>

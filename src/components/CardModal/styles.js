@@ -49,12 +49,18 @@ export const Flex = styled.div`
 
 
 export const Content = styled(Flex)`
-  padding: 0 25px;
-
-  @media only screen and (min-width: 820px) {
-    padding: 0 40px;
-  }
+  padding: 0 10px;
   flex: 1;
+  ${({ expand }) =>
+    expand
+      ? css`
+          padding: 0 25px;
+
+          @media only screen and (min-width: 740px) {
+            padding: 0 40px;
+          }
+        `
+      : ``}
 `;
 
 export const Header = styled.div`
@@ -90,6 +96,7 @@ export const ModalWrapper = styled(Block)`
   flex-direction: column;
   background-color: white;
   display: flex;
+  overflow: hidden;
   
 `;
 export const ImageWrapper = styled.div`
@@ -141,9 +148,9 @@ export const Spacer = styled.div`
 `;
 
 export const Title = styled(Text)`
-  font-size: 15px;
-  line-height: 1.46667;
-  font-weight: 500;
+  font-size: ${({ expand }) => (expand ? "1.7rem" : "1.5rem")};
+  line-height: 1.23;
+  font-weight: ${({ expand }) => (expand ? 600 : 500)};
   letter-spacing: 0;
   white-space: normal;
   opacity: 1;
@@ -161,10 +168,10 @@ export const Overview = styled(Text)`
   //white-space: normal;
   overflow: hidden !important;
   text-overflow: ellipsis;
-  -webkit-line-clamp: 6;
+  -webkit-line-clamp: 5;
   display: -webkit-box;
   padding-bottom: 2px;
-  //flex:auto;
+  //flex:2;
   opacity:0.8;
 `;
 

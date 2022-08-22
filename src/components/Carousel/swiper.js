@@ -24,11 +24,12 @@ import { Pagination, Navigation, Mousewheel } from "swiper";
 import { useEpicState } from "../Epic/context";
 
 import { SwiperWrapper } from "./views";
+import useMedia from "../../hooks/useMedia";
 
 function Index(
   {
     children,
-    style,
+    style, 
     dark,
     breakpoints,
     transitionEvents,
@@ -40,6 +41,17 @@ function Index(
   const swiper = useRef();
   const [isBeginning, setIsBeginning] = useState(() => true);
   const [isEnd, setIsEnd] = useState(() => false);
+
+  const device= useMedia(
+    // Media queries
+    ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"],
+    
+    ["desktop", "tablet", "mobile"],
+    
+    "desktop"
+  );
+
+  
 
   const [cbRef, isHovering] = useHover();
   const onSwiperReady = useCallback((instance) => {
@@ -86,11 +98,19 @@ function Index(
     ...breakpoints,
   };
 
+  const mobile = device==="mobile"
+  const desktop=device==="desktop"
   return (
     <>
       <SwiperWrapper
         ref={SwiperWrapperRef}
-        style={{ ...style, overflow: "visible" }}
+        style={{
+          ...style,
+          overflow: "visible",
+          padding: desktop ? "0 40px" : "",
+        }}
+        mobile={mobile}
+        desktop={desktop}
       >
         <Swiper
           className="Carousel"
@@ -118,7 +138,7 @@ function Index(
           disable={isBeginning}
           visible={isHovering}
           dark={dark}
-          style={{ opacity: isMobile ? 0 : 1 }}
+          style={{ opacity: desktop ? 1 : 0 }}
         />
         <Forward
           key="next"
@@ -129,7 +149,7 @@ function Index(
           disable={isEnd}
           visible={isHovering}
           dark={dark}
-          style={{ opacity: isMobile ? 0 : 1 }}
+          style={{ opacity: desktop ? 1 : 0 }}
         />
       </SwiperWrapper>
     </>

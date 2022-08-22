@@ -10,7 +10,7 @@ export const GlobalStyles = createGlobalStyle`
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #333333;
-    //font-size:  62.5%;
+    font-size:  62.5%;
 }
 button{
   margin: 0;

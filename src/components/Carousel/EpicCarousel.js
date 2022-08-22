@@ -52,32 +52,69 @@ export default function EpicCarousel({
     }
   }, [visible, fetchMore, data, hasMore, isFetching]);
 
-  return (
-    <>
-      <Swiperjs
-        ref={swiper}
-        style={style}
-        dark={dark}
-        onSlideChangeTransitionStart={slideChangeTransitionStart}
-        onSlideChangeTransitionEnd={slideChangeTransitionEnd}
-      >
-        {data.length !== 0
-          ? data.map((movie, i) => {
-             
-              return (
-                <SwiperSlide ref={slide} key={i} index={i}>
-                  <Slide index={i} movie={movie} />
-                </SwiperSlide>
-              );
-            })
-          : [...Array(5).fill(0)].map((movie, i) => {
-              return (
-                <SwiperSlide ref={slide} key={i} index={i}>
-                  <Slide />
-                </SwiperSlide>
-              );
-            })}
-      </Swiperjs>
-    </>
-  );
+   const breakpoints = {
+     breakpoints: {
+       320: {
+         slidesPerView: 3,
+         spaceBetween: 10,
+       },
+       480: {
+         slidesPerView: 4,
+         spaceBetween: 10,
+       },
+       740: {
+         slidesPerView: 6,
+         spaceBetween: 10,
+       },
+       1000: {
+         slidesPerView: 8,
+         spaceBetween: 10,
+       },
+       1320: {
+         slidesPerView: 9,
+         spaceBetween: 10,
+       },
+       1500: {
+         slidesPerView: 9,
+         spaceBetween: 10,
+       },
+     },
+   };
+   return (
+     <>
+       <Swiperjs
+         ref={swiper}
+         style={style}
+         dark={dark}
+         onSlideChangeTransitionStart={slideChangeTransitionStart}
+         onSlideChangeTransitionEnd={slideChangeTransitionEnd}
+         breakpoints={breakpoints}
+       >
+         {data.length !== 0 ? (
+           <>
+             {data.map((movie, i) => {
+               return (
+                 <SwiperSlide ref={slide} key={i} index={i}>
+                   <Slide index={i} movie={movie} />
+                 </SwiperSlide>
+               );
+             })}
+             {hasMore && !loading && (
+               <SwiperSlide key={"loading"}>
+                 <Slide ref={elRef} />
+               </SwiperSlide>
+             )}
+           </>
+         ) : (
+           [...Array(5).fill(0)].map((movie, i) => {
+             return (
+               <SwiperSlide ref={slide} key={i} index={i}>
+                 <Slide />
+               </SwiperSlide>
+             );
+           })
+         )}
+       </Swiperjs>
+     </>
+   );
 }

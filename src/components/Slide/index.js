@@ -4,7 +4,7 @@ import { useSwiperSlide } from "swiper/react";
 import { CardWrapper, Image } from "../Card/styles";
 import { useEpicState } from "../Epic/context";
 import AspectBox from "../AspectBox";
-
+import Shimmer from "../shimmer";
 
 
 const Slide = forwardRef(({ height, style,index, movie },ref) => {

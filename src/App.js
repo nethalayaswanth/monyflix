@@ -68,7 +68,7 @@ function App() {
       <Section query={"POPULAR"} title={"Popular"} />
       <Section query={"UPCOMING"} title={"Upcoming"} />
       <Section query={"PLAYING"} title={"Playing Now"} />
-      <Epic genre={"Drama"} />
+      <Epic genre={["Romance"]} title={"Drama"} />
     </div>
   );
 }

@@ -52,6 +52,8 @@ import { useModalState } from "../../contexts/modalContext";
 
 import { useLayoutEffectAfterMount } from "../../hooks/useEffectAfterMount";
 import { useSpring, animated } from "react-spring";
+import ProgressiveImage from "../ProgressiveImage";
+import useMedia from "../../hooks/useMedia";
 
 const CardModal = forwardRef(({ style, width }, ref) => {
   const [
@@ -156,12 +158,18 @@ const CardModal = forwardRef(({ style, width }, ref) => {
   const current = movie || movieDetails?.movie;
   const year = current?.releaseDate.split("-")[0];
 
-  const src = current
+  const posterPath = current
     ? `https://image.tmdb.org/t/p/original/${current?.posterPath}`
     : null;
+    const placeholderPoster = movie
+      ? `https://image.tmdb.org/t/p/w500/${current?.posterPath}`
+      : null;
   const backDropPath = current
     ? `https://image.tmdb.org/t/p/original/${current?.backdropPath}`
     : null;
+    const placeHolderBackDropPath = current
+      ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
+      : null;
 
 
 
@@ -169,21 +177,22 @@ const CardModal = forwardRef(({ style, width }, ref) => {
     return {
       from: {
         opacity: 1,
-      },
-      to: {
-        opacity: 0,
-      },
+      }
     };
   });
 
   useLayoutEffect(() => {
     if (miniExpand && activate) {
-      api.start();
+      api.start({
+        opacity: 0,
+      });
       
     }
     if (!miniExpand && !activate) {
-      console.log("adnkahjd");
-      api.start({ reverse: true });
+     
+      api.start({
+        opacity:1 ,
+      });
     }
   }, [activate, api, miniExpand]);
 
@@ -207,21 +216,39 @@ const CardModal = forwardRef(({ style, width }, ref) => {
     dispatch({ type: "set reset" });
   }, [dispatch]);
   
+
+  
+  const device = useMedia(
+    // Media queries
+    ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"],
+
+    ["desktop", "tablet", "mobile"],
+
+    "desktop"
+  );
+
+    const mobile = device === "mobile";
+    const desktop = device === "desktop"; 
   return (
     <ModalWrapper ref={ref} id="card-modal">
       <animated.div
         style={{
-          
           opacity: opacity,
-
-          ...(expand && { position: "absolute", top: 0,
-          left: 0,
           width: "100%",
-          height: "max-content", }),
+          height: "100%",
+          ...(expand && {
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }),
         }}
       >
         <AspectBox potrait>
-          <Image src={src} alt={``} />
+          <Shimmer
+            style={{ width: "100%", height: "100%", Zindex: 5 }}
+            src={posterPath}
+            alt={``}
+          />
         </AspectBox>
       </animated.div>
       <animated.div
@@ -233,6 +260,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
           display: "flex",
           flexDirection: "column",
           opacity: opacity.to({ range: [1.0, 0.0], output: [0, 1] }),
+          ...(expand && !desktop && { minHeight: "100vh" }),
           ...(!expand && { position: "absolute" }),
         }}
       >
@@ -252,16 +280,17 @@ const CardModal = forwardRef(({ style, width }, ref) => {
                   id={id}
                   light={false}
                   //style={{ transform: "translateY(-12.7%)" }}
-                  playOnMount={true}
+                  play={true}
                 />
               )}
             </animated.div>
           </div>
 
           <AspectBox style={{ zIndex: 1 }}>
-            <Shimmer
+            <ProgressiveImage
               style={{ width: "100%", height: "100%", Zindex: 5 }}
               src={backDropPath}
+              placeholderSrc={placeHolderBackDropPath}
               alt={``}
             />
           </AspectBox>
@@ -282,10 +311,10 @@ const CardModal = forwardRef(({ style, width }, ref) => {
         >
           {
             <>
-              <Content >
+              <Content expand={expand} style={{}}>
                 <Description expand={expand}>
                   <Header>
-                    <Title>{current.title}</Title>
+                    <Title expand={expand}>{current.title}</Title>
                   </Header>
                   <InlineFlex>
                     <Item>{year}</Item>
@@ -297,12 +326,12 @@ const CardModal = forwardRef(({ style, width }, ref) => {
                 <Overview>{current.overview}</Overview>
                 <Spacer />
                 {!(expand || expanded) && (
-                  <div>
+                  <>
                     <Divider />
                     <Open>
                       <Up onClick={handleExpand} />
                     </Open>
-                  </div>
+                  </>
                 )}
               </Content>
               {videoData && (expand || expanded) && (

@@ -24,14 +24,10 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { BrowserRouter } from "react-router-dom";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-const client = new ApolloClient({
-  uri: "http://localhost:4000/",
-  cache,
-});
 
 const queryClient = new QueryClient();
 root.render(
-  <ApolloProvider client={client}>
+  
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />
@@ -40,7 +36,7 @@ root.render(
 
       <ReactQueryDevtools initialIsOpen />
     </QueryClientProvider>
-  </ApolloProvider>
+ 
 );
 
 // If you want to start measuring performance in your app, pass a function

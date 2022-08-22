@@ -19,7 +19,7 @@ const Text = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.8em;
+  font-size: 1.2rem;
   font-weight: 400;
   line-height: 1.34;
   margin-top: 0.5em;

@@ -2,7 +2,7 @@ import styled, { css } from "styled-components";
 
 export const SwiperWrapper = styled.div`
   position: relative;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 
   .swiper {
     margin: 0 auto;
@@ -18,9 +18,10 @@ export const SwiperWrapper = styled.div`
     top: 0;
     padding: 0 25px;
 
-    @media only screen and (min-width: 820px) {
+    @media only screen and (min-width: 740px) {
       padding: 0 40px;
     }
+    ${({desktop})=>desktop?css`{padding:0px }`:''}
   }
   .wrapper {
     position: relative;

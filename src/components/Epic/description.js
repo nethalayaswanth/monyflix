@@ -7,16 +7,19 @@ const Container = styled.div`
   display: flex;
   align-items: flex-end;
   flex: 1;
-  padding: 0 25px 20px;
   text-align: left;
   z-index: 8;
   color: white;
 
-  position: absolute;
   align-items: center;
   height: calc(100% - 102px);
-  padding-left: 40px;
-  padding-right: 40px;
+  padding: 0 25px;
+
+  @media only screen and (min-width: 740px) {
+    padding: 10vh 40px;
+  }
+
+  padding-bottom: 10vh;
 `;
 
 const Details = styled.div`
@@ -31,26 +34,36 @@ const Text = styled.div`
   text-overflow: ellipsis;
   margin: 7px 0;
   word-wrap: break-word;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  line-height: 1.34;
+  line-height: 2.4rem;
   opacity: 0.7;
 `;
 
 const ButtonText = styled.div`
   display: block;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.34;
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 2rem;
+  @media only screen and (min-width: 740px) {
+    font-size: 1.6rem;
+    font-weight: bold;
+    line-height: 2.4rem;
+  }
 `;
 const Title = styled(Text)`
-  font-size: 1.8rem;
-  font-weight: 600;
-  line-height: 1.34;
+  font-size: 1.6rem;
+  font-weight: bold;
+  line-height: 2.4rem;
   color: rgba(255, 255, 255, 1);
   white-space: normal;
   opacity: 1;
   letter-spacing: 0;
+  @media only screen and (min-width: 740px) {
+    font-size: 2.4rem;
+    font-weight: 600;
+    line-height: 1.34;
+  }
 `;
 
 const Overview = styled(Text)`
@@ -74,7 +87,6 @@ const Flex = styled.div`
 
 const Button = styled.div`
   display: flex;
-  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -86,12 +98,20 @@ const Button = styled.div`
   border: 0px;
   border-radius: 4px;
   cursor: pointer;
-  margin-left:20px;
-  padding:4px;
-  padding-left: 10px;
-  padding-right: 10px;
+  margin-left: 20px;
+  padding: 0.6rem;
+  padding-left: 1.6rem;
+  padding-right: 1.8rem;
+  background-color: rgba(109, 109, 110, 0.7);
+  color: white;
   &:hover {
-    background-color: rgba(255, 255, 255, 0.75);
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  @media only screen and (min-width: 740px) {
+    padding: 0.8rem;
+    padding-left: 2rem;
+    padding-right: 2.4rem;
   }
 `;
 

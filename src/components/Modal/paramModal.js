@@ -20,7 +20,7 @@ import { getStyles, getExpandStyles } from "./utils";
 import { useSpring, animated, to } from "@react-spring/web";
 import useHover from "../../hooks/useHover";
 import { useAppState } from "../../contexts/appContext";
-import useMeasure from "react-use-measure";
+
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
 import ParamCardModal from "../CardModal/paramModal";
@@ -307,6 +307,7 @@ console.log("%ccollapse", "color:red");
    
     requestAnimationFrame(() => {
       const main = document.getElementById("app");
+      if(!main) return
       main.style.top = "unset";
       main.style.position = "static";
       window.scroll({

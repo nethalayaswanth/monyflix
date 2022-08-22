@@ -10,11 +10,11 @@ export const Container = styled.div`
   overflow: hidden;
   background-color: rgb(4, 0, 0);
   margin: auto;
-  max-width: 1680px;
-  height: calc(1680px * 9 / 16);
+  max-width: 100vw;
+  //max-height:100vh;
   z-index: 1;
 
-  @media only screen and (max-width: 1679px) {
+  @media only screen and (max-width: 100vw) {
     width: 100%;
     height: 56.25vw;
   }
@@ -40,7 +40,7 @@ export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  max-height: 100vh;
+  max-height: 120vh;
 
   /* @media only screen and (min-width: 550px) {
     min-height: 750px;
@@ -75,12 +75,12 @@ export const TopGradient = styled.div`
   position: absolute;
   top: 0;
   width: 100%;
-  height: 10%;
+  height: 30%;
   -webkit-mask-image: linear-gradient(to bottom, #000 75%);
   mask-image: linear-gradient to bottom, #000 75%;
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 0%,
     rgba(0, 0, 0, 0.7) 10%,
     rgba(0, 0, 0, 0.6) 20%,
     rgba(0, 0, 0, 0.02) 80%,

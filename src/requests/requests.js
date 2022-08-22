@@ -12,7 +12,7 @@ import {
   Movie,
 } from "./queries";
 
-const endpoint = "http://localhost:4001/";
+const endpoint = "http://localhost:4000/";
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
@@ -56,11 +56,31 @@ export function useGetSimilarMovies({ id }) {
   );
 }
 export function useGetMoviesByGenre({ genres }) {
+  const Id = {
+    Romance: 10749,
+    Drama: 18,
+    Music: 10402,
+    Animation: 16,
+    Comedy: 35,
+    Action: 28,
+    Horror: 21,
+    Thriller: 53,
+    Mystery: 9648,
+    Adventure: 12,
+    Fantasy: 14,
+  };
+
+  let A = [];
+
+  genres.forEach((x) => {
+    A.push(`${Id[x]}`);
+  });
+  console.log(A);
   return useInfiniteQuery(
     ["getMoviesByGenre", genres],
     async ({ pageParam = 0 }) => {
       const data = await graphQLClient.request(MovieGenre, {
-        genres,
+        genres: A,
         after: pageParam,
       });
       return data;

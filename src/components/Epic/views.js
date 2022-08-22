@@ -4,21 +4,39 @@ import radient from "../../assets/radient.png";
 export const Container = styled.div`
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: flex-start;
   overflow: hidden;
-  min-height: 500px;
-  max-height:100vh;
+  background-color: rgb(0, 0, 0);
+  margin: auto;
+  max-width: 100vw;
+  z-index: 1;
+  min-height: calc(100vw / 0.65);
 
-  @media only screen and (min-width: 550px) {
-    min-height: 750px;
+  max-height: 100vh;
+
+  @media only screen and (min-width: 480px) {
+    min-height: calc(100vw / 0.85);
   }
+ 
   @media only screen and (min-width: 650px) {
-    min-height: 950px;
+    min-height: 520px;
   }
+
   @media only screen and (min-width: 740px) {
     min-height: 362px;
   }
-  background-color: rgb(4, 0, 0);
+
+  .absolute {
+    height: 100%;
+    width: 100%;
+    -o-object-fit: cover;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+  }
 `;
 
 export const Image = styled.img`
@@ -27,6 +45,16 @@ export const Image = styled.img`
   margin-bottom: -7px;
 `;
 
+export const Carousel = styled.div`
+  position: absolute;
+  width: 100%;
+  height: unset;
+  bottom: 10px;
+  @media only screen and (min-width: 1000px) {
+    bottom: 20px;
+  }
+  top: unset;
+`;
 export const Gradient = styled.div`
   position: absolute;
   bottom: 0;
@@ -38,12 +66,12 @@ export const Gradient = styled.div`
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  background-color: rgba(30, 30, 30, 0.3);
+  background-color: rgba(30, 30, 30, 0.2);
   -webkit-backdrop-filter: blur(30px) saturate(70%);
   backdrop-filter: blur(30px) saturate(70%);
   z-index: 1;
   background-image: url(${radient});
-  background: rgba(4, 0, 0, 0.5);
+  background: rgba(4, 0, 0, 0.2);
   z-index: 7;
 `;
 

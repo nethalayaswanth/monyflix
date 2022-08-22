@@ -9,19 +9,21 @@ import React, {
   useMemo,
 } from "react";
 
-import { Container, Image, Gradient, Wrapper } from "./views";
+import { Container,Carousel, Image, Gradient, Wrapper } from "./views";
 import Card from "../Card";
-import Youtube from "../Youtube";
+import {Youtube} from "../Youtube";
 import EpicCarousel from "../Carousel/EpicCarousel";
 import { useEpicState } from "./context";
 import AspectBox from "../AspectBox";
 import Description from "./description";
 import { useGetMoviesByGenre } from "../../requests/requests";
-
-
-export default function EpicContainer({ genre }) {
+import Shimmer from "../shimmer";
+import useMedia from "../../hooks/useMedia";
+import { useModalState } from "../../contexts/modalContext";
+export default function EpicContainer({ genre ,title:header}) {
   const [state, dispatch] = useEpicState();
   
+  console.log(header);
   const {
     data,
     error,
@@ -30,7 +32,7 @@ export default function EpicContainer({ genre }) {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useGetMoviesByGenre({ genres: [genre] });
+  } = useGetMoviesByGenre({ genres: genre });
 
   
   const movies = useMemo(() => {
@@ -53,56 +55,98 @@ const title= movies[state.id]?.title
   const id = useMemo(() => {
     if (!movies[state.id]) return null;
     const videos = movies[state.id].videos;
+    if(!videos) return null
     const clip = videos.clip[0];
     const trailer = videos.trailer[0];
     const teaser = videos.teaser[0];
 
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [movies, state.id]);
+
+  const device = useMedia(
+  );
+
+  const mobile = device === "mobile";
+  const desktop = device === "desktop"; 
+
+  const [{activated,expand}]=useModalState()
+
+  const play = activated || expand ;
+
   return (
     <Container>
-      <Wrapper>
-        <AspectBox
-          style={{
-            backgroundColor: "black",
-            borderRadius: "initial",
-            marginBottom: "80px",
-          }}
-          epic={true}
-        >
-          {backdropPath && (
-            <Image
-              src={`https://image.tmdb.org/t/p/original/${backdropPath}`}
-            />
-          )}
-        </AspectBox>
-
+      <div
+        style={{
+          borderRadius: "initial",
+          width: "100%",
+        }}
+      >
+        {backdropPath && (
+          <Shimmer
+            style={{ objectFit: "cover", objectPosition: "50% 0%" }}
+            src={`https://image.tmdb.org/t/p/original/${backdropPath}`}
+          />
+        )}
+      </div>
+      <Carousel
+        style={{
+          zIndex: 8,
+        }}
+      >
+        {movies[state.id] && (
+          <Description movie={movies[state.id]} genre={header} />
+        )}
         <EpicCarousel
           epic={true}
           dark={true}
-          style={{
-            bottom: "-20px",
-            position: "absolute",
-            zIndex: 8,
-            width: "100%",
-          }}
           data={movies}
           loading={status === "loading"}
           hasMore={hasNextPage}
           isFetching={isFetchingNextPage}
           fetchMore={fetchNextPage}
+          style={{ margin: 0 }}
         />
-      </Wrapper>
-      <AspectBox style={{zIndex:3}} absolute>
-        <Gradient />
-      </AspectBox>
-      {movies[state.id] && (
-        <Description movie={movies[state.id]} genre={genre} />
-      )}
+      </Carousel>
+
+      <Gradient />
+
       {id && state.show && (
-        <AspectBox absolute>
-          <Youtube id={id} light={false} playOnMount={true} />
-        </AspectBox>
+        <div className="absolute">
+          <div
+            style={{
+              display: "flex",
+              height: "100%",
+              width: "100%",
+              position: "relative",
+              marginTop: "-10vh",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                overflow: "hidden",
+                transform: "translate(-50%,-50%)",
+                height: "100%",
+                ...(!desktop ? { aspectRatio: 16 / 9 } : { width: "100%" }),
+              }}
+            >
+              <Youtube
+                id={id}
+                playOnMount={!play}
+                light={false}
+                interectionOptions={{
+                  rootMargin: "200px 0px 200px 0px",
+                  threshold: 0.7,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+        // <AspectBox absolute>
+        //   <Youtube id={id} light={false} playOnMount={true} />
+        // </AspectBox>
       )}
     </Container>
   );

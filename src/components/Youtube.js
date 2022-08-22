@@ -38,172 +38,104 @@ const Intersect = styled.div`
   left: 50%;
   transform: translate(-50%,0%);
 `;
-const Controls=styled(Intersect)`
-height: 100%;
-z-index:20
-`
 
-const Audio = styled.div`
-  align-items: center;
 
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  position: absolute;
-  right: 0;
-  z-index: 10;
-  bottom: 15%;
-  width: 15%;
-
-  @media only screen and (max-width: 1679px) {
-    bottom: 7%;
-    width: 10%;
-  }
-  @media only screen and (max-width: 739px) {
-    height: calc(110vw / 0.65);
-  }
-`;
-
-const Button = styled.div`
-  -webkit-box-align: center;
-  align-items: center;
-  appearance: none;
-  border: 0px;
-  cursor: pointer;
-  display: flex;
-  -webkit-box-pack: center;
-  justify-content: center;
-  opacity: 1;
-  padding: 10%;
-  position: relative;
-  user-select: none;
-  will-change: background-color, color;
-  word-break: break-word;
-  white-space: nowrap;
-  border-radius: 50%;
-  background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  color: white;
-`;
-
-const Icon = styled.div`
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  height: 10%;
-  width: 10%;
-`;
-
-export function Youtube({ id, style, light = true,miniModal, playOnMount = false,full=false,interectionOptions }) {
+export function Youtube({
+  id,
+  style,
+  light = true,
+  miniModal,
+  play = false,
+  full = false,
+  interectionOptions,
+}) {
   const playerRef = useRef();
 
-
   const [ready, setReady] = useState(false);
-  const [mount, setMount] = useState(false);
-  const [duration, setDuration] = useState();
   const [loaded, setLoaded] = useState(false);
-  const [play, setPlay] = useState(playOnMount);
+  const [Play, setPlay] = useState(play);
   const [start, setStart] = useState(false);
   const [show, setShow] = useState(false);
-  const [iconShow, setIconShow] = useState(false)
-const [mute,setMute]=useState(false)
- const [
-   {
-     
-     
-     miniExpanded,
-    
-     expanded,
-   },
-   dispatch,
- ] = useModalState();
-
+  const [iconShow, setIconShow] = useState(false);
+  const [mute, setMute] = useState(false);
 
   const playerRefCb = useCallback((ref) => {
     playerRef.current = ref;
-      
   }, []);
 
   const [hoverRef, isHovering] = useHover();
 
-    const [visible, elRef] = useIntersectionObserver({
-      options: {
-        threshold: 0.9,
-        triggerOnce: false,
-        ...(interectionOptions && interectionOptions),
-      },
-    });
+  const [visible, elRef] = useIntersectionObserver({
+    options: {
+      threshold: 0.9,
+      triggerOnce: false,
+      ...(interectionOptions && interectionOptions),
+    },
+  });
 
-    const wrapperRefCb = useCallback(
-      (ref) => {
-        elRef(ref);
-        if (light) {
-          hoverRef(ref);
-        }
-      },
-      [elRef, hoverRef, light]
-    );
+  const wrapperRefCb = useCallback(
+    (ref) => {
+      elRef(ref);
+      if (light) {
+        hoverRef(ref);
+      }
+    },
+    [elRef, hoverRef, light]
+  );
 
   const onReady = useCallback((e) => {
-     
     setReady(true);
-const player = playerRef.current.getInternalPlayer();
-   player.setLoop(true)
+    const player = playerRef.current.getInternalPlayer();
+    player.setLoop(true);
   }, []);
 
   useLayoutEffect(() => {
-     
     if (!ready) return;
+
     setPlay(visible);
-   
-     
+
     if (loaded) {
       setShow(visible);
-      
     }
   }, [visible, ready, loaded]);
 
+  useLayoutEffect(() => {
+    if (!ready) return;
+
+    if (loaded) {
+      setPlay(Play);
+      setShow(Play);
+    }
+  }, [ready, Play, loaded]);
+
   const onStart = useCallback((e) => {
-     
     setStart(true);
   }, []);
 
   const onEnded = useCallback((e) => {
-    
-   
     setShow(false);
   }, []);
 
   const onBufferEnd = useCallback(
     (e) => {
-       
       if (loaded) setShow(visible);
     },
     [loaded, visible]
   );
 
   const onBuffer = useCallback((e) => {
-     
     setShow(false);
   }, []);
 
-  const onSeek = useCallback(() => {
-     
+  const onError = useCallback((e) => {
+    setShow(false);
   }, []);
+  const onSeek = useCallback(() => {}, []);
 
   useEffect(() => {
     let timeout;
     let youtube = playerRef.current;
-    if (full){
+    if (full) {
       setLoaded(true);
     }
     if (!ready || !start || full) {
@@ -213,8 +145,7 @@ const player = playerRef.current.getInternalPlayer();
     timeout = setInterval(() => {
       const secondsLoaded = youtube.getSecondsLoaded();
       const currentTime = youtube.getCurrentTime();
-      if (secondsLoaded > 4 && currentTime > 4) {
-         
+      if (secondsLoaded > 6 && currentTime > 4) {
         setLoaded(true);
         setStart(false);
       }
@@ -226,16 +157,16 @@ const player = playerRef.current.getInternalPlayer();
   }, [full, ready, start]);
 
   useLayoutEffect(() => {
-    if(isHovering===undefined) return
+    if (isHovering === undefined) return;
     setIconShow(isHovering);
   }, [isHovering]);
 
   const styles = useMemo(() => {
     return {
-      position: 'absolute',
-       top: 0,
-        left: 0,
-     ...!full && {pointerEvents: "none"},
+      position: "absolute",
+      top: 0,
+      left: 0,
+      ...(!full && { pointerEvents: "none" }),
       opacity: show || light ? 1 : 0,
       transition: "opacity 0.5s",
       overflow: "hidden",
@@ -244,25 +175,19 @@ const player = playerRef.current.getInternalPlayer();
     };
   }, [full, show, light, style]);
 
-  const handleMute=useCallback(()=>{
-    setMute(x=>!x)
-  },[])
+  const handleMute = useCallback(() => {
+    setMute((x) => !x);
+  }, []);
 
   return (
     <VideoContainer playerstyle={style}>
       <Intersect id="intersect" ref={wrapperRefCb} />
-     {show && <Controls>
-        <Audio>
-          <Button onClick={handleMute} >
-            <Icon>{mute ? <Unmute /> : <Mute />}</Icon>
-          </Button>
-        </Audio>
-      </Controls>}
+
       <ReactPlayer
         className="react-player"
         ref={playerRefCb}
         url={`https://www.youtube.com/watch?v=${id}`}
-        playing={play}
+        playing={Play}
         light={light}
         controls={full}
         volume={show && mute ? 0.9 : 0}
@@ -273,6 +198,7 @@ const player = playerRef.current.getInternalPlayer();
         onBuffer={onBuffer}
         onEnded={onEnded}
         onSeek={onSeek}
+        onError={onError}
         style={styles}
         width="100%"
         height="100%"

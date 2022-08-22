@@ -18,12 +18,12 @@ import Youtube from "../Youtube";
 import { useEpicState, EpicProvider } from "./context";
 import EpicContainer from "./EpicContainer";
 
-export default function Epic({genre }) {
+export default function Epic(props) {
  
 
   return (
     <EpicProvider>
-      <EpicContainer genre={genre} />
+    <EpicContainer {...props} />
     </EpicProvider>
   );
 }

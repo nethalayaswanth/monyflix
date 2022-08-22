@@ -18,10 +18,10 @@ import { useCardState } from "../Card/context";
 import { getStyles, getExpandStyles } from "./utils";
 
 import { useSpring, animated, to } from "@react-spring/web";
-//import useHover from "../../hooks/useHover";
+
 import { useHover } from "@use-gesture/react";
 import { useAppState } from "../../contexts/appContext";
-import useMeasure from "react-use-measure";
+
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
 import CardModal from "../CardModal";
@@ -295,7 +295,6 @@ const ExpandModal = ({}) => {
   const [resetAppStyles, setResetAppStyles] = useState(false);
 
   useLayoutEffect(() => {
-    console.log(parentRef, miniRectMesureRef.current);
     if (!miniRectMesureRef.current || !parentRef) return;
 
     if (expand && !expanded) {
@@ -367,7 +366,7 @@ const ExpandModal = ({}) => {
 
     if (!expand && expanded) {
       const modal = modalRef.current.getBoundingClientRect();
-      const parent = parentRect();
+      const parent = parentRef.getBoundingClientRect();
       const { top: miniTop } = miniRectMesureRef.current;
 
       const cy = -miniTranslateY.current;
@@ -452,12 +451,15 @@ const ExpandModal = ({}) => {
     };
   }, [dispatch]);
 
-  console.log(activated, activate, expand, expanded, miniExpand, miniExpanded);
+ 
 
   useLayoutEffect(() => {
     console.log("expand", expand);
   }, [expand]);
+
   const full = expand || expanded;
+
+  console.log("full",full)
   return activated || full
     ? createPortal(
         <Wrapper
