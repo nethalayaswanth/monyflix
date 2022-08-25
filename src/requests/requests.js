@@ -5,7 +5,7 @@ import {
   latestMovie, Movie, MovieGenre, Movies, recommendedMovies, similarMovies, videosById
 } from "./queries";
 
-const endpoint = "http://localhost:4000/";
+const endpoint = process.env.APP_BASE_ENDPOINT;
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
