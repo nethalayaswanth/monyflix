@@ -1,11 +1,4 @@
-import {
-  useLayoutEffect,
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
-import isEqual from "lodash/isEqual";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const useHoverBubble = () => {
   const [isHovering, setIsHovering] = useState();
@@ -29,15 +22,6 @@ const useHoverBubble = () => {
 
   const nodeRef = useRef();
 
-  useLayoutEffect(() => {
-     
-      `%cisHovering:${isHovering}`,
-
-      "color:black;background-color:red;"
-    );
-
-     
-  }, [isHovering]);
 
   useEffect(() => {
     if (nodeRef.current) {

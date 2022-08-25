@@ -33,8 +33,8 @@ const AspectBox = ({ style, children,height, potrait, absolute,...props },ref) =
   return (
     <Container
       style={{
+        paddingTop: height ? height : potrait ? "150%" : "56.25%",
         ...style,
-        paddingTop: height ? height : potrait ? "149.82%" : "56.25%",
       }}
       absolute={absolute}
       {...props}

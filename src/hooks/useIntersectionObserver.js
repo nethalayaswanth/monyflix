@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const defaultOptions = {
   threshold: 0,
@@ -24,7 +24,7 @@ function useIntersectionObserver({ options } = {}) {
     if (!elementRef.current) return;
 
     const { triggerOnce, ...intersectionOptions } = overrideOptions;
-    
+
     let isUnmounted = false;
     const ob = new IntersectionObserver(
       (entries) => {

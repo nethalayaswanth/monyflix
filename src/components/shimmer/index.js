@@ -1,4 +1,4 @@
-import styled, {css, keyframes } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 export const keyFrameExampleOne = keyframes`
    0%{
@@ -26,10 +26,7 @@ const styles = css`
   position: relative;
 `;
 
-
 export const Shimmer = styled.img`
-${styles}
-`
-
-;
+  ${styles}
+`;
 export default Shimmer;

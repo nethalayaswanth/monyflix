@@ -1,29 +1,24 @@
 import React, {
-  useRef,
-  useState,
-  createContext,
-  useReducer,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
+  useCallback, useMemo, useState
 } from "react";
 
-import { Container,Carousel, Image, Gradient, Wrapper } from "./views";
-import Card from "../Card";
-import {Youtube} from "../Youtube";
-import EpicCarousel from "../Carousel/EpicCarousel";
-import { useEpicState } from "./context";
-import AspectBox from "../AspectBox";
-import Description from "./description";
-import { useGetMoviesByGenre } from "../../requests/requests";
-import Shimmer from "../shimmer";
-import useMedia from "../../hooks/useMedia";
+import { useInView } from "react-intersection-observer";
 import { useModalState } from "../../contexts/modalContext";
+import useMedia from "../../hooks/useMedia";
+import { useGetMoviesByGenre } from "../../requests/requests";
+import AudioControls from "../AudioControls";
+import EpicCarousel from "../Carousel/EpicCarousel";
+import Shimmer from "../shimmer";
+import { Youtube } from "../Youtube";
+import { useEpicState } from "./context";
+import Description from "./description";
+import { Carousel, Container, Details, Gradient } from "./views";
+
+
 export default function EpicContainer({ genre ,title:header}) {
   const [state, dispatch] = useEpicState();
   
-  console.log(header);
+ 
   const {
     data,
     error,
@@ -73,8 +68,26 @@ const title= movies[state.id]?.title
 
   const play = activated || expand ;
 
+
+  const [audio,setAudio] =useState(false)
+ const [show, setShow] = useState();
+
+ const showCb = useCallback(({ show }) => {
+   setShow(show);
+ }, []);
+
+  const handleAudio=useCallback(()=>{
+    setAudio(x=>!x)
+  },[])
+
+
+   const { ref:elRef, inView, entry } = useInView({
+     threshold: 0.7,
+   });
+ 
+
   return (
-    <Container>
+    <Container ref={elRef}>
       <div
         style={{
           borderRadius: "initial",
@@ -94,7 +107,10 @@ const title= movies[state.id]?.title
         }}
       >
         {movies[state.id] && (
-          <Description movie={movies[state.id]} genre={header} />
+          <Details>
+            <Description movie={movies[state.id]} genre={header} />
+            {show && <AudioControls cb={handleAudio} audio={audio} />}
+          </Details>
         )}
         <EpicCarousel
           epic={true}
@@ -105,7 +121,7 @@ const title= movies[state.id]?.title
           isFetching={isFetchingNextPage}
           fetchMore={fetchNextPage}
           style={{ margin: 0 }}
-        />
+        ></EpicCarousel>
       </Carousel>
 
       <Gradient />
@@ -134,19 +150,22 @@ const title= movies[state.id]?.title
             >
               <Youtube
                 id={id}
-                playOnMount={!play}
+                play={!play}
                 light={false}
                 interectionOptions={{
                   rootMargin: "200px 0px 200px 0px",
                   threshold: 0.7,
                 }}
+                audio={audio}
+                cb={showCb}
+                visible={inView}
               />
             </div>
           </div>
         </div>
-        // <AspectBox absolute>
-        //   <Youtube id={id} light={false} playOnMount={true} />
-        // </AspectBox>
+           
+           
+           
       )}
     </Container>
   );

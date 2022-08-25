@@ -1,25 +1,12 @@
 import React, {
-  memo,
-  useMemo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useLayoutEffect,
-  children,
-  cloneElement,
+  memo, useCallback, useLayoutEffect, useMemo, useRef
 } from "react";
-import styled, { css } from "styled-components";
 import { createPortal } from "react-dom";
+import styled from "styled-components";
 import useWindowSize from "../../hooks/useWindowSize";
-import usePrevious from "../../hooks/usePrevious";
-import { useLayoutEffectAfterMount } from "../../hooks/useEffectAfterMount";
-import { useCardState } from "../Card/context";
-import { getStyles, getExpandStyles } from "./utils";
 
-import { useSpring, animated, to } from "@react-spring/web";
+import { animated, useSpring } from "@react-spring/web";
 import useHover from "../../hooks/useHover";
-import { useAppState } from "../../contexts/appContext";
 
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";

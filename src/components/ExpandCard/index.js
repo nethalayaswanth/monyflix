@@ -1,19 +1,10 @@
-import React, {
-  useRef,
-  useState,
-  forwardRef,
-  useCallback,
-  useLayoutEffect,
-} from "react";
-import styled, { css } from "styled-components";
-import { useSwiperSlide } from "swiper/react";
+import React, { forwardRef, useCallback } from "react";
+import styled from "styled-components";
 
-import { useEpicState } from "../Epic/context";
-import { CardWrapper, Image } from "../Card/styles";
 import { useNavigate } from "react-router-dom";
 import AspectBox from "../AspectBox";
+import { CardWrapper } from "../Card/styles";
 import Youtube from "../Youtube";
-import { useModalState } from "../../contexts/modalContext";
 
 const Text = styled.div`
   white-space: nowrap;
@@ -25,19 +16,23 @@ const Text = styled.div`
   margin-top: 0.5em;
 `;
 const ExpandCard = forwardRef(({ height, style, data }, ref) => {
-
   let navigate = useNavigate();
-  
 
-  const handleClick=useCallback(()=>{
-
- 
-    navigate(`/watch/${data?.key}`, { });
-  },[data?.key,  navigate])
+  const handleClick = useCallback(() => {
+    navigate(`/watch/${data?.key}`, {});
+  }, [data?.key, navigate]);
 
   return (
-    <CardWrapper onClick={handleClick} color="transparent" height={height} ref={ref} style={style}>
-      <AspectBox>{data && <Youtube style={{borderRadius:'6px'}} id={data?.key} />}</AspectBox>
+    <CardWrapper
+      onClick={handleClick}
+      color="transparent"
+      height={height}
+      ref={ref}
+      style={style}
+    >
+      <AspectBox>
+        {data && <Youtube style={{ borderRadius: "6px" }} id={data?.key} />}
+      </AspectBox>
       <Text>{data.name}</Text>
     </CardWrapper>
   );

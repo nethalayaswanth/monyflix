@@ -1,60 +1,31 @@
 import React, {
-  useRef,
-  useState,
-  forwardRef,
-  useLayoutEffect,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
+  forwardRef, useCallback, useLayoutEffect, useMemo, useState
 } from "react";
-import { useQueryClient, useQuery } from "react-query";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import useHover from "../../hooks/useHover";
+import { useQueryClient } from "react-query";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AspectBox from "../AspectBox";
-//import { Image } from "../Card/styles";
-import { useCardState } from "../Card/context";
-import ExpandSlide from "../ExpandCard/expandSlide";
-import Shimmer from "../shimmer";
+   
+import { useModalState } from "../../contexts/modalContext";
 import {
-  Flex,
-  Image,
-  VideoWrapper,
-  ModalWrapper,
-  ImageWrapper,
-  Description,
-  InlineFlex,
-  Title,
-  Overview,
-  Down,
-  Adult,
-  Text,
-  Item,
-  Header,
-  Block,
-  CloseButton,
-  Content,
-  Close,
-  Spacer,
-  Open,
-  Up,
-  Divider,
-} from "./styles";
-import {
-  useGetVideosById,
-  useGetSimilarMovies,
-  useMovieDetails,
-  getMovieDetails,
+  useGetRecommendedMovies, useGetSimilarMovies, useGetVideosById, useMovieDetails
 } from "../../requests/requests";
+import ExpandSlide from "../ExpandCard/expandSlide";
 import ModalSection from "../ModalSection";
 import Youtube from "../Youtube";
-import { useModalState } from "../../contexts/modalContext";
+import {
+  Adult, Button, Close, Content, Description, Divider, Genres, Header, Image, InlineFlex, Item, ModalWrapper, Open, Overview, Spacer, Title, Up
+} from "./styles";
 
-import { useLayoutEffectAfterMount } from "../../hooks/useEffectAfterMount";
-import { useSpring, animated } from "react-spring";
-import ProgressiveImage from "../ProgressiveImage";
+import { animated, useSpring } from "react-spring";
+
 import useMedia from "../../hooks/useMedia";
-
+import AudioControls from "../AudioControls";
+import Video from "../CroppedVideo";
+import DetailsCard from "../DetailsCard";
+import ProgressiveImage from "../ProgressiveImage";
+import Section from "../Section/DetailsSection";
+import timeConversion from "./utils";
+import { useInView } from "react-intersection-observer";
 const CardModal = forwardRef(({ style, width }, ref) => {
   const [
     {
@@ -70,7 +41,6 @@ const CardModal = forwardRef(({ style, width }, ref) => {
     dispatch,
   ] = useModalState();
 
- 
   const {
     data: movieDetails,
     isLoading: movieDetailsLoading,
@@ -91,6 +61,9 @@ const CardModal = forwardRef(({ style, width }, ref) => {
     status,
   } = useGetSimilarMovies({ id: movie?.id || param });
 
+  const recommendedMovies= useGetRecommendedMovies({ id: movie?.id || param });
+  
+
   const movies = useMemo(() => {
     if (data) {
       var list = [];
@@ -103,6 +76,20 @@ const CardModal = forwardRef(({ style, width }, ref) => {
     }
     return [];
   }, [data]);
+
+  const recommendedmovies = useMemo(() => {
+    const data = recommendedMovies?.data;
+    if (data) {
+      var list = [];
+
+      data.pages.forEach(({ recommendedMovies: { data } }, i) => {
+        list = [...list, ...data];
+      });
+
+      return list;
+    }
+    return [];
+  }, [recommendedMovies?.data]);
   let [searchParams, setSearchParams] = useSearchParams();
 
   let location = useLocation();
@@ -145,6 +132,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
   });
 
   const id = useMemo(() => {
+    console.log(movieDetails);
     if (!movieDetails) return null;
     const videos = movieDetails.movie.videos;
     if (!videos) return null;
@@ -155,29 +143,32 @@ const CardModal = forwardRef(({ style, width }, ref) => {
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [movieDetails]);
 
-  const current = movie || movieDetails?.movie;
+  const current = movieDetails?.movie || movie;
   const year = current?.releaseDate.split("-")[0];
+  const genres = movieDetails?.movie.genres;
+  const runTime = movieDetails?.movie.runtime;
+
+
+
 
   const posterPath = current
     ? `https://image.tmdb.org/t/p/original/${current?.posterPath}`
     : null;
-    const placeholderPoster = movie
-      ? `https://image.tmdb.org/t/p/w500/${current?.posterPath}`
-      : null;
+  const placeholderPoster = movie
+    ? `https://image.tmdb.org/t/p/w500/${current?.posterPath}`
+    : null;
   const backDropPath = current
     ? `https://image.tmdb.org/t/p/original/${current?.backdropPath}`
     : null;
-    const placeHolderBackDropPath = current
-      ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
-      : null;
-
-
+  const placeHolderBackDropPath = current
+    ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
+    : null;
 
   const [{ opacity }, api] = useSpring(() => {
     return {
       from: {
         opacity: 1,
-      }
+      },
     };
   });
 
@@ -186,57 +177,95 @@ const CardModal = forwardRef(({ style, width }, ref) => {
       api.start({
         opacity: 0,
       });
-      
     }
     if (!miniExpand && !activate) {
-     
       api.start({
-        opacity:1 ,
+        opacity: 1,
       });
     }
   }, [activate, api, miniExpand]);
 
-  useLayoutEffect(() => {
-    if(expand && expanded) return
-     if (!miniExpand && expand) {
-      
-       api.start({opacity:0});
+   const [overlay, setOverlay] = useState();
+
+   useLayoutEffect(() => {
+     let timeout;
+     if (!expand || miniExpand) {
+       setOverlay(expand);
+       return;
      }
-    if (!expand && expanded) {
-       console.log("kingis");
+     timeout = setTimeout(() => {
+       setOverlay(expand);
+     }, 350);
+     return () => {
+       clearTimeout(timeout);
+     };
+   }, [expand, miniExpand]);
+
+  useLayoutEffect(() => {
+    if (overlay && expanded) return;
+    if (!miniExpand && overlay) {
+      api.start({ opacity: 0 });
+    }
+    if (!overlay && expanded) {
+      console.log("kingis");
       api.start({
-        
-          opacity: 1,
-        
+        opacity: 1,
       });
     }
-  }, [api, expand, expanded, miniExpand]);
+  }, [api, overlay, expanded, miniExpand]);
 
   const handleSimilarMovieclick = useCallback(() => {
     dispatch({ type: "set reset" });
+     window.scrollTo({
+       top: 0,
+       left: 0,
+       behavior: "smooth",
+     });
   }, [dispatch]);
-  
 
-  
-  const device = useMedia(
-    // Media queries
-    ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"],
+  const device = useMedia();
 
-    ["desktop", "tablet", "mobile"],
+  const {
+    ref: elRef,
+    inView,
+    entry,
+  } = useInView({
+    threshold: 0.95,
+    rootMargin: "100px 0px 100px 0px",
+  });
+  const mobile = device === "mobile";
+  const desktop = device === "desktop";
 
-    "desktop"
-  );
+  const [audio, setAudio] = useState(false);
+  const [show, setShow] = useState();
 
-    const mobile = device === "mobile";
-    const desktop = device === "desktop"; 
+  const showCb = useCallback(({ show }) => {
+    setShow(show);
+  }, []);
+
+  const handleAudio = useCallback(() => {
+    setAudio((x) => !x);
+  }, []);
+
+ 
   return (
-    <ModalWrapper ref={ref} id="card-modal">
+    <ModalWrapper
+      ref={ref}
+      id="card-modal"
+      style={{
+        backgroundColor:
+          !miniExpand &&
+          expand &&
+          opacity.to({ range: [0.8, 0.2], output: ["transparent", "white"] }),
+        ...(!expanded && { boxShadow: "unset" }),
+      }}
+    >
       <animated.div
         style={{
           opacity: opacity,
           width: "100%",
           height: "100%",
-          ...(expand && {
+          ...(overlay && {
             position: "absolute",
             top: 0,
             left: 0,
@@ -244,7 +273,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
         }}
       >
         <AspectBox potrait>
-          <Shimmer
+          <Image
             style={{ width: "100%", height: "100%", Zindex: 5 }}
             src={posterPath}
             alt={``}
@@ -259,7 +288,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          opacity: opacity.to({ range: [1.0, 0.0], output: [0, 1] }),
+          opacity: opacity.to({ range: [0.8, 0.2], output: [0, 1] }),
           ...(expand && !desktop && { minHeight: "100vh" }),
           ...(!expand && { position: "absolute" }),
         }}
@@ -272,62 +301,117 @@ const CardModal = forwardRef(({ style, width }, ref) => {
               left: 0,
               width: "100%",
               zIndex: 2,
+              aspectRatio: 19 / 10,
             }}
+            ref={elRef}
           >
-            <animated.div style={{ width }}>
+            <animated.div
+              style={{
+                width,
+                aspectRatio: 19 / 10,
+                maxHeight: "min(800px,100vh)",
+                zIndex: 2,
+                position: "absolute",
+                backgroundColor: "transparent",
+              }}
+            >
               {id && (
-                <Youtube
-                  id={id}
-                  light={false}
-                  //style={{ transform: "translateY(-12.7%)" }}
-                  play={true}
-                />
+                <Video show={show} crop={false}>
+                  <Youtube
+                    id={id}
+                    light={false}
+                    play={true}
+                    audio={audio}
+                    cb={showCb}
+                    visible={inView}
+                  />
+                </Video>
+              )}
+              {(
+                <>
+                  {(expand || expanded) &&<Button onClick={handleClose}>
+                    <Close style={{ fill: "white" }} />
+                  </Button>}
+                  {show && (
+                    <Button
+                      onClick={handleAudio}
+                      style={{ bottom: 0, top: "auto" }}
+                    >
+                      <AudioControls audio={audio} />
+                    </Button>
+                  )}
+                </>
               )}
             </animated.div>
           </div>
 
-          <AspectBox style={{ zIndex: 1 }}>
+          <div style={{ zIndex: 1, width: "100%", aspectRatio: 19 / 10 }}>
             <ProgressiveImage
-              style={{ width: "100%", height: "100%", Zindex: 5 }}
+              style={{
+                width: "100%",
+                Zindex: 5,
+                position: "relative",
+                aspectRatio: 19 / 10,
+              }}
               src={backDropPath}
               placeholderSrc={placeHolderBackDropPath}
               alt={``}
             />
-          </AspectBox>
+          </div>
         </>
 
-        {(expand || expanded) && (
-          <CloseButton onClick={handleClose}>
-            <Close style={{ fill: "white" }} />
-          </CloseButton>
-        )}
-        <div
+        <animated.div
           style={{
             position: "relative",
             zIndex: 3,
             backgroundColor: "inherit",
             flex: "auto",
+            opacity: opacity.to({ range: [0.6, 0.0], output: [0, 1] }),
           }}
         >
           {
             <>
               <Content expand={expand} style={{}}>
-                <Description expand={expand}>
-                  <Header>
-                    <Title expand={expand}>{current.title}</Title>
-                  </Header>
-                  <InlineFlex>
-                    <Item>{year}</Item>
-                    <Adult>{current.adult ? "U/A 13+" : "U/A 18+"}</Adult>
-                  </InlineFlex>
-                  {/* <Spacer /> */}
-                </Description>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: desktop ? "row" : "column",
+                  }}
+                >
+                  <Description expand={expand}>
+                    <Header>
+                      <Title expand={expand}>{current.title}</Title>
+                    </Header>
+                    <InlineFlex>
+                      <Item>{year}</Item>
+                      {runTime && <Item>{timeConversion(runTime)}</Item>}
+                      <Adult>{current.adult ? "U/A 13+" : "U/A 18+"}</Adult>
+                    </InlineFlex>
+                    <Overview>{current.overview}</Overview>
+                    {/* <Spacer /> */}
+                  </Description>
+                  {genres && (expand || expanded) && (
+                    <Genres>
+                      <span style={{ ...(!desktop && { fontWeight: 600 }) }}>
+                        Genres:
+                      </span>
+                      {genres.map((genre, i) => {
+                        const last = i === genres.length - 1;
+                        return (
+                          <span>
+                            {`${genre}`}
+                            {!last && ","}
+                          </span>
+                        );
+                      })}
+                    </Genres>
+                  )}
+                </div>
 
-                <Overview>{current.overview}</Overview>
                 <Spacer />
+                <Divider />
                 {!(expand || expanded) && (
                   <>
-                    <Divider />
                     <Open>
                       <Up onClick={handleExpand} />
                     </Open>
@@ -366,6 +450,19 @@ const CardModal = forwardRef(({ style, width }, ref) => {
                       title="Bloopers"
                     />
                   )}
+                  {!recommendedMovies.isLoading && recommendedMovies?.data && (
+                    <Section
+                      title="Recommended"
+                      movies={recommendedmovies}
+                      loading={recommendedMovies.status === "loading"}
+                      hasMore={recommendedMovies.hasNextPage}
+                      isFetching={recommendedMovies.isFetchingNextPage}
+                      fetchMore={recommendedMovies.fetchNextPage}
+                      slidesPerView={"auto"}
+                    >
+                      <DetailsCard onClick={handleSimilarMovieclick} />
+                    </Section>
+                  )}
                   {data && (
                     <ModalSection
                       title="More Like This"
@@ -382,7 +479,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
               )}
             </>
           }
-        </div>
+        </animated.div>
       </animated.div>
     </ModalWrapper>
   );

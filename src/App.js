@@ -1,39 +1,35 @@
-import { gql, useQuery } from "@apollo/client";
-
-import styled from "styled-components";
-import Section from "./components/Section";
-import Youtube from "./components/Youtube";
-import Epic from "./components/Epic";
-import Landing from "./components/Landing";
-import { AppProvider, useAppState } from "./contexts/appContext";
-import { ModalProvider } from "./contexts/modalContext";
-import Modal from "./components/Modal";
-import Watch from "./components/watch";
-import { useTransition, animated } from "react-spring";
-import { useModalState } from "./contexts/modalContext";
+import { createUseGesture, scrollAction } from "@use-gesture/react";
+import { useEffect, useState } from "react";
 import {
-  Routes,
-  Route,
-  Outlet,
-  Link,
-  useLocation,
-  useNavigate,
-  useParams,
-  BrowserRouter,
   Navigate,
+  Route,
+  Routes,
+  useLocation,
   useMatch,
 } from "react-router-dom";
-import { createUseGesture, scrollAction } from "@use-gesture/react";
-import { useEffect, useRef, useState } from "react";
+import { useTransition } from "react-spring";
+import Epic from "./components/Epic";
+import Landing from "./components/Landing";
+import Modal from "./components/Modal";
+import Section from "./components/Section";
+import {
+  DetailsSection,
+  ExpandCardSection,
+  LandScapeSection,
+} from "./components/Section/DetailsSection";
+import Watch from "./components/watch";
+import { AppProvider } from "./contexts/appContext";
+import { ModalProvider, useModalState } from "./contexts/modalContext";
 
 function App() {
-  const match = useMatch("/browse");
+  
 
   const useGesture = createUseGesture([scrollAction]);
-  const [{ activate, parent, activated,expand,expanded }, dispatch] = useModalState();
+  const [{  expand, expanded }, dispatch] =
+    useModalState();
   const [scroll, setScroll] = useState();
   useEffect(() => {
-    if(expand || expanded) return
+    if (expand || expanded) return;
     dispatch({ type: "set enabled", enabled: !scroll });
   }, [dispatch, expand, expanded, scroll]);
   useGesture(
@@ -67,8 +63,25 @@ function App() {
 
       <Section query={"POPULAR"} title={"Popular"} />
       <Section query={"UPCOMING"} title={"Upcoming"} />
+
+      <DetailsSection genres={["Thriller"]} title={"Thrillers"} />
+      <Epic genre={["Romance", "Drama"]} title={"Romance"} />
       <Section query={"PLAYING"} title={"Playing Now"} />
-      <Epic genre={["Romance"]} title={"Drama"} />
+      <LandScapeSection
+        genres={["ScienceFiction", "Thriller"]}
+        title={"Sci-Fi"}
+      />
+      <ExpandCardSection genres={["Horror"]} title={"Horror"} />
+      <DetailsSection
+        genres={["Thriller", "Crime", "Mystery"]}
+        title={"Mystery"}
+      />
+      <LandScapeSection
+        genres={["Documentary", "Mystery"]}
+        title={"Documentary"}
+      />
+      <ExpandCardSection genres={["Comedy", "Drama"]} title={"Comedy"} />
+      <DetailsSection genres={["Drama", "Adventure"]} title={"Adventure"} />
     </div>
   );
 }
@@ -81,13 +94,7 @@ const Index = () => {
 
   const bg = state?.backgroundState || location;
 
-  const transitions = useTransition(bg, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-
-    delay: 200,
-  });
+  
   return (
     <AppProvider>
       <ModalProvider>

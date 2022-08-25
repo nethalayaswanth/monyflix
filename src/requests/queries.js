@@ -1,13 +1,10 @@
-import { useQuery } from "@apollo/client";
-import { GraphQLClient, gql } from "graphql-request";
+import { gql } from "graphql-request";
 
 export const CORE_VIDEO_FIELDS = gql`
   fragment CoreVideoFields on Video {
     id
     key
     name
-    size
-    type
     official
   }
 `;
@@ -37,15 +34,15 @@ export const CORE_MOVIE_FIELDS = gql`
   }
 `;
 
-// export const latestMovies = gql`
-//   ${CORE_MOVIE_FIELDS}
-//   query latestMovies {
-//     latestMovies {
-//       ...CoreMovieFields
+   
+   
+   
+   
+   
 
-//     }
-//   }
-// `;
+   
+   
+   
 
 export const MovieGenre = gql`
   ${CORE_MOVIE_FIELDS}
@@ -58,6 +55,9 @@ export const MovieGenre = gql`
     MovieGenre(genres: $genres, after: $after) {
       data {
         ...CoreMovieFields
+        images{
+          filePath
+        }
       }
       cursor
       hasMore
@@ -117,9 +117,9 @@ export const Movie = gql`
   }
 `;
 
-export const SimilarMovies = gql`
+export const similarMovies = gql`
   ${CORE_MOVIE_FIELDS}
-  query SimilarMovies(
+  query similarMovies(
     $id: ID!
     $after: Int
     $withVideo: Boolean = false
@@ -134,6 +134,27 @@ export const SimilarMovies = gql`
     }
   }
 `;
+export const recommendedMovies = gql`
+  ${CORE_MOVIE_FIELDS}
+  query recommendedMovies(
+    $id: ID!
+    $after: Int
+    $withVideo: Boolean = false
+    $videoTypes: [VideoType] = [CLIP]
+  ) {
+    recommendedMovies(id: $id, after: $after) {
+      data {
+        ...CoreMovieFields
+        images {
+          filePath
+        }
+      }
+      cursor
+      hasMore
+    }
+  }
+`;
+
 
 export const latestMovie = gql`
   ${CORE_MOVIE_FIELDS}
@@ -143,6 +164,9 @@ export const latestMovie = gql`
   ) {
     latestMovie {
       ...CoreMovieFields
+      images{
+        filePath
+      }
     }
   }
 `;
@@ -209,7 +233,8 @@ const queries = {
   latestMovie,
   Movies,
   videosById,
-  SimilarMovies,
+  similarMovies,
+  recommendedMovies,
   Movie,
 };
 

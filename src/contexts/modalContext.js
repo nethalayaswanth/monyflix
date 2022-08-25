@@ -1,12 +1,4 @@
-import React, {
-  useRef,
-  useState,
-  createContext,
-  useReducer,
-  useCallback,
-  useContext,
-  useMemo,
-} from "react";
+import React, { createContext, useContext, useMemo, useReducer } from "react";
 
 const ModalContext = createContext();
 
@@ -169,3 +161,4 @@ function useModalState() {
 }
 
 export { useModalState, ModalProvider };
+

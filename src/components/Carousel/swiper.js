@@ -1,30 +1,21 @@
 import React, {
-  useRef,
-  useState,
   forwardRef,
-  useCallback,
-  useLayoutEffect,
+  useCallback, useRef,
+  useState
 } from "react";
 
-import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
-import { Forward, Backward } from "../Controller";
 import "swiper/css";
-import "swiper/css/pagination";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { Swiper } from "swiper/react";
+import { Backward, Forward } from "../Controller";
 
-import {
-  BrowserView,
-  MobileView,
-  isBrowser,
-  isMobile,
-} from "react-device-detect";
 
+import { Mousewheel } from "swiper";
 import useHover from "../../hooks/useHover";
-import { Pagination, Navigation, Mousewheel } from "swiper";
-import { useEpicState } from "../Epic/context";
 
-import { SwiperWrapper } from "./views";
 import useMedia from "../../hooks/useMedia";
+import { SwiperWrapper } from "./views";
 
 function Index(
   {
@@ -43,7 +34,7 @@ function Index(
   const [isEnd, setIsEnd] = useState(() => false);
 
   const device= useMedia(
-    // Media queries
+       
     ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"],
     
     ["desktop", "tablet", "mobile"],
@@ -66,9 +57,11 @@ function Index(
     },
     [cbRef]
   );
+
+  const slidesPerView=props.slidesPerView
   const params = {
     mousewheel: { forceToAxis: true },
-    breakpoints: {
+...(!slidesPerView &&  { breakpoints: {
       320: {
         slidesPerView: 2,
         spaceBetween: 10,
@@ -94,12 +87,13 @@ function Index(
         slidesPerView: 8,
         spaceBetween: 10,
       },
-    },
+    }}),
     ...breakpoints,
   };
 
   const mobile = device==="mobile"
   const desktop=device==="desktop"
+
   return (
     <>
       <SwiperWrapper
@@ -115,7 +109,7 @@ function Index(
         <Swiper
           className="Carousel"
           direction={"horizontal"}
-          spaceBetween={20}
+          spaceBetween={10}
           slidesPerView="4"
           enabled={enabled}
           modules={[Mousewheel]}
@@ -124,7 +118,9 @@ function Index(
             setIsBeginning(swiper.isBeginning);
             setIsEnd(swiper.isEnd);
           }}
+
           {...(transitionEvents && transitionEvents)}
+          
           {...params}
           {...props}
         >

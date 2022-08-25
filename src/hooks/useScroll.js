@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo, useRef } from "react";
 import throttle from "lodash/throttle";
+import { useCallback, useMemo, useRef } from "react";
 import useEventListener from "./useEventListener";
 
 export const useScroll = (options) => {

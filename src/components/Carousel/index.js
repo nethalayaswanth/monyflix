@@ -1,23 +1,14 @@
 import React, {
-  useRef,
-  useState,
-  useLayoutEffect,
-  useCallback,
-  useMemo,
-  useEffect,
+  cloneElement, useEffect, useLayoutEffect, useRef,
+  useState
 } from "react";
-import { useSwiper, SwiperSlide } from "swiper/react";
-//import SwiperSlide from "../swiperSlide";
+import { SwiperSlide } from "swiper/react";
+   
 
-import { useEpicState } from "../Epic/context";
-import Slide from "../Slide";
-import Card,{CardHolder} from "../Card";
-import Swiperjs from "./swiper";
-import AspectBox from "../AspectBox";
-import useHover from "../../hooks/useHover";
-import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import { useModalState } from "../../contexts/modalContext";
-import Shimmer from "../shimmer";
+import useIntersectionObserver from "../../hooks/useIntersectionObserver";
+import Card, { CardHolder } from "../Card";
+import Swiperjs from "./swiper";
 
 export default function Carousel({
   data,
@@ -29,6 +20,7 @@ export default function Carousel({
   hasMore,
   isFetching,
   movies,
+  children,...props
 }) {
   const swiper = useRef();
 
@@ -55,6 +47,8 @@ export default function Carousel({
    }, [dispatch, modalEnabled]);
 
 
+   
+
    const transitionEvents={ onTransitionStart:() => {
             setModalEnabled((x)=>x?!x:x)
              
@@ -67,44 +61,63 @@ export default function Carousel({
           
           onTouchEnd:()=>{setModalEnabled((x) => (x ? x : !x))}} 
 
-   
-  
-  
   return (
     <>
       <Swiperjs
         ref={swiper}
         transitionEvents={transitionEvents}
         enabled={!activated}
+        {...props}
       >
-        {!loading && data !== undefined  ? (
+        {!loading && data !== undefined ? (
           <>
             {data.map((movie, i) => {
               return (
                 <SwiperSlide key={`${i}`}>
-                  <Card key={i} id={i} movie={movie} />
+                  {children ? (
+                    cloneElement(children, {
+                      key: i ,
+                      id: i ,
+                      movie:  movie ,
+                    })
+                  ) : (
+                    <Card key={i} id={i} movie={movie} />
+                  )}
                 </SwiperSlide>
               );
             })}
             {hasMore && !loading && (
               <SwiperSlide key={"loading"}>
-                <Card ref={elRef} />
+                {children ? (
+                  cloneElement(children, {
+                  ref :elRef
+                  })
+                ) : (
+                  <Card ref={elRef} />
+                )}
+                
               </SwiperSlide>
             )}
           </>
         ) : (
-          
-            [...Array(8).fill(0)].map((movie, i) => {
-              return (
-                <SwiperSlide key={i} index={i}>
+          [...Array(8).fill(0)].map((movie, i) => {
+            return (
+              <SwiperSlide key={i} index={i}>
+                {children ? (
+                  cloneElement(children, {
+                    key: i,
+                    id: i,
+                    movie: movie,
+                  })
+                ) : (
                   <CardHolder
                     index={i}
                     style={{ backgroundColor: "	#C8C8C8" }}
                   />
-                </SwiperSlide>
-              );
-            })
-          
+                )}
+              </SwiperSlide>
+            );
+          })
         )}
       </Swiperjs>
     </>

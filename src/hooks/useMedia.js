@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const Queries = 
   ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"]

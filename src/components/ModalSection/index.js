@@ -1,16 +1,10 @@
-import React, {
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-} from "react";
+import React from "react";
 
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
-import Header from "../Header";
-import Divider from "../Divider";
 import ModalCarousel from "../Carousel/modalCarousel";
+import Divider from "../Divider";
+import Header from "../Header";
 
 const Container = styled.div`
   width: 100%;
@@ -27,7 +21,6 @@ export default function ModalSection({
   fetchMore,
   children,
 }) {
-  
   return (
     <Container>
       <Header title={title} />

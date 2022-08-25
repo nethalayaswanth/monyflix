@@ -18,16 +18,16 @@ export const getStyles = ({ parent}) => {
   const boxwidth = width * 2 - width / 2;
   const boxHeight = (boxwidth * 149.82) / 100;
 
- const w = document.body.clientWidth;
+  const w = document.body.clientWidth;
 
   const scaleLeft = l - (boxwidth - width) / 2;
-  const leftMin =w<=630?25: 40;
+  const leftMin = w <= 630 ? 25 : 40;
   const LeftMax = document.body.clientWidth - boxwidth - leftMin;
   const finalLeft = clamp(scaleLeft, leftMin, LeftMax);
   const translateLeft = finalLeft - l;
 
   const scaleTop = t - (boxHeight - height) / 2;
-  // const finaltop = clamp(scaleTop, scrollTopPadding, scroll - boxHeight);
+
   const translateTop = scaleTop - t;
 
   return {

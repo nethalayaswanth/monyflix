@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import radient from "../../assets/radient.png";
 
 export const Container = styled.div`
@@ -18,7 +18,7 @@ export const Container = styled.div`
   @media only screen and (min-width: 480px) {
     min-height: calc(100vw / 0.85);
   }
- 
+
   @media only screen and (min-width: 650px) {
     min-height: 520px;
   }
@@ -81,4 +81,24 @@ export const Wrapper = styled.div`
   flex-direction: column;
   overflow: hidden;
   background-color: rgb(4, 0, 0);
+`;
+
+export const Details = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex: 1;
+  text-align: left;
+  z-index: 8;
+  color: white;
+  background-color: transparent;
+
+  height: calc(100% - 102px);
+  padding: 0 25px;
+
+  @media only screen and (min-width: 740px) {
+    padding: 10vh 40px;
+  }
+
+  padding-bottom: 10vh;
 `;

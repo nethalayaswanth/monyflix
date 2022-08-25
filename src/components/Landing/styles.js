@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import down from "../../assets/down.png";
 
 
@@ -11,17 +11,19 @@ export const Container = styled.div`
   background-color: rgb(4, 0, 0);
   margin: auto;
   max-width: 100vw;
-  //max-height:100vh;
+
   z-index: 1;
 
   @media only screen and (max-width: 100vw) {
     width: 100%;
-    height: 56.25vw;
+    height: calc(56.25vw );
+    max-height: 100vh;
+       
   }
   @media only screen and (max-width: 739px) {
-    height: calc(110vw / 0.65);
+    height: calc((110vw / 0.65));
   }
-  //background-color: rgb(4, 0, 0);
+     
   .absolute {
     height: 100%;
     width: 100%;
@@ -36,59 +38,79 @@ export const Container = styled.div`
 
 export const Picture = styled(Container)``;
 export const Wrapper = styled.div`
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  -o-object-fit: cover;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  max-height: 120vh;
+  
 
-  /* @media only screen and (min-width: 550px) {
-    min-height: 750px;
+  /* @media only screen and (max-width: 100vw) {
+    width: 100%;
+    height: calc(56.25vw);
+    min-height: 500px;
   }
-  @media only screen and (min-width: 650px) {
-    min-height: 950px;
+  @media only screen and (max-width: 739px) {
+    height: calc((120vw / 0.65));
   } */
-
- 
 `;
 
 export const Gradient = styled.div`
   position: absolute;
-  bottom: 0;
+  
   width: 100%;
   height: 100%;
-  -webkit-mask-image: linear-gradient(to bottom, #000 75%);
-  mask-image: linear-gradient to bottom, #000 75%;
-  background: linear-gradient(
-    to bottom,
-    transparent 70%,
-    rgba(0, 0, 0, 0.02) 20%,
-    rgba(0, 0, 0, 0.7) 98%
-  );
   z-index: 3;
-  pointer-events:none;
-  /* -webkit-backdrop-filter: blur(30px) saturate(70%);
-  backdrop-filter: blur(30px) saturate(70%); */
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(1px) saturate(70%) opacity(20%);
+  backdrop-filter: blur(1px) saturate(70%) opacity(20%);
+
+  background-color: transparent;
+  background-image: linear-gradient(
+    180deg,
+    hsla(0, 0%, 8%, 0) 0,
+    hsla(0, 0%, 8%, 0.15) 15%,
+    hsla(0, 0%, 8%, 0.35) 29%,
+    hsla(0, 0%, 8%, 0.58) 44%,
+    #141414 88%,
+    #141414
+  );
+  background-position: 0 top;
+  background-repeat: repeat-x;
+  background-size: 100% 100%;
+  bottom: -10px;
+  height: 14.7%;
+  opacity: 1;
+  top: auto;
+  width: 100%;
 `;
 
-export const TopGradient = styled.div`
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 30%;
-  -webkit-mask-image: linear-gradient(to bottom, #000 75%);
-  mask-image: linear-gradient to bottom, #000 75%;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 0.7) 10%,
-    rgba(0, 0, 0, 0.6) 20%,
-    rgba(0, 0, 0, 0.02) 80%,
-    transparent 100%
+export const TopGradient = styled(Gradient)`
+top:-10px ;
+bottom:auto;
+background-image: linear-gradient(
+    0deg,
+    hsla(0, 0%, 8%, 0) 0,
+    hsla(0, 0%, 8%, 0.15) 15%,
+    hsla(0, 0%, 8%, 0.35) 29%,
+    hsla(0, 0%, 8%, 0.58) 44%,
+    #141414 88%,
+    #141414
   );
-  z-index: 3;
-  /* -webkit-backdrop-filter: blur(30px) saturate(70%);
-  backdrop-filter: blur(30px) saturate(70%); */
+  
+`;
+
+export const Overlay = styled.div`
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(30px) saturate(50%) opacity(100%);
+  backdrop-filter: blur(30px) saturate(50%) opacity(100%);
+  background-color: rgba(0, 0, 0,0.9);
 `;
 
 export const Down = styled.div`

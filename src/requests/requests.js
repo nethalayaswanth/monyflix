@@ -1,15 +1,8 @@
-import { useQuery, useInfiniteQuery } from "react-query";
-import { GraphQLClient, gql } from "graphql-request";
+import { GraphQLClient } from "graphql-request";
+import { useInfiniteQuery, useQuery } from "react-query";
 
 import {
-  seriesList,
-  MovieGenre,
-  trendingMovies,
-  latestMovie,
-  SimilarMovies,
-  Movies,
-  videosById,
-  Movie,
+  latestMovie, Movie, MovieGenre, Movies, recommendedMovies, similarMovies, videosById
 } from "./queries";
 
 const endpoint = "http://localhost:4000/";
@@ -42,7 +35,7 @@ export function useGetSimilarMovies({ id }) {
   return useInfiniteQuery(
     ["getSimilarMovies", id],
     async ({ pageParam = 0 }) => {
-      const data = await graphQLClient.request(SimilarMovies, {
+      const data = await graphQLClient.request(similarMovies, {
         id,
         after: pageParam,
       });
@@ -50,6 +43,23 @@ export function useGetSimilarMovies({ id }) {
     },
     {
       getNextPageParam: ({ similarMovies: { cursor, hasMore } }, pages) => {
+        return hasMore ? cursor : undefined;
+      },
+    }
+  );
+}
+export function useGetRecommendedMovies({ id }) {
+  return useInfiniteQuery(
+    ["getRecommendedMovies", id],
+    async ({ pageParam = 0 }) => {
+      const data = await graphQLClient.request(recommendedMovies, {
+        id,
+        after: pageParam,
+      });
+      return data;
+    },
+    {
+      getNextPageParam: ({ recommendedMovies: { cursor, hasMore } }, pages) => {
         return hasMore ? cursor : undefined;
       },
     }
@@ -63,11 +73,18 @@ export function useGetMoviesByGenre({ genres }) {
     Animation: 16,
     Comedy: 35,
     Action: 28,
-    Horror: 21,
+    Horror: 27,
     Thriller: 53,
     Mystery: 9648,
     Adventure: 12,
     Fantasy: 14,
+    Crime: 80,
+    ScienceFiction: 878,
+    Family: 10751,
+    History: 36,
+    War: 10752,
+    Western:37,
+    Documentary:99
   };
 
   let A = [];
@@ -75,7 +92,7 @@ export function useGetMoviesByGenre({ genres }) {
   genres.forEach((x) => {
     A.push(`${Id[x]}`);
   });
-  console.log(A);
+ 
   return useInfiniteQuery(
     ["getMoviesByGenre", genres],
     async ({ pageParam = 0 }) => {
@@ -106,19 +123,22 @@ export function useGetLatestMovie() {
   });
 }
 
-export function useGetVideosById({ id, types }) {
+export const getVideosById = async ({ id, types }) => {
   const include = types.reduce((x, y) => {
     x[y.toLowerCase()] = true;
     return x;
   }, {});
-  return useQuery(["videos", id, types], async () => {
-    const data = await graphQLClient.request(videosById, {
-      types,
-      id,
-      ...include,
-    });
-    return data;
+
+  const data = await graphQLClient.request(videosById, {
+    types,
+    id,
+    ...include,
   });
+  return data;
+};
+
+export function useGetVideosById({ id, types }) {
+  return useQuery(["videos", id, types], () => getVideosById({ id, types }));
 }
 
 export const getMovieDetails = async ({ id }) => {
@@ -130,15 +150,5 @@ export const getMovieDetails = async ({ id }) => {
 };
 
 export function useMovieDetails({ id, ...args }) {
-  return useQuery(
-    ["movie", id],
-    async () => {
-      const data = await graphQLClient.request(Movie, {
-        id,
-      });
-
-      return data;
-    },
-    { ...args }
-  );
+  return useQuery(["movie", id], () => getMovieDetails({ id }));
 }

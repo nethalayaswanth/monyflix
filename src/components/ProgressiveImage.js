@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Image as Img } from "./Card/styles";
 
 const ProgressiveImage = ({ placeholderSrc, src, style, ...props }) => {
@@ -7,37 +7,36 @@ const ProgressiveImage = ({ placeholderSrc, src, style, ...props }) => {
   const srcRef = useRef(null);
 
   const current = placeholderSrc || src;
-  
+
   const [loading, setLoading] = useState(true);
 
   useLayoutEffect(() => {
-     if (!current) {
-       srcRef.current = null;
-       return;
-     }
-    
+    if (!current) {
+      srcRef.current = null;
+      return;
+    }
+
     srcRef.current = current;
     render();
   }, [current]);
 
   useEffect(() => {
-    setLoading(true)
-   let timeout
+    setLoading(true);
+
     const img = new Image();
     img.src = src;
     img.onload = () => {
-timeout=setTimeout(()=>{srcRef.current = src;
-render();
-setLoading(false);},500)
-      
+      srcRef.current = src;
+      render();
+      setLoading(false);
     };
 
-   return ()=>{clearTimeout(timeout);}
+    return () => {};
   }, [src]);
 
   return (
     <>
-      {srcRef.current&&current ? (
+      {srcRef.current && current ? (
         <Img
           {...(current && { src: srcRef.current, ...props })}
           style={{

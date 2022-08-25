@@ -1,28 +1,19 @@
 import React, {
-  memo,
-  useMemo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useLayoutEffect,
-  children,
-  cloneElement,
+  memo, useCallback, useLayoutEffect, useRef,
+  useState
 } from "react";
-import styled, { css } from "styled-components";
 import { createPortal } from "react-dom";
-import useWindowSize from "../../hooks/useWindowSize";
+import styled from "styled-components";
 import usePrevious from "../../hooks/usePrevious";
-import { useLayoutEffectAfterMount } from "../../hooks/useEffectAfterMount";
-import { useCardState } from "../Card/context";
-import { getStyles, getExpandStyles } from "./utils";
+import useWindowSize from "../../hooks/useWindowSize";
+import { getExpandStyles, getStyles } from "./utils";
 
-import { useSpring, animated, to } from "@react-spring/web";
+import { animated, useSpring } from "@react-spring/web";
 
 import { useHover } from "@use-gesture/react";
 import { useAppState } from "../../contexts/appContext";
 
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
 import CardModal from "../CardModal";
 
@@ -483,7 +474,6 @@ const ExpandModal = ({}) => {
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",
-              cursor: "grab",
             }}
           >
             <CardModal width={width} />

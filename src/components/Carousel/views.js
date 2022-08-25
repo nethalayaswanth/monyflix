@@ -21,7 +21,14 @@ export const SwiperWrapper = styled.div`
     @media only screen and (min-width: 740px) {
       padding: 0 40px;
     }
-    ${({desktop})=>desktop?css`{padding:0px }`:''}
+    ${({ desktop }) =>
+      desktop
+        ? css`
+             {
+              padding: 0px;
+            }
+          `
+        : ""}
   }
   .wrapper {
     position: relative;
@@ -39,6 +46,7 @@ export const SwiperWrapper = styled.div`
     touch-action: none;
     box-sizing: content-box;
     flex: auto;
+    max-height: min-content;
   }
 
   .swiper-slide {

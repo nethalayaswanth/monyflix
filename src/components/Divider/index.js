@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 const Divider = styled.div`
   display: block;
@@ -12,4 +12,4 @@ const Divider = styled.div`
   }
 `;
 
-export default Divider
+export default Divider;

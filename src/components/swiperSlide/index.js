@@ -1,11 +1,7 @@
 import React, {
-  useRef,
-  useState,
-  forwardRef,
-  useMem0,
-  useCallback,
+  forwardRef
 } from "react";
-import { SwiperSlide as Slide} from "swiper/react";
+import { SwiperSlide as Slide } from "swiper/react";
 
 const Index = ({ styles, index, children }, ref) => {
   return (

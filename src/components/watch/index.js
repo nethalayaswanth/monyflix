@@ -1,8 +1,7 @@
-import AspectBox from "../AspectBox";
-import { Youtube } from "../Youtube";
 import styled from "styled-components";
+import { Youtube } from "../Youtube";
 
-import { useParams, useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -21,7 +20,7 @@ const Watch = () => {
   return (
     <Container>
       <div style={{ height: "100%", width: "100%" }}>
-        <Youtube id={id} light={false} play={true} full />
+        <Youtube id={id} visible={true} light={false} play={true} full />
       </div>
     </Container>
   );

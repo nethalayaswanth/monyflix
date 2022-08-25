@@ -1,7 +1,8 @@
-import styled, { css } from "styled-components";
 import { CgChevronDownO } from "react-icons/cg";
-import { MdOutlineClose } from "react-icons/md";
 import { IoChevronForwardCircleOutline } from "react-icons/io5";
+import { MdOutlineClose } from "react-icons/md";
+import { animated } from "react-spring";
+import styled, { css } from "styled-components";
 
 export const Down = styled(CgChevronDownO)`
   max-height: 32px;
@@ -47,7 +48,6 @@ export const Flex = styled.div`
   }}
 `;
 
-
 export const Content = styled(Flex)`
   padding: 0 10px;
   flex: 1;
@@ -74,8 +74,8 @@ export const InlineFlex = styled(Flex)`
   flex-wrap: wrap;
 `;
 
-export const Block = styled.div`
-  //overflow: hidden;
+export const Block = styled(animated.div)`
+     
   display: flex;
   position: relative;
   width: 100%;
@@ -97,7 +97,6 @@ export const ModalWrapper = styled(Block)`
   background-color: white;
   display: flex;
   overflow: hidden;
-  
 `;
 export const ImageWrapper = styled.div`
   position: relative;
@@ -118,7 +117,7 @@ export const AspectBox = styled.div`
   object-fit: cover;
 `;
 export const Text = styled.p`
-  //white-space: nowrap;
+     
   overflow: hidden;
   text-overflow: ellipsis;
   word-wrap: break-word;
@@ -144,7 +143,7 @@ export const Spacer = styled.div`
   display: flex;
   -webkit-box-align: center;
   align-items: center;
-  flex:auto;
+  flex: auto;
 `;
 
 export const Title = styled(Text)`
@@ -165,17 +164,21 @@ export const Overview = styled(Text)`
   line-height: 1.41667;
   max-height: 100%;
   -webkit-box-orient: vertical;
-  //white-space: normal;
+     
   overflow: hidden !important;
   text-overflow: ellipsis;
   -webkit-line-clamp: 5;
   display: -webkit-box;
   padding-bottom: 2px;
-  //flex:2;
-  opacity:0.8;
+     
+  opacity: 0.8;
+
+  &.details {
+    -webkit-line-clamp: 2;
+  }
 `;
 
-export const CloseButton = styled.div`
+export const Button = styled.div`
   cursor: pointer;
   display: none;
   margin: 1em;
@@ -189,9 +192,9 @@ export const CloseButton = styled.div`
 
 export const Divider = styled.div`
   display: block;
-  //margin: 0 1em;
-  // margin: 0 2px;
-  border: 0.5px  solid rgba(0, 0, 0, 0.15);
+     
+     
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
 `;
 export const Close = styled(MdOutlineClose)`
   background-color: #181818;
@@ -215,7 +218,7 @@ export const Open = styled(InlineFlex)`
   padding: 0;
   margin-bottom: 0.3em;
   justify-content: flex-end;
-  margin-top:0.5em;
+  margin-top: 0.5em;
 `;
 
 export const Up = styled(IoChevronForwardCircleOutline)`
@@ -229,5 +232,20 @@ export const Up = styled(IoChevronForwardCircleOutline)`
 
 export const Description = styled(Flex)`
   height: unset;
+  padding-right: ${({ expand }) => expand && "2rem"};
 `;
 
+export const Genres = styled.div`
+  font-size: 14px;
+  line-height: 1.41667;
+  word-break: break-word;
+  margin-top: 0.8em;
+  margin-bottom: 0.25em;
+  span {
+    &:first-of-type {
+      opacity: 1;
+      font-weight: 500;
+    }
+    opacity: 0.8;
+  }
+`;

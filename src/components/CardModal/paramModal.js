@@ -1,58 +1,31 @@
 import React, {
-  useRef,
-  useState,
-  forwardRef,
-  useLayoutEffect,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
+  forwardRef, useCallback, useMemo, useState
 } from "react";
-import { useQueryClient, useQuery } from "react-query";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import useHover from "../../hooks/useHover";
+import { useQueryClient } from "react-query";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AspectBox from "../AspectBox";
-//import { Image } from "../Card/styles";
-import { useCardState } from "../Card/context";
-import ExpandSlide from "../ExpandCard/expandSlide";
+   
+import { useModalState } from "../../contexts/modalContext";
 import {
-  Flex,
-  Image,
-  VideoWrapper,
-  ModalWrapper,
-  ImageWrapper,
-  Description,
-  InlineFlex,
-  Title,
-  Overview,
-  Down,
-  Adult,
-  Text,
-  Item,
-  Header,
-  Block,
-  CloseButton,
-  Content,
-  Close,
-  Spacer,
-  Open,
-  Up,
-  Divider,
-} from "./styles";
-import {
-  useGetVideosById,
-  useGetSimilarMovies,
-  useMovieDetails,
-  getMovieDetails,
+  useGetRecommendedMovies, useGetSimilarMovies, useGetVideosById, useMovieDetails
 } from "../../requests/requests";
+import ExpandSlide from "../ExpandCard/expandSlide";
 import ModalSection from "../ModalSection";
 import Youtube from "../Youtube";
-import { useModalState } from "../../contexts/modalContext";
+import {
+  Adult, Button, Close, Content, Description, Divider,
+  Genres, Header, InlineFlex, Item, ModalWrapper, Overview, Spacer, Title
+} from "./styles";
 
-import { useLayoutEffectAfterMount } from "../../hooks/useEffectAfterMount";
-import { useSpring, animated } from "react-spring";
-import Shimmer from "../shimmer";
+import { animated } from "react-spring";
+import { useInView } from "react-intersection-observer";
+import useMedia from "../../hooks/useMedia";
+import AudioControls from "../AudioControls";
+import Video from "../CroppedVideo";
+import DetailsCard from "../DetailsCard";
 import ProgressiveImage from "../ProgressiveImage";
+import Section from "../Section/DetailsSection";
+import timeConversion from "./utils";
 const ParamCardModal = forwardRef(({ style, width }, ref) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -88,7 +61,7 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
     isFetchingNextPage,
     status,
   } = useGetSimilarMovies({ id: param });
-
+const recommendedMovies = useGetRecommendedMovies({ id: param });
   const movies = useMemo(() => {
     if (data) {
       var list = [];
@@ -101,6 +74,21 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
     }
     return [];
   }, [data]);
+  const recommendedmovies = useMemo(() => {
+    const data = recommendedMovies?.data;
+
+    console.log(data)
+    if (data) {
+      var list = [];
+
+      data.pages.forEach(({ recommendedMovies: { data } }, i) => {
+        list = [...list, ...data];
+      });
+
+      return list;
+    }
+    return [];
+  }, [recommendedMovies?.data]);
 
   let location = useLocation();
   let navigate = useNavigate();
@@ -134,8 +122,11 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [movieDetails]);
 
+  console.log(movieDetails)
   const current = movieDetails?.movie;
   const year = current?.releaseDate.split("-")[0];
+  const genres = movieDetails?.movie.genres;
+    const runTime = movieDetails?.movie.runtime;
 
   console.log(videoData);
 
@@ -148,6 +139,38 @@ const placeHolder = current
   ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
   : null;
       
+   const device = useMedia();
+
+   const mobile = device === "mobile";
+   const desktop = device === "desktop";
+
+   const {
+     ref: elRef,
+     inView,
+     entry,
+   } = useInView({
+     threshold: 0.95,
+     rootMargin: "100px 0px 100px 0px",
+   });
+   const [audio, setAudio] = useState(false);
+   const [show, setShow] = useState();
+
+   const showCb = useCallback(({ show }) => {
+     setShow(show);
+   }, []);
+
+   const handleAudio = useCallback(() => {
+     setAudio((x) => !x);
+   }, []);
+
+    const handleSimilarMovieclick = useCallback(() => {
+      dispatch({ type: "set reset" });
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    }, [dispatch]);
   return (
     <ModalWrapper ref={ref} id="card-param-modal">
       <animated.div
@@ -169,17 +192,41 @@ const placeHolder = current
               left: 0,
               width: "100%",
               zIndex: 2,
+              height: "auto",
+              aspectRatio: 16 / 9,
             }}
+            ref={elRef}
           >
-            <animated.div style={{ width }}>
+            <animated.div
+              style={{ width, position: "relative", height: "100%" }}
+            >
               {id && (
-                <Youtube
-                  id={id}
-                  light={false}
-                  //style={{ transform: "translateY(-12.7%)" }}
-                  play={true}
-                />
+                <Video show={show} crop={false}>
+                  <Youtube
+                    id={id}
+                    light={false}
+                    play={true}
+                    audio={audio}
+                    cb={showCb}
+                    visible={inView}
+                  />
+                </Video>
               )}
+              {
+                <>
+                  <Button onClick={handleClose}>
+                    <Close style={{ fill: "white" }} />
+                  </Button>
+                  {show && (
+                    <Button
+                      onClick={handleAudio}
+                      style={{ bottom: 0, top: "auto" }}
+                    >
+                      <AudioControls audio={audio} />
+                    </Button>
+                  )}
+                </>
+              }
             </animated.div>
           </div>
           <AspectBox style={{ zIndex: 1 }}>
@@ -192,11 +239,6 @@ const placeHolder = current
           </AspectBox>
         </>
 
-        {
-          <CloseButton onClick={handleClose}>
-            <Close style={{ fill: "white" }} />
-          </CloseButton>
-        }
         <div
           style={{
             position: "relative",
@@ -209,18 +251,42 @@ const placeHolder = current
             <>
               {
                 <Content expand={expand}>
-                  <Description expand={expand}>
-                    <Header>
-                      <Title>{current.title}</Title>
-                    </Header>
-                    <InlineFlex>
-                      <Item>{year}</Item>
-                      <Adult>{current.adult ? "U/A 13+" : "U/A 18+"}</Adult>
-                    </InlineFlex>
-                    {/* <Spacer /> */}
-                  </Description>
-
-                  <Overview>{current.overview}</Overview>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: desktop ? "row" : "column",
+                    }}
+                  >
+                    <Description expand={expand}>
+                      <Header>
+                        <Title>{current?.title}</Title>
+                      </Header>
+                      <InlineFlex>
+                        <Item>{year}</Item>
+                        {runTime && <Item>{timeConversion(runTime)}</Item>}
+                        <Adult>{current?.adult ? "U/A 13+" : "U/A 18+"}</Adult>
+                      </InlineFlex>
+                      {/* <Spacer /> */}
+                      <Overview>{current?.overview}</Overview>
+                    </Description>
+                    {genres && (expand || expanded) && (
+                      <Genres>
+                        <span style={{ ...(!desktop && { fontWeight: 600 }) }}>
+                          Genres:
+                        </span>
+                        {genres.map((genre, i) => {
+                          const last = i === genres.length - 1;
+                          return (
+                            <span>
+                              {`${genre}`}
+                              {!last && ","}
+                            </span>
+                          );
+                        })}
+                      </Genres>
+                    )}
+                  </div>
+                  <Divider />
                   <Spacer />
                 </Content>
               }
@@ -260,6 +326,19 @@ const placeHolder = current
                           />
                         )}{" "}
                       </>
+                    )}
+                    {!recommendedMovies.isLoading && recommendedMovies?.data && (
+                      <Section
+                        title="Recommended"
+                        movies={recommendedmovies}
+                        loading={recommendedMovies.status === "loading"}
+                        hasMore={recommendedMovies.hasNextPage}
+                        isFetching={recommendedMovies.isFetchingNextPage}
+                        fetchMore={recommendedMovies.fetchNextPage}
+                        slidesPerView={"auto"}
+                      >
+                        <DetailsCard onClick={handleSimilarMovieclick} />
+                      </Section>
                     )}
                     {data && (
                       <ModalSection

@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import Shimmer from "../shimmer";
 export const CardContainer = styled.div`
   box-sizing: border-box;
@@ -15,12 +15,13 @@ export const CardContainer = styled.div`
 
 export const CardWrapper = styled.div`
   box-sizing: border-box;
-  //box-shadow: 0 4px 7px rgb(0 0 0 / 25%);
+     
   overflow: hidden;
-  background-color: ${({ color }) => (color ? `${color}` :"rgb(249, 250, 251)")};
+  background-color: ${({ color }) =>
+    color ? `${color}` : "rgb(249, 250, 251)"};
   position: relative;
   width: 100%;
-  border-radius:6px;
+  border-radius: 6px;
 `;
 
 export const Image = styled(Shimmer)`
@@ -28,19 +29,18 @@ export const Image = styled(Shimmer)`
   position: absolute;
   top: 0;
   width: 100%;
-  max-width:100%;
+  max-width: 100%;
   height: 100%;
   left: 0;
   object-fit: cover;
-  z-index:5;
+  z-index: 5;
 `;
 
 export const AspectBox = styled.div`
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    object-fit: cover;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  object-fit: cover;
 `;
-

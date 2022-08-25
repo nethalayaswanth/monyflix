@@ -1,7 +1,6 @@
-import React, { useRef, useLayoutEffect, useState, useCallback } from "react";
+import React from "react";
 
-import styled, { css } from "styled-components";
-import { useSwiper } from "swiper/react";
+import styled from "styled-components";
 import { ReactComponent as Arrow } from "../../assets/prev.svg";
 
 const NavButton = styled.button`

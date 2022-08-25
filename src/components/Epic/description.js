@@ -1,7 +1,9 @@
-import styled, { css } from "styled-components";
-import {RiInformationLine} from 'react-icons/ri'
-import { useSearchParams } from "react-router-dom";
 import { useCallback } from "react";
+import { RiInformationLine } from 'react-icons/ri';
+import { useQueryClient } from "react-query";
+import { useSearchParams } from "react-router-dom";
+import styled from "styled-components";
+import { getMovieDetails, getVideosById } from "../../requests/requests";
 
 const Container = styled.div`
   display: flex;
@@ -26,6 +28,7 @@ const Details = styled.div`
   text-align: left;
   position: relative;
   max-width: 370px;
+  background-color:transparent;
 `;
 
 const Text = styled.div`
@@ -83,6 +86,9 @@ const Flex = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  @media only screen and (min-width: 740px) {
+   margin-top:1.8rem
+  }
 `;
 
 const Button = styled.div`
@@ -119,28 +125,42 @@ const Button = styled.div`
 const Description = ({ movie, genre }) => {
 
   let [searchParams, setSearchParams] = useSearchParams();
+  
+  const queryClient = useQueryClient();
+
+  const handlePrefetch = useCallback(async () => {
+    const types = ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"];
+    await queryClient.prefetchQuery(["movie", movie?.id], async () =>
+      getMovieDetails({ id: movie?.id })
+    );
+    await queryClient.prefetchQuery(["videos", movie?.id, types], async () =>
+      getVideosById({ id: movie?.id, types })
+    );
+  }, [movie, queryClient]);
+
   const handleClick = useCallback(() => {
+    handlePrefetch()
     setSearchParams({ mv: movie?.id });
     
 
     
-  }, [movie, setSearchParams]);
+  }, [handlePrefetch, movie?.id, setSearchParams]);
   
   return (
-    <Container>
+    
       <Details>
-        <Text>{genre.toUpperCase()}</Text>
-        <Title>{movie.title}</Title>
+        <Text>{genre?.toUpperCase()}</Text>
+        <Title>{movie?.title}</Title>
 
         <Flex>
-          <Text>{movie.adult ? "U/A 13+" : "U/A 18+"}</Text>
+          <Text>{movie?.adult ? "U/A 13+" : "U/A 18+"}</Text>
           <Button onClick={handleClick}>
             <RiInformationLine style={{height:'18px',width:'18px',marginRight:'8px'}}/>
             <ButtonText>More Info</ButtonText>
           </Button>
         </Flex>
       </Details>
-    </Container>
+    
   );
 };
 

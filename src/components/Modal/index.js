@@ -1,7 +1,7 @@
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
-import ParamModal from "./paramModal";
 import ExpandModal from "./expandModal";
+import ParamModal from "./paramModal";
 
 const Modal = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,7 +14,7 @@ const Modal = () => {
 
   return (!parent && param ) ? <ParamModal /> : parent ? <ExpandModal /> : null;
 
-  //return ((!parent && param) ? <ParamModal /> : parent ? <ExpandModal /> : null);
+     
 };
 
 export default Modal;

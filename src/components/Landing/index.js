@@ -1,45 +1,36 @@
 import React, {
-  useRef,
-  useState,
-  createContext,
-  useReducer,
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
+  useCallback, useMemo, useRef,
+  useState
 } from "react";
-import { gql, useQuery } from "@apollo/client";
 
-import { useGetLatestMovie } from "../../requests/requests";
-import styled, { css } from "styled-components";
-import AspectBox from "../AspectBox";
-import Card from "../Card";
-import {Youtube }from "../Youtube";
+import { useInView } from "react-intersection-observer";
+import { useQueryClient } from "react-query";
+import { useSearchParams } from "react-router-dom";
+import { getMovieDetails, getVideosById, useGetLatestMovie } from "../../requests/requests";
+import AudioControls from "../AudioControls";
+import Video from "../CroppedVideo";
+import { Youtube } from "../Youtube";
 
-import {
-  Container,
-  Picture,
-  Wrapper,
-  Gradient,
-  TopGradient,Scroll,
-  Down,
-} from "./styles";
-import useMedia from "../../hooks/useMedia";
 import { useModalState } from "../../contexts/modalContext";
+import useMedia from "../../hooks/useMedia";
+import Description from "../Epic/description";
+import { Details } from "../Epic/views";
+import {
+  Container, Down, Gradient, Picture, Scroll
+} from "./styles";
 
 const Landing = () => {
   const { data, loading, error } = useGetLatestMovie();
 
   const scrollRef = useRef();
 
-  // const movie = useMemo(() => {
+     
 
-  //   return { movie, backdropPath };
-  // }, [data]);
+     
+     
 
   const movie = data?.latestMovie;
-  const backdropPath = movie?.backdropPath;
+  const backdropPath = movie?.images?.filePath;
   const posterPath = movie?.posterPath;
 
   const id = useMemo(() => {
@@ -53,7 +44,27 @@ const Landing = () => {
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [data]);
 
-  const handleClick = useCallback(() => {
+
+    const { ref, inView, entry } = useInView({
+      threshold: 0.95,
+    });
+
+  const refcb = useCallback(
+    (node) => {
+      
+      if (typeof ref === "function") {
+        ref(node);
+        return;
+      }
+      if (ref && ref.current) {
+        ref.current = node;
+      }
+      scrollRef.current = node;
+    },
+    [ref]
+  );
+
+  const handleScroll = useCallback(() => {
     const len = Math.abs(window.scrollX - scrollRef.current.scrollHeight);
     window.scrollBy({
       top: len,
@@ -62,27 +73,54 @@ const Landing = () => {
     });
   }, []);
 
+  
 
-  const device = useMedia(
-    // Media queries
-    ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"],
-
-    ["desktop", "tablet", "mobile"],
-
-    "desktop"
-  );
+  const device = useMedia( );
 
   const mobile = device === "mobile";
-  const desktop = device === "desktop"; 
+  const desktop = device === "desktop";
 
-  const [{activated,expand}]=useModalState()
+  const [{ activated, expand }] = useModalState();
 
-  const play = activated || expand ;
+  const play = activated || expand;
 
-  console.log(activated, expand,play);
+ 
+
+  let [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
+
+  const handlePrefetch = useCallback(async () => {
+    const types = ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"];
+    const id = movie?.id;
+    await queryClient.prefetchQuery(["movie", id], async () =>
+      getMovieDetails({ id: id })
+    );
+    await queryClient.prefetchQuery(["videos", id, types], async () =>
+      getVideosById({ id: id, types })
+    );
+  }, [movie, queryClient]);
+
+  const handleClick = useCallback(() => {
+    handlePrefetch();
+    setSearchParams({ mv: movie.id });
+  }, [movie, handlePrefetch, setSearchParams]);
+
+  
+     
+  const [audio, setAudio] = useState(false);
+  const [show, setShow] = useState();
+
+  const showCb = useCallback(({ show }) => {
+    setShow(show);
+  }, []);
+
+  const handleAudio = useCallback(() => {
+    setAudio((x) => !x);
+  }, []);
+
 
   return (
-    <Container ref={scrollRef}>
+    <Container ref={refcb}>
       <Picture
         style={{
           backgroundColor: "black",
@@ -91,7 +129,7 @@ const Landing = () => {
           zIndex: 0,
           padding: "20px",
         }}
-        epic={true}
+        onClick={handleClick}
       >
         {
           <picture>
@@ -112,45 +150,52 @@ const Landing = () => {
         }
       </Picture>
 
-      <div className="absolute">
-        <Gradient />
-        <TopGradient />
+      <div
+        style={{
+          zIndex: 5,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "flex-end",
+        }}
+        className="absolute"
+      >
+        <Gradient style={{ zIndex: 1 }} />
+       
+
+        {(show || desktop) && (
+          <Details style={{ zIndex: 2, height: "18vw", paddingBottom: "10vh" }}>
+            <Description movie={movie} />
+            {show && <AudioControls cb={handleAudio} audio={audio} />}
+          </Details>
+        )}
       </div>
       {id && (
-        <div className="absolute">
-          <div
-            style={{
-              display: "flex",
-              height: "100%",
-              width: "100%",
-              position: "relative",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                overflow: "hidden",
-                transform: "translate(-50%,-50%)",
-                height: "100%",
-                ...(!desktop ? { aspectRatio: 16 / 9 } : { width: "100%" }),
-              }}
-            >
-              <Youtube
-                id={id}
-                playOnMount={!play}
-                light={false}
-                interectionOptions={{
-                  rootMargin: "200px 0px 200px 0px",
-                  threshold: 0.7,
-                }}
-              />
-            </div>
-          </div>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            aspectRatio: "19/10",
+            maxHeight: "800px",
+            zIndex: 2,
+            position: "absolute",
+            backgroundColor: "transparent",
+          }}
+        >
+          <Video show={show}>
+            {" "}
+            <Youtube
+              id={id}
+              play={!play}
+              light={false}
+              audio={audio}
+              cb={showCb}
+              visible={inView}
+            />
+          </Video>
         </div>
       )}
-      <Scroll onClick={handleClick}>
+
+      <Scroll onClick={handleScroll}>
         <Down />
       </Scroll>
     </Container>

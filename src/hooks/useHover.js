@@ -1,11 +1,4 @@
-import {
-  useLayoutEffect,
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
-import isEqual from "lodash/isEqual";
+import { useCallback, useRef, useState } from "react";
 
 const useHover = () => {
   const [isHovering, setIsHovering] = useState();
@@ -25,21 +18,21 @@ const useHover = () => {
 
   const nodeRef = useRef();
 
-  // useEffect(() => {
-  //   if (nodeRef.current) {
-  //
-  //     nodeRef.current.addEventListener("mouseenter", handleMouseOver);
-  //     nodeRef.current.addEventListener("mouseleave", handleMouseOut);
-  //   }
+     
+     
+     
+     
+     
+     
 
-  //   return () => {
-  //     if (nodeRef.current) {
-  //
-  //       nodeRef.current.removeEventListener("mouseenter", handleMouseOver);
-  //       nodeRef.current.removeEventListener("mouseleave", handleMouseOut);
-  //     }
-  //   };
-  // }, [handleMouseOver, handleMouseOut]);
+     
+     
+     
+     
+     
+     
+     
+     
 
   const callbackRef = useCallback(
     (node) => {

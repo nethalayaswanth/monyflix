@@ -1,33 +1,22 @@
 import React, {
-  useEffect,
-  useRef,
-  useMemo,
-  useState,
-  useCallback,
-  useLayoutEffect,
-  memo,
+  memo, useCallback,
+  useLayoutEffect, useMemo, useRef, useState
 } from "react";
-import ReactPlayer from "react-player/lazy";
-import useInterval from "../hooks/useInterval";
-import useTimeout from "../hooks/useTimeout";
-import styled, { css } from "styled-components";
-import useIntersectionObserver from "../hooks/useIntersectionObserver";
 import { BsFillPlayFill } from "react-icons/bs";
+import ReactPlayer from "react-player/lazy";
+import styled from "styled-components";
 import useHover from "../hooks/useHover";
 import AspectBox from "./AspectBox";
-import {VscMute as Mute} from 'react-icons/vsc'
-import { VscUnmute as Unmute } from "react-icons/vsc";
-import { useModalState } from "../contexts/modalContext";
 
 
 
-const VideoContainer=styled.div`
-width:100%;
-height:100%;
-position:relative;
-z-index:1;  
-display:flex;
-`
+const VideoContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+`;
 
 const Intersect = styled.div`
   position: absolute;
@@ -35,8 +24,9 @@ const Intersect = styled.div`
   width: 100%;
   height: 100%;
   max-width: 100vw;
+  max-width: 100vh;
   left: 50%;
-  transform: translate(-50%,0%);
+  transform: translate(-50%, 0%);
 `;
 
 
@@ -48,16 +38,20 @@ export function Youtube({
   play = false,
   full = false,
   interectionOptions,
+  audio = true,
+  cb,
+  visible = true
 }) {
   const playerRef = useRef();
 
   const [ready, setReady] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+ 
   const [Play, setPlay] = useState(play);
-  const [start, setStart] = useState(false);
   const [show, setShow] = useState(false);
   const [iconShow, setIconShow] = useState(false);
-  const [mute, setMute] = useState(false);
+  
+
+
 
   const playerRefCb = useCallback((ref) => {
     playerRef.current = ref;
@@ -65,22 +59,16 @@ export function Youtube({
 
   const [hoverRef, isHovering] = useHover();
 
-  const [visible, elRef] = useIntersectionObserver({
-    options: {
-      threshold: 0.9,
-      triggerOnce: false,
-      ...(interectionOptions && interectionOptions),
-    },
-  });
+  
 
   const wrapperRefCb = useCallback(
     (ref) => {
-      elRef(ref);
+      
       if (light) {
         hoverRef(ref);
       }
     },
-    [elRef, hoverRef, light]
+    [ hoverRef, light]
   );
 
   const onReady = useCallback((e) => {
@@ -91,36 +79,38 @@ export function Youtube({
 
   useLayoutEffect(() => {
     if (!ready) return;
+    
+    setPlay(visible && play);
+   setShow(visible && play);
+  }, [visible, ready, play]);
 
-    setPlay(visible);
+ 
 
-    if (loaded) {
-      setShow(visible);
-    }
-  }, [visible, ready, loaded]);
+     
+     
 
-  useLayoutEffect(() => {
-    if (!ready) return;
-
-    if (loaded) {
-      setPlay(Play);
-      setShow(Play);
-    }
-  }, [ready, Play, loaded]);
+     
+      
+     
+     
+     
+     
+     
 
   const onStart = useCallback((e) => {
-    setStart(true);
+    
   }, []);
 
   const onEnded = useCallback((e) => {
     setShow(false);
+
   }, []);
 
   const onBufferEnd = useCallback(
     (e) => {
-      if (loaded) setShow(visible);
+       setShow(visible);
     },
-    [loaded, visible]
+    [visible]
   );
 
   const onBuffer = useCallback((e) => {
@@ -132,29 +122,9 @@ export function Youtube({
   }, []);
   const onSeek = useCallback(() => {}, []);
 
-  useEffect(() => {
-    let timeout;
-    let youtube = playerRef.current;
-    if (full) {
-      setLoaded(true);
-    }
-    if (!ready || !start || full) {
-      return;
-    }
-
-    timeout = setInterval(() => {
-      const secondsLoaded = youtube.getSecondsLoaded();
-      const currentTime = youtube.getCurrentTime();
-      if (secondsLoaded > 6 && currentTime > 4) {
-        setLoaded(true);
-        setStart(false);
-      }
-    }, 300);
-
-    return () => {
-      clearInterval(timeout);
-    };
-  }, [full, ready, start]);
+  useLayoutEffect(()=>{cb && cb({show,audio})},[cb,audio, show])
+  
+ 
 
   useLayoutEffect(() => {
     if (isHovering === undefined) return;
@@ -175,14 +145,9 @@ export function Youtube({
     };
   }, [full, show, light, style]);
 
-  const handleMute = useCallback(() => {
-    setMute((x) => !x);
-  }, []);
-
+ 
   return (
-    <VideoContainer playerstyle={style}>
-      <Intersect id="intersect" ref={wrapperRefCb} />
-
+    <VideoContainer ref={wrapperRefCb} playerstyle={style}>
       <ReactPlayer
         className="react-player"
         ref={playerRefCb}
@@ -190,7 +155,7 @@ export function Youtube({
         playing={Play}
         light={light}
         controls={full}
-        volume={show && mute ? 0.9 : 0}
+        volume={show && audio ? 1 : 0}
         start={5}
         onReady={onReady}
         onStart={onStart}

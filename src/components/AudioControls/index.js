@@ -1,11 +1,6 @@
-import styled, { css } from "styled-components";
-
-
-const Controls = styled.div`
-  height: 100%;
-  z-index: 20;
-  max-height: 100vh;
-`;
+import { useCallback } from "react";
+import { VscMute as MuteIcon, VscUnmute as UnmuteIcon } from "react-icons/vsc";
+import styled from "styled-components";
 
 const Audio = styled.div`
   align-items: center;
@@ -13,19 +8,9 @@ const Audio = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  position: absolute;
-  right: 0;
-  z-index: 10;
-
-  bottom: 7%;
-  width: 10%;
-
-  @media only screen and (max-width: 739px) {
-    height: calc(110vw / 0.65);
-  }
 `;
 
-const Button = styled.div`
+const Button = styled.button`
   -webkit-box-align: center;
   align-items: center;
   appearance: none;
@@ -43,23 +28,53 @@ const Button = styled.div`
   white-space: nowrap;
   border-radius: 50%;
   background-color: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  color: white;
+  border-radius: 50%;
+  max-height: 36px;
+  max-width: 36px;
+  min-height: 24px;
+  min-width: 24px;
+`;
+
+const Mute = styled(MuteIcon)`
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+  height: min(1.8rem,10vw);
+  width: min(1.8rem,10vw);
+  
+
+ 
+  fill: white;
   color: white;
 `;
 
-const Icon = styled.div`
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
+const Unmute = styled(UnmuteIcon)`
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
+
   align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
+
   justify-content: center;
-  height: 10%;
-  width: 10%;
+  height: 1.8rem;
+  width: 1.8rem;
+  
+  fill: white;
+  color: white;
 `;
+
+const AudioControls = ({ cb, audio }) => {
+  const handleClick = useCallback(() => {
+    cb?.();
+  }, [cb]);
+
+  return (
+    <Audio>
+      <Button onClick={handleClick}>{audio ? <Unmute /> : <Mute />}</Button>
+    </Audio>
+  );
+};
+
+export default AudioControls;

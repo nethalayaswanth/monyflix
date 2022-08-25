@@ -1,21 +1,10 @@
-import React, {
-  useRef,
-  useState,
-  useLayoutEffect,
-  useCallback,
-  useMemo,
-  useEffect,
-  cloneElement,
-} from "react";
-import { useSwiper, SwiperSlide } from "swiper/react";
-//import SwiperSlide from "../swiperSlide";
+import React, { cloneElement, useEffect, useRef } from "react";
+import { SwiperSlide } from "swiper/react";
+   
 
-import { useEpicState } from "../Epic/context";
-import Slide from "../Slide";
-import Card from "../Card";
-import Swiperjs from "./swiper";
-import ExpandCard from "../ExpandCard";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
+import ExpandCard from "../ExpandCard";
+import Swiperjs from "./swiper";
 
 export default function ModalCarousel({
   data,
