@@ -43,7 +43,6 @@ export const SwiperWrapper = styled.div`
     transform: translate3d(0px, 0, 0);
     height: 100%;
     width: 100%;
-    touch-action: none;
     box-sizing: content-box;
     flex: auto;
     max-height: min-content;

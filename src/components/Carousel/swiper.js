@@ -11,7 +11,7 @@ import { Swiper } from "swiper/react";
 import { Backward, Forward } from "../Controller";
 
 
-import { Mousewheel } from "swiper";
+import { Mousewheel, FreeMode, Keyboard } from "swiper";
 import useHover from "../../hooks/useHover";
 
 import useMedia from "../../hooks/useMedia";
@@ -112,15 +112,25 @@ function Index(
           spaceBetween={10}
           slidesPerView="4"
           enabled={enabled}
-          modules={[Mousewheel]}
+          modules={[Mousewheel, FreeMode, Keyboard]}
           onSwiper={onSwiperReady}
           onSlideChange={(swiper) => {
             setIsBeginning(swiper.isBeginning);
             setIsEnd(swiper.isEnd);
           }}
-
-          {...(transitionEvents && transitionEvents)}
+          preloadImages={false}
+          freeMode={{
+            enabled: true,
+            sticky: true,
+            momentumBounce: false,
+            momentumBounceRatio: 0.5,
+          }}
           
+          keyboard={{
+            enabled: true,
+            onlyInViewport: false,
+          }}
+          {...(transitionEvents && transitionEvents)}
           {...params}
           {...props}
         >

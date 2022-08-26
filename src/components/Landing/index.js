@@ -51,7 +51,7 @@ const Landing = () => {
 
   const refcb = useCallback(
     (node) => {
-      
+      scrollRef.current = node;
       if (typeof ref === "function") {
         ref(node);
         return;
@@ -59,13 +59,14 @@ const Landing = () => {
       if (ref && ref.current) {
         ref.current = node;
       }
-      scrollRef.current = node;
+      
     },
     [ref]
   );
 
   const handleScroll = useCallback(() => {
-    const len = Math.abs(window.scrollX - scrollRef.current.scrollHeight);
+    const { bottom } = scrollRef.current.getBoundingClientRect();
+    const len = Math.abs(window.scrollX - bottom);
     window.scrollBy({
       top: len,
       left: 0,
