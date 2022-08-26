@@ -194,7 +194,6 @@ useLayoutEffect(() => {
       });
 
 
-     
       api.start({
         to: async (animate) => {
             
@@ -210,7 +209,7 @@ useLayoutEffect(() => {
                 opacity: 1,
               },
             ],
-            config: {velocity:2, tension: 1000,mass:5, clamp: true },
+            config: {tension: 500,mass:5, clamp: true },
           }).then((r) => {
             window.scrollTo({
               top: 0,

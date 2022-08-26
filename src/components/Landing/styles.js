@@ -133,7 +133,7 @@ export const Scroll = styled.button`
   width: 100%;
   height: 10%;
   transition: all 1000ms;
-  z-index:9;
+  z-index:30;
   &:hover {
     bottom: -4px;
     scale: 1.1em;

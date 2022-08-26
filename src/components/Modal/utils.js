@@ -45,9 +45,6 @@ export const getStyles = ({ parent}) => {
 export const collapseStyles = ({ parent,expandWidth}) => {
 const { height, width, top, left, right } = parent;
   const collapseX = left - document.body.clientWidth / 2 ;
-
-
-
 };
 
 export const getExpandStyles = ({
@@ -64,12 +61,9 @@ export const getExpandStyles = ({
   const lastHeight = 850;
   
 
-  const scale = getScale({
-    width: miniWidth,
-    height: miniHeight,
-    finalWidth: lastWidth,
-    finalHeight: lastHeight,
-  });
+ 
+
+  const scale=miniWidth/lastWidth
   const translateX = miniLeft - document.body.clientWidth / 2 + miniWidth / 2;
  
   const translateY = 36 - miniTop;

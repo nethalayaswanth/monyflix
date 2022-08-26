@@ -37,10 +37,12 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
       miniExpanded,
       expand,
       expanded,
+      details
     },
     dispatch,
   ] = useModalState();
 
+  //console.log(movie)
   const {
     data: movieDetails,
     isLoading: movieDetailsLoading,
@@ -161,8 +163,12 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
     ? `https://image.tmdb.org/t/p/original/${current?.backdropPath}`
     : null;
   const placeHolderBackDropPath = current
-    ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
+    ? `https://image.tmdb.org/t/p/w300/${movie?.backdropPath}`
     : null;
+
+    const overlayBackDrop = movie
+      ? `https://image.tmdb.org/t/p/w300/${movie?.backdropPath}`
+      : null;
 
   const [{ opacity }, api] = useSpring(() => {
     return {
@@ -195,7 +201,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
      }
      timeout = setTimeout(() => {
        setOverlay(expand);
-     }, 200);
+     }, 100);
      return () => {
        clearTimeout(timeout);
      };
@@ -207,7 +213,6 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
       api.start({ opacity: 0 });
     }
     if (!overlay && expanded) {
-      console.log("kingis");
       api.start({
         opacity: 1,
       });
@@ -257,7 +262,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
           !miniExpand &&
           expand &&
           opacity.to({ range: [0.8, 0.2], output: ["transparent", "white"] }),
-        ...(!expanded && { boxShadow: "unset" }),
+        ...(!miniExpand && !expanded && { boxShadow: "unset" }),
       }}
     >
       <animated.div
@@ -275,7 +280,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
           }),
         }}
       >
-        <AspectBox potrait>
+        <AspectBox potrait={!details}>
           <Image
             style={{ width: "100%", height: "100%", Zindex: 5 }}
             src={posterPath}
@@ -469,6 +474,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
                       isFetching={recommendedMovies.isFetchingNextPage}
                       fetchMore={recommendedMovies.fetchNextPage}
                       slidesPerView={"auto"}
+                      enabled={true}
                     >
                       <DetailsCard onClick={handleSimilarMovieclick} />
                     </Section>

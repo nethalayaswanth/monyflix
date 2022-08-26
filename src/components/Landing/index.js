@@ -64,7 +64,8 @@ const Landing = () => {
     [ref]
   );
 
-  const handleScroll = useCallback(() => {
+  const handleScroll = useCallback((e) => {
+    e.stopPropagation()
     const { bottom } = scrollRef.current.getBoundingClientRect();
     const len = Math.abs(window.scrollX - bottom);
     window.scrollBy({

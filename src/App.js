@@ -67,6 +67,7 @@ function App() {
       <DetailsSection genres={["Thriller"]} title={"Thrillers"} />
       <Epic genre={["Romance", "Drama"]} title={"Romance"} />
       <Section query={"PLAYING"} title={"Playing Now"} />
+      <DetailsSection genres={["Music"]} title={"Music"} />
       <LandScapeSection
         genres={["ScienceFiction", "Thriller"]}
         title={"Sci-Fi"}

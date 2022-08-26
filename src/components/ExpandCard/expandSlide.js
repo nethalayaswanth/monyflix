@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { getMovieDetails, getVideosById } from "../../requests/requests";
 import AspectBox from "../AspectBox";
 import { CardWrapper, Image } from "../Card/styles";
+import ProgressiveImage from "../ProgressiveImage";
 
 const ExpandSlide = forwardRef(({ height, style, data, onClick }, ref) => {
   let navigate = useNavigate();
@@ -33,10 +34,16 @@ const ExpandSlide = forwardRef(({ height, style, data, onClick }, ref) => {
     onClick?.();
   }, [data?.data?.id, handlePrefetch, onClick, setSearchParams]);
   const src = `https://image.tmdb.org/t/p/original/${data?.data?.posterPath}`;
-
+const placeholderSrc = data?.data
+  ? `https://image.tmdb.org/t/p/w300/${data?.data?.posterPath}`
+  : null;
   return (
     <CardWrapper onClick={handleClick} height={height} ref={ref} style={style}>
-      <AspectBox potrait>{data && <Image src={src} alt="" />}</AspectBox>
+      <AspectBox potrait>
+        {data && (
+          <ProgressiveImage placeholderSrc={placeholderSrc} src={src} alt="" />
+        )}
+      </AspectBox>
     </CardWrapper>
   );
 });

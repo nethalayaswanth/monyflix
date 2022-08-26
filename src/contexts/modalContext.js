@@ -11,6 +11,7 @@ const initialState = {
   expanded: false,
   activate: false,
   activated: false,
+  details:false,
   movie: null,
   param: null,
   enabled: true,
@@ -21,9 +22,7 @@ function Reducer(state, action) {
     case "set modal": {
       return {
         ...state,
-        movie: action.movie,
-        parent: action.parent,
-        activate: action.activate,
+       ...action.payload
       };
     }
     case "set movie": {
@@ -114,6 +113,7 @@ function Reducer(state, action) {
         expanded: false,
         activate: false,
         activated: false,
+        details:false,
         movie: null,
         param: null,
       };

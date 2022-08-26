@@ -50,7 +50,7 @@ const ExpandModal = ({}) => {
     dispatch,
   ] = useModalState();
 
-
+console.log("ndjddnj", parentRef);
 
   const screen = useWindowSize();
   const [prevActivated] = usePrevious(activated);
@@ -138,6 +138,7 @@ const ExpandModal = ({}) => {
     const l = window.scrollX + left;
     const t = window.scrollY + top;
 
+
     return {
       from: {
         width: width,
@@ -195,6 +196,7 @@ const ExpandModal = ({}) => {
         toHeight,
       } = miniHoverStyles();
 
+      
       api.start({
         to: async (animate) => {
           const show = miniExpand;
@@ -300,6 +302,7 @@ const ExpandModal = ({}) => {
         top: miniTop,
       } = miniRectMesureRef.current;
 
+   
       const {
         height,
         width: expandWidth,
@@ -314,6 +317,8 @@ const ExpandModal = ({}) => {
         miniRight,
         miniTop,
       });
+
+      console.log(expandWidth, ey, scaleY, scaleX);
 
       miniTranslateY.current = y.get();
 

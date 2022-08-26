@@ -58,6 +58,8 @@ export default function ModalCarousel({
     }
   }, [visible, fetchMore, data, hasMore, isFetching]);
 
+
+
   return (
     <>
       <Swiperjs breakpoints={breakpoints} ref={swiper}>

@@ -1,4 +1,4 @@
-import { forwardRef, useCallback } from "react";
+import { forwardRef, useCallback, useRef } from "react";
 import { useQueryClient } from "react-query";
 import { useSearchParams } from "react-router-dom";
 import { getMovieDetails, getVideosById } from "../../requests/requests";
@@ -14,8 +14,12 @@ import {
 } from "../CardModal/styles";
 import timeConversion from "../CardModal/utils";
 import ProgressiveImage from "../ProgressiveImage";
+import { useModalState } from "../../contexts/modalContext";
 
 const DetailsCard = ({ movie: current, onClick }, ref) => {
+
+    const [{ activated, expand, enabled, expanded }, dispatch] =
+      useModalState();
   const src = current
     ? `https://image.tmdb.org/t/p/original/${current?.images?.filePath}`
     : null;
@@ -39,12 +43,15 @@ const DetailsCard = ({ movie: current, onClick }, ref) => {
       getVideosById({ id: id, types })
     );
   }, [current, queryClient]);
-
+const miniRef = useRef();
   const handleClick = useCallback(() => {
+  
+
     handlePrefetch();
-    setSearchParams({ mv: current.id });
+   
+    setSearchParams({ mv: current?.id });
     onClick?.();
-  }, [current?.id, handlePrefetch, onClick, setSearchParams]);
+  }, [current?.id, dispatch, handlePrefetch, onClick, setSearchParams]);
   return (
     <div
       ref={ref}
@@ -53,9 +60,10 @@ const DetailsCard = ({ movie: current, onClick }, ref) => {
         display: "flex",
         flexDirection: "column",
         position: "relative",
+        cursor:'pointer'
       }}
     >
-      <AspectBox>
+      <AspectBox ref={miniRef}>
         <ProgressiveImage
           style={{ borderRadius: "6px" }}
           src={src}

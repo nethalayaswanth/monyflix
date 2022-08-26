@@ -20,6 +20,7 @@ export default function Carousel({
   hasMore,
   isFetching,
   movies,
+  enabled,
   children,...props
 }) {
   const swiper = useRef();
@@ -66,7 +67,7 @@ export default function Carousel({
       <Swiperjs
         ref={swiper}
         transitionEvents={transitionEvents}
-        enabled={!activated}
+        enabled={enabled || !activated}
         {...props}
       >
         {!loading && data !== undefined ? (

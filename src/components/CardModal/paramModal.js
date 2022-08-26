@@ -348,6 +348,7 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
                         isFetching={recommendedMovies.isFetchingNextPage}
                         fetchMore={recommendedMovies.fetchNextPage}
                         slidesPerView={"auto"}
+                        enabled={true}
                       >
                         <DetailsCard onClick={handleSimilarMovieclick} />
                       </Section>

@@ -103,8 +103,8 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
 
     dispatch({
       type: "set modal",
-      movie: movie,
-      parent: miniRef.current,
+      payload:{ movie: movie,
+      parent: miniRef.current}
     });
     setSearchParams({ mv: movie?.id });
   }, [dispatch, handlePrefetch, movie, setSearchParams]);
@@ -154,7 +154,7 @@ export const CardHolder = ({ style, index }) => {
       id="card-holder"
     >
       <AspectBox potrait>
-        <Shimmer width="100%" height="100%" delay={index * 300} />
+        <ProgressiveImage width="100%" height="100%" delay={index * 300} />
       </AspectBox>
     </CardOuter>
   );
