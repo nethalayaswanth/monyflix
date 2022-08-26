@@ -38,7 +38,7 @@ export default function EpicCarousel({
     if (data === undefined || isFetching) return;
 
     if (visible && hasMore) {
-      console.log("fetchmore");
+      
       fetchMore();
     }
   }, [visible, fetchMore, data, hasMore, isFetching]);

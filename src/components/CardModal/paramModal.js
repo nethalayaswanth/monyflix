@@ -172,12 +172,14 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
 
   const handleSimilarMovieclick = useCallback(() => {
     dispatch({ type: "set reset" });
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
+    // window.scrollTo({
+    //   top: 0,
+    //   left: 0,
+    //   behavior: "smooth",
+    // });
   }, [dispatch]);
+
+  
   return (
     <ModalWrapper ref={ref} id="card-param-modal">
       <animated.div

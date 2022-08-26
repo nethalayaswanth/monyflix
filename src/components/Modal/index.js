@@ -3,6 +3,7 @@ import { useModalState } from "../../contexts/modalContext";
 import ExpandModal from "./expandModal";
 import ParamModal from "./paramModal";
 
+
 const Modal = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -14,6 +15,7 @@ const Modal = () => {
 
   return (!parent && param ) ? <ParamModal /> : parent ? <ExpandModal /> : null;
 
+  
      
 };
 

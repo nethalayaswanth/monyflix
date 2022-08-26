@@ -38,7 +38,6 @@ const Slide = forwardRef(
     const handleClick = useCallback(() => {
       handlePrefetch();
 
-      console.log("dnkxx,kn xk kx x");
       setSearchParams({ mv: movie?.id });
     }, [movie, handlePrefetch, setSearchParams]);
 

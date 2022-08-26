@@ -1,5 +1,10 @@
 import React, {
-  memo, useCallback, useLayoutEffect, useMemo, useRef
+  memo,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
@@ -74,6 +79,7 @@ const ParamModal = ({}) => {
 
   
 useLayoutEffect(() => {
+  
   if (param) {
     dispatch({
       type: "set param",
@@ -105,6 +111,7 @@ useLayoutEffect(() => {
   );
 
   const springInitialStyles = useMemo(() => {
+  
     const w = document.body.clientWidth;
     const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
     const width = lastWidth * 0.8;
@@ -178,27 +185,27 @@ useLayoutEffect(() => {
 
   const scrollRef = useRef();
 
-  
 
+    scrollRef.current = window.scrollY;
+  
+    const [scrolly]=useState(()=>(window.scrollY))
+ 
+     
   useLayoutEffect(() => {
     if (parentRef) return;
 
-  
- const { top, width, left, lastWidth, height, scale, y } = springInitialStyles;
+    const { top, width, left, lastWidth, height, scale, y } =
+      springInitialStyles;
     if (expand && !expanded) {
-      
+     
       requestAnimationFrame(() => {
-        scrollRef.current = window.scrollY;
         const main = document.getElementById("app");
         main.style.position = "fixed";
-        main.style.top = `-${scrollRef.current}px`;
+        main.style.top = `-${scrolly}px`;
       });
-
 
       api.start({
         to: async (animate) => {
-            
-
           await animate({
             to: [
               {
@@ -210,7 +217,7 @@ useLayoutEffect(() => {
                 opacity: 1,
               },
             ],
-            config: {tension: 500,mass:5, clamp: true },
+            config: { tension: 500, mass: 5, clamp: true },
           }).then((r) => {
             window.scrollTo({
               top: 0,
@@ -237,16 +244,12 @@ useLayoutEffect(() => {
     }
 
     if (!expand && expanded) {
-       
-console.log("%ccollapse", "color:red");
-       const body = document.getElementsByTagName("BODY")[0];
-       let bodystyle = body.style;
-       body.style.overflowY = "scroll";
+      const body = document.getElementsByTagName("BODY")[0];
+      let bodystyle = body.style;
+      body.style.overflowY = "scroll";
 
       api.start({
         to: async (animate) => {
-           
-         
           await animate({
             to: [
               {
@@ -260,52 +263,61 @@ console.log("%ccollapse", "color:red");
             ],
             config: { tension: 35, mass: 3, clamp: true, friction: 1 },
           }).then((r) => {
-             
-
             requestAnimationFrame(() => {
               const main = document.getElementById("app");
               main.style.top = "unset";
               main.style.position = "static";
               body.style = bodystyle;
               window.scroll({
-                top: scrollRef.current,
+                top: scrolly,
                 left: 0,
               });
-              
             });
-             dispatch({
-               type: "set reset",
-             });  
-              if (param) {
-                searchParams.delete("mv");
-                setSearchParams(searchParams);
-              }
-                
+            dispatch({
+              type: "set reset",
+            });
+            if (param) {
+              searchParams.delete("mv");
+              setSearchParams(searchParams);
+            }
           });
         },
       });
     }
-  }, [expand, dispatch, api, expanded, parentRef, springInitialStyles, param, searchParams, setSearchParams]);
+  }, [
+    expand,
+    dispatch,
+    api,
+    expanded,
+    parentRef,
+    scrolly,
+    springInitialStyles,
+    param,
+    searchParams,
+    setSearchParams,
+  ]);
 
-  useLayoutEffect(()=>{},[])
+ 
  useLayoutEffect(() => {
    return () => {
-   
-    requestAnimationFrame(() => {
-      const main = document.getElementById("app");
-      if(!main) return
-      main.style.top = "unset";
-      main.style.position = "static";
-      window.scroll({
-        top:scroll|| scrollRef.current,
-        left: 0,
-      });
-    });
+     requestAnimationFrame(() => {
+       const main = document.getElementById("app");
+       if (!main) return;
+       main.style.top = "unset";
+       main.style.position = "static";
+       window.scroll({
+         top: scrolly,
+         left: 0,
+       });
+     });
      dispatch({
        type: "set reset",
      });
    };
- }, [dispatch,scroll]);
+ }, [dispatch, scrolly]);
+
+ const main = document.getElementById("app");
+
 
 
 
@@ -333,7 +345,7 @@ console.log("%ccollapse", "color:red");
               opacity,
             }}
           >
-            <ParamCardModal />
+           { <ParamCardModal />}
           </animated.div>
           <animated.div
             onClick={handleClose}

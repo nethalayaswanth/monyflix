@@ -59,6 +59,7 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
   }, [movie, queryClient]);
 
   useLayoutEffect(() => {
+  
     if (isHovering === undefined || activated || !enabled || !desktop) return;
     if (!isHovering) return;
 
@@ -70,9 +71,9 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
       handlePrefetch();
       dispatch({
         type: "set modal",
-        movie: movie,
+        payload:{movie: movie,
         parent: miniRef.current,
-        activate: true,
+        activate: true,}
       });
     }, 200);
 

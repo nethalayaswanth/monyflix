@@ -50,7 +50,7 @@ const ExpandModal = ({}) => {
     dispatch,
   ] = useModalState();
 
-console.log("ndjddnj", parentRef);
+
 
   const screen = useWindowSize();
   const [prevActivated] = usePrevious(activated);
@@ -318,7 +318,7 @@ console.log("ndjddnj", parentRef);
         miniTop,
       });
 
-      console.log(expandWidth, ey, scaleY, scaleX);
+      
 
       miniTranslateY.current = y.get();
 
