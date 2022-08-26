@@ -5,7 +5,8 @@ import {
   latestMovie, Movie, MovieGenre, Movies, recommendedMovies, similarMovies, videosById
 } from "./queries";
 
-const endpoint = process.env.APP_BASE_ENDPOINT;
+const endpoint =
+  process.env.NODE_ENV !== "production"?`${process.env.REACT_APP_BASE_ENDPOINT}`:`${process.env.APP_BASE_ENDPOINT}`;
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
