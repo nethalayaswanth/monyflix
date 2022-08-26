@@ -121,7 +121,7 @@ const Landing = () => {
 
 
   return (
-    <Container ref={refcb}>
+    <Container onClick={handleClick}  ref={refcb}>
       <Picture
         style={{
           backgroundColor: "black",
@@ -130,7 +130,6 @@ const Landing = () => {
           zIndex: 0,
           padding: "20px",
         }}
-        onClick={handleClick}
       >
         {
           <picture>
@@ -161,7 +160,6 @@ const Landing = () => {
         className="absolute"
       >
         <Gradient style={{ zIndex: 1 }} />
-       
 
         {(show || desktop) && (
           <Details style={{ zIndex: 2, height: "18vw", paddingBottom: "10vh" }}>
