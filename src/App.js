@@ -7,7 +7,7 @@ import {
   useLocation,
   useMatch,
 } from "react-router-dom";
-import { useTransition } from "react-spring";
+
 import Epic from "./components/Epic";
 import Landing from "./components/Landing";
 import Modal from "./components/Modal";
@@ -18,7 +18,7 @@ import {
   LandScapeSection,
 } from "./components/Section/DetailsSection";
 import Watch from "./components/watch";
-import { AppProvider } from "./contexts/appContext";
+
 import { ModalProvider, useModalState } from "./contexts/modalContext";
 
 function App() {
@@ -96,7 +96,7 @@ const Index = () => {
 
   
   return (
-    <AppProvider>
+    
       <ModalProvider>
         <Routes location={bg}>
           <Route path="/">
@@ -126,7 +126,7 @@ const Index = () => {
           </Routes>
         )}
       </ModalProvider>
-    </AppProvider>
+    
   );
 };
 

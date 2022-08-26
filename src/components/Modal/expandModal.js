@@ -11,7 +11,7 @@ import { getExpandStyles, getStyles } from "./utils";
 import { animated, useSpring } from "@react-spring/web";
 
 import { useHover } from "@use-gesture/react";
-import { useAppState } from "../../contexts/appContext";
+
 
 import { useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
@@ -50,7 +50,7 @@ const ExpandModal = ({}) => {
     dispatch,
   ] = useModalState();
 
-  const [{ isModalOpen }, setModalGlobal] = useAppState();
+
 
   const screen = useWindowSize();
   const [prevActivated] = usePrevious(activated);
@@ -90,7 +90,7 @@ const ExpandModal = ({}) => {
   useLayoutEffect(() => {
     if (param && !expand) {
       dispatch({ type: "set expand", expand: true });
-      console.log("expand");
+     
     }
     if (!param && expanded) dispatch({ type: "set expand", expand: false });
   }, [expand, dispatch, param, expanded]);
@@ -115,7 +115,7 @@ const ExpandModal = ({}) => {
     return getStyles({ parent });
   }, [parentRect]);
 
-  const [modalExpand, setModalExpand] = useState(false);
+
 
   const [
     {
@@ -129,6 +129,8 @@ const ExpandModal = ({}) => {
       top,
       transformOrigin,
       opacity,
+      fade,
+      minifade
     },
     api,
   ] = useSpring(() => {
@@ -148,6 +150,8 @@ const ExpandModal = ({}) => {
         y: 0,
         transformOrigin: "center center",
         opacity: 0,
+        fade: 0,
+        minifade: 0,
       },
     };
   });
@@ -200,6 +204,7 @@ const ExpandModal = ({}) => {
               width: toWidth,
               x: X,
               y: Y,
+              minifade:1
             },
             from: {
               width: fromWidth,
@@ -209,6 +214,7 @@ const ExpandModal = ({}) => {
               y: 0,
               left: fromLeft,
               top: fromTop,
+              minifade: 0,
               transformOrigin: "center center",
             },
             config: { tension: 100 },
@@ -229,14 +235,11 @@ const ExpandModal = ({}) => {
               width: fromWidth,
               x: 0,
               y: 0,
+              minifade:0
             },
             config: { tension: 300, mass: 3, clamp: true },
           }).then(() => {
             dispatch({ type: "set reset" });
-            setModalGlobal({
-              type: "set modalActivated",
-              isModalActive: false,
-            });
           });
         },
       });
@@ -248,7 +251,7 @@ const ExpandModal = ({}) => {
     miniExpand,
     miniHoverStyles,
     parentRef,
-    setModalGlobal,
+  
     prevMiniExpand,
   ]);
 
@@ -270,7 +273,7 @@ const ExpandModal = ({}) => {
 
   useLayoutEffect(() => {
     if (expand && miniExpand && modalRef.current) {
-      console.log("mony iahdasdkj ");
+   
       scrollRef.current = window.scrollY;
       miniRectMesureRef.current = modalRef.current.getBoundingClientRect();
       return;
@@ -278,7 +281,7 @@ const ExpandModal = ({}) => {
 
     if (expand) {
       scrollRef.current = window.scrollY;
-      console.log("minirect");
+    
       miniRectMesureRef.current = parentRect();
     }
   }, [expand, miniExpand, parentRect]);
@@ -297,7 +300,6 @@ const ExpandModal = ({}) => {
         top: miniTop,
       } = miniRectMesureRef.current;
 
-      console.log("expand", miniTop, miniLeft, parentRef);
       const {
         height,
         width: expandWidth,
@@ -332,6 +334,7 @@ const ExpandModal = ({}) => {
                 y: screen.width < 630 ? -miniTop : ey,
                 left: "auto",
                 opacity: 1,
+                fade:1
               },
             ],
             config: { tension: 100, clamp: true },
@@ -349,6 +352,7 @@ const ExpandModal = ({}) => {
           left: "auto",
           transformOrigin: "top center",
           opacity: 0,
+          fade:0,
         },
       });
 
@@ -380,6 +384,7 @@ const ExpandModal = ({}) => {
                 scaleX: csX,
 
                 opacity: 0,
+                fade:0,
               },
             ],
             config: { tension: 35, mass: 3, clamp: true, friction: 1 },
@@ -408,7 +413,7 @@ const ExpandModal = ({}) => {
     api,
     y,
     expanded,
-    setModalGlobal,
+    
     parentRect,
     width,
     parentRef,
@@ -432,7 +437,7 @@ const ExpandModal = ({}) => {
     if (!prevActivate && activate) {
       dispatch({ type: "set activated", activated: true });
     }
-  }, [activate, setModalGlobal, dispatch, prevActivate]);
+  }, [activate, dispatch, prevActivate]);
 
   useLayoutEffect(() => {
     return () => {
@@ -444,13 +449,10 @@ const ExpandModal = ({}) => {
 
  
 
-  useLayoutEffect(() => {
-    console.log("expand", expand);
-  }, [expand]);
+
 
   const full = expand || expanded;
 
-  console.log("full",full)
   return activated || full
     ? createPortal(
         <Wrapper
@@ -476,7 +478,7 @@ const ExpandModal = ({}) => {
               justifyContent: "center",
             }}
           >
-            <CardModal width={width} />
+            <CardModal width={width} fade={fade} minifade={minifade} />
           </animated.div>
           <animated.div
             onClick={handleClose}

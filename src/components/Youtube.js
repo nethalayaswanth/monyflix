@@ -8,7 +8,7 @@ import styled from "styled-components";
 import useHover from "../hooks/useHover";
 import AspectBox from "./AspectBox";
 
-
+import useMedia from "../hooks/useMedia";
 
 const VideoContainer = styled.div`
   width: 100%;
@@ -18,16 +18,7 @@ const VideoContainer = styled.div`
   display: flex;
 `;
 
-const Intersect = styled.div`
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  max-width: 100vw;
-  max-width: 100vh;
-  left: 50%;
-  transform: translate(-50%, 0%);
-`;
+
 
 
 export function Youtube({
@@ -51,7 +42,10 @@ export function Youtube({
   const [iconShow, setIconShow] = useState(false);
   
 
+const device = useMedia();
 
+const mobile = device === "mobile";
+const desktop = device === "desktop";
 
   const playerRefCb = useCallback((ref) => {
     playerRef.current = ref;
@@ -155,7 +149,7 @@ export function Youtube({
         playing={Play}
         light={light}
         controls={full}
-        volume={show && audio ? 1 : 0}
+        volume={(show && audio) || (full && desktop) ? 1 : 0}
         start={5}
         onReady={onReady}
         onStart={onStart}
@@ -183,9 +177,9 @@ export function Youtube({
               autoplay: 1,
               controls: full ? 1 : 0,
               disablekb: 1,
-              fs: 0,
+              fs: full && desktop ? 1 : 0,
               loop: 1,
-              modestbranding: 1,
+              modestbranding: full && desktop ? 0 : 1,
               playlist: id,
               host: `${window.location.protocol}//www.youtube.com`,
             },

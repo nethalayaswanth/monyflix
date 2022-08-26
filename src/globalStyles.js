@@ -11,7 +11,9 @@ export const GlobalStyles = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
     color: #333333;
     font-size:  62.5%;
+
 }
+
 button{
   margin: 0;
     padding: 0;

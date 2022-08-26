@@ -49,7 +49,7 @@ const ParamModal = ({}) => {
   const state=useModalState()
 
 
-  console.log("activated", state);
+  
   const screen = useWindowSize();
  
   const modalRef = useRef();
@@ -82,7 +82,7 @@ useLayoutEffect(() => {
 }, [dispatch, param]);
 
   useLayoutEffect(() => {
-    console.log("param expand");
+    
     if (param && !expand)
     
       dispatch({
@@ -182,8 +182,7 @@ useLayoutEffect(() => {
   useLayoutEffect(() => {
     if (parentRef) return;
 
-    
- console.log(`%c${expand}`, "color:green");
+  
  const { top, width, left, lastWidth, height, scale, y } = springInitialStyles;
     if (expand && !expanded) {
       
@@ -195,7 +194,7 @@ useLayoutEffect(() => {
       });
 
 
-      console.log('%cexpand','color:red')
+     
       api.start({
         to: async (animate) => {
             

@@ -26,7 +26,7 @@ import ProgressiveImage from "../ProgressiveImage";
 import Section from "../Section/DetailsSection";
 import timeConversion from "./utils";
 import { useInView } from "react-intersection-observer";
-const CardModal = forwardRef(({ style, width }, ref) => {
+const CardModal = forwardRef(({ style, width,}, ref) => {
   const [
     {
       movie,
@@ -132,7 +132,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
   });
 
   const id = useMemo(() => {
-    console.log(movieDetails);
+    
     if (!movieDetails) return null;
     const videos = movieDetails.movie.videos;
     if (!videos) return null;
@@ -195,7 +195,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
      }
      timeout = setTimeout(() => {
        setOverlay(expand);
-     }, 350);
+     }, 200);
      return () => {
        clearTimeout(timeout);
      };
@@ -262,7 +262,10 @@ const CardModal = forwardRef(({ style, width }, ref) => {
     >
       <animated.div
         style={{
-          opacity: opacity,
+          opacity: opacity.to({
+            range: [1, 0.2],
+            output: [1, 0],
+          }),
           width: "100%",
           height: "100%",
           ...(overlay && {
@@ -327,11 +330,13 @@ const CardModal = forwardRef(({ style, width }, ref) => {
                   />
                 </Video>
               )}
-              {(
+              {
                 <>
-                  {(expand || expanded) &&<Button onClick={handleClose}>
-                    <Close style={{ fill: "white" }} />
-                  </Button>}
+                  {(expand || expanded) && (
+                    <Button onClick={handleClose}>
+                      <Close style={{ fill: "white" }} />
+                    </Button>
+                  )}
                   {show && (
                     <Button
                       onClick={handleAudio}
@@ -341,7 +346,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
                     </Button>
                   )}
                 </>
-              )}
+              }
             </animated.div>
           </div>
 
@@ -366,7 +371,7 @@ const CardModal = forwardRef(({ style, width }, ref) => {
             zIndex: 3,
             backgroundColor: "inherit",
             flex: "auto",
-            opacity: opacity.to({ range: [0.6, 0.0], output: [0, 1] }),
+            opacity: opacity.to({ range: [0.6, 0.4, 0], output: [0, 1, 1] }),
           }}
         >
           {
@@ -392,13 +397,16 @@ const CardModal = forwardRef(({ style, width }, ref) => {
                   </Description>
                   {genres && (expand || expanded) && (
                     <Genres>
-                      <span style={{ ...(!desktop && { fontWeight: 600 }) }}>
+                      <span
+                        key={"genres"}
+                        style={{ ...(!desktop && { fontWeight: 600 }) }}
+                      >
                         Genres:
                       </span>
                       {genres.map((genre, i) => {
                         const last = i === genres.length - 1;
                         return (
-                          <span>
+                          <span key={i}>
                             {`${genre}`}
                             {!last && ","}
                           </span>

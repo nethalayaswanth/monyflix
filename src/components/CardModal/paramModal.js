@@ -77,7 +77,7 @@ const recommendedMovies = useGetRecommendedMovies({ id: param });
   const recommendedmovies = useMemo(() => {
     const data = recommendedMovies?.data;
 
-    console.log(data)
+ 
     if (data) {
       var list = [];
 
@@ -90,8 +90,7 @@ const recommendedMovies = useGetRecommendedMovies({ id: param });
     return [];
   }, [recommendedMovies?.data]);
 
-  let location = useLocation();
-  let navigate = useNavigate();
+  
 
   const handleClose = useCallback(
     (e) => {
@@ -122,13 +121,13 @@ const recommendedMovies = useGetRecommendedMovies({ id: param });
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [movieDetails]);
 
-  console.log(movieDetails)
+
   const current = movieDetails?.movie;
   const year = current?.releaseDate.split("-")[0];
   const genres = movieDetails?.movie.genres;
     const runTime = movieDetails?.movie.runtime;
 
-  console.log(videoData);
+  
 
 
 const backDropPath = current
@@ -271,13 +270,13 @@ const placeHolder = current
                     </Description>
                     {genres && (expand || expanded) && (
                       <Genres>
-                        <span style={{ ...(!desktop && { fontWeight: 600 }) }}>
+                        <span key={'genres'} style={{ ...(!desktop && { fontWeight: 600 }) }}>
                           Genres:
                         </span>
                         {genres.map((genre, i) => {
                           const last = i === genres.length - 1;
                           return (
-                            <span>
+                            <span key={i}>
                               {`${genre}`}
                               {!last && ","}
                             </span>
