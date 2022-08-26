@@ -15,6 +15,7 @@ const initialState = {
   movie: null,
   param: null,
   enabled: true,
+  scroll:null
 };
 
 function Reducer(state, action) {

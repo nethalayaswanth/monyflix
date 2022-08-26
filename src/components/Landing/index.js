@@ -82,7 +82,7 @@ const Landing = () => {
   const mobile = device === "mobile";
   const desktop = device === "desktop";
 
-  const [{ activated, expand }] = useModalState();
+  const [{ activated, expand },dispatch] = useModalState();
 
   const play = activated || expand;
 
@@ -103,6 +103,10 @@ const Landing = () => {
   }, [movie, queryClient]);
 
   const handleClick = useCallback(() => {
+    dispatch({
+      type: "set modal",
+      ...(!activated && { scroll: window.scrollY }),
+    });
     handlePrefetch();
     setSearchParams({ mv: movie.id });
   }, [movie, handlePrefetch, setSearchParams]);

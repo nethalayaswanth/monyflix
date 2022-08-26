@@ -48,7 +48,10 @@ const miniRef = useRef();
   
 
     handlePrefetch();
-   
+   dispatch({
+     type: "set modal",
+     ...(!activated && { scroll: window.scrollY }),
+   });
     setSearchParams({ mv: current?.id });
     onClick?.();
   }, [current?.id, dispatch, handlePrefetch, onClick, setSearchParams]);

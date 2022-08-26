@@ -44,10 +44,18 @@ const LandscapeCard = ({ movie: current }, ref) => {
     );
   }, [current, queryClient]);
 
+
+  
+  const [{ activated, expand }, dispatch] = useModalState();
+
   const handleClick = useCallback(() => {
     handlePrefetch();
+    dispatch({
+      type: "set modal",
+      ...(!activated && { scroll: window.scrollY }),
+    });
     setSearchParams({ mv: current.id });
-  }, [current, handlePrefetch, setSearchParams]);
+  }, [current, dispatch,handlePrefetch, setSearchParams]);
 
      
      
@@ -89,7 +97,6 @@ const LandscapeCard = ({ movie: current }, ref) => {
     setAudio((x) => !x);
   }, []);
 
-  const [{ activated, expand }] = useModalState();
 
   const play = activated || expand;
 

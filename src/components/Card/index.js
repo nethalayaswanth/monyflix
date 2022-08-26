@@ -103,8 +103,11 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
 
     dispatch({
       type: "set modal",
-      payload:{ movie: movie,
-      parent: miniRef.current}
+      payload: {
+        movie: movie,
+        parent: miniRef.current,
+        ...(!activated && {scroll: window.scrollY}),
+      },
     });
     setSearchParams({ mv: movie?.id });
   }, [dispatch, handlePrefetch, movie, setSearchParams]);

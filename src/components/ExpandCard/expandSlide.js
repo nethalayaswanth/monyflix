@@ -25,11 +25,7 @@ const ExpandSlide = forwardRef(({ height, style, data, onClick }, ref) => {
   const handleClick = useCallback(() => {
     handlePrefetch();
     setSearchParams({ mv: data?.data?.id });
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
+    
 
     onClick?.();
   }, [data?.data?.id, handlePrefetch, onClick, setSearchParams]);

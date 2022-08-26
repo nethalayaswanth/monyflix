@@ -42,6 +42,7 @@ const ParamModal = ({}) => {
 
       miniExpanded,
       expanded,
+      scroll
     },
     dispatch,
   ] = useModalState();
@@ -286,7 +287,7 @@ console.log("%ccollapse", "color:red");
     }
   }, [expand, dispatch, api, expanded, parentRef, springInitialStyles, param, searchParams, setSearchParams]);
 
-  
+  useLayoutEffect(()=>{},[])
  useLayoutEffect(() => {
    return () => {
    
@@ -296,7 +297,7 @@ console.log("%ccollapse", "color:red");
       main.style.top = "unset";
       main.style.position = "static";
       window.scroll({
-        top: scrollRef.current,
+        top:scroll|| scrollRef.current,
         left: 0,
       });
     });
@@ -304,7 +305,7 @@ console.log("%ccollapse", "color:red");
        type: "set reset",
      });
    };
- }, [dispatch]);
+ }, [dispatch,scroll]);
 
 
 
