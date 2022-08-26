@@ -392,7 +392,9 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
                       {runTime && <Item>{timeConversion(runTime)}</Item>}
                       <Adult>{current.adult ? "U/A 13+" : "U/A 18+"}</Adult>
                     </InlineFlex>
-                    <Overview>{current.overview}</Overview>
+                    <Overview className={expand && "expand"}>
+                      {current.overview}
+                    </Overview>
                     {/* <Spacer /> */}
                   </Description>
                   {genres && (expand || expanded) && (

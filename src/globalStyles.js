@@ -11,6 +11,7 @@ export const GlobalStyles = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
     color: #333333;
     font-size:  62.5%;
+    height:100%
 
 }
 

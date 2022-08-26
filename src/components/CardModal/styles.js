@@ -164,17 +164,21 @@ export const Overview = styled(Text)`
   line-height: 1.41667;
   max-height: 100%;
   -webkit-box-orient: vertical;
-     
+
   overflow: hidden !important;
   text-overflow: ellipsis;
   -webkit-line-clamp: 5;
   display: -webkit-box;
   padding-bottom: 2px;
-     
+
   opacity: 0.8;
 
   &.details {
     -webkit-line-clamp: 2;
+  }
+
+  &.expand {
+    -webkit-line-clamp: unset;
   }
 `;
 

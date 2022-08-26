@@ -2,23 +2,38 @@ import React, {
   forwardRef, useCallback, useMemo, useState
 } from "react";
 import { useQueryClient } from "react-query";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import AspectBox from "../AspectBox";
-   
+
 import { useModalState } from "../../contexts/modalContext";
 import {
-  useGetRecommendedMovies, useGetSimilarMovies, useGetVideosById, useMovieDetails
+  useGetRecommendedMovies,
+  useGetSimilarMovies,
+  useGetVideosById,
+  useMovieDetails,
 } from "../../requests/requests";
 import ExpandSlide from "../ExpandCard/expandSlide";
 import ModalSection from "../ModalSection";
 import Youtube from "../Youtube";
 import {
-  Adult, Button, Close, Content, Description, Divider,
-  Genres, Header, InlineFlex, Item, ModalWrapper, Overview, Spacer, Title
+  Adult,
+  Button,
+  Close,
+  Content,
+  Description,
+  Divider,
+  Genres,
+  Header,
+  InlineFlex,
+  Item,
+  ModalWrapper,
+  Overview,
+  Spacer,
+  Title,
 } from "./styles";
 
-import { animated } from "react-spring";
 import { useInView } from "react-intersection-observer";
+import { animated } from "react-spring";
 import useMedia from "../../hooks/useMedia";
 import AudioControls from "../AudioControls";
 import Video from "../CroppedVideo";
@@ -61,7 +76,7 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
     isFetchingNextPage,
     status,
   } = useGetSimilarMovies({ id: param });
-const recommendedMovies = useGetRecommendedMovies({ id: param });
+  const recommendedMovies = useGetRecommendedMovies({ id: param });
   const movies = useMemo(() => {
     if (data) {
       var list = [];
@@ -77,7 +92,6 @@ const recommendedMovies = useGetRecommendedMovies({ id: param });
   const recommendedmovies = useMemo(() => {
     const data = recommendedMovies?.data;
 
- 
     if (data) {
       var list = [];
 
@@ -89,8 +103,6 @@ const recommendedMovies = useGetRecommendedMovies({ id: param });
     }
     return [];
   }, [recommendedMovies?.data]);
-
-  
 
   const handleClose = useCallback(
     (e) => {
@@ -113,7 +125,7 @@ const recommendedMovies = useGetRecommendedMovies({ id: param });
   const id = useMemo(() => {
     if (!movieDetails) return null;
     const videos = movieDetails.movie.videos;
-    if(!videos) return null;
+    if (!videos) return null;
     const clip = videos.clip[0];
     const trailer = videos.trailer[0];
     const teaser = videos.teaser[0];
@@ -121,55 +133,51 @@ const recommendedMovies = useGetRecommendedMovies({ id: param });
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [movieDetails]);
 
-
   const current = movieDetails?.movie;
   const year = current?.releaseDate.split("-")[0];
   const genres = movieDetails?.movie.genres;
-    const runTime = movieDetails?.movie.runtime;
+  const runTime = movieDetails?.movie.runtime;
 
-  
+  const backDropPath = current
+    ? `https://image.tmdb.org/t/p/original/${current?.backdropPath}`
+    : null;
 
+  const placeHolder = current
+    ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
+    : null;
 
-const backDropPath = current
-  ? `https://image.tmdb.org/t/p/original/${current?.backdropPath}`
-  : null;
+  const device = useMedia();
 
-const placeHolder = current
-  ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
-  : null;
-      
-   const device = useMedia();
+  const mobile = device === "mobile";
+  const desktop = device === "desktop";
 
-   const mobile = device === "mobile";
-   const desktop = device === "desktop";
+  const {
+    ref: elRef,
+    inView,
+    entry,
+  } = useInView({
+    threshold: 0.95,
+    rootMargin: "100px 0px 100px 0px",
+  });
+  const [audio, setAudio] = useState(false);
+  const [show, setShow] = useState();
 
-   const {
-     ref: elRef,
-     inView,
-     entry,
-   } = useInView({
-     threshold: 0.95,
-     rootMargin: "100px 0px 100px 0px",
-   });
-   const [audio, setAudio] = useState(false);
-   const [show, setShow] = useState();
+  const showCb = useCallback(({ show }) => {
+    setShow(show);
+  }, []);
 
-   const showCb = useCallback(({ show }) => {
-     setShow(show);
-   }, []);
+  const handleAudio = useCallback(() => {
+    setAudio((x) => !x);
+  }, []);
 
-   const handleAudio = useCallback(() => {
-     setAudio((x) => !x);
-   }, []);
-
-    const handleSimilarMovieclick = useCallback(() => {
-      dispatch({ type: "set reset" });
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth",
-      });
-    }, [dispatch]);
+  const handleSimilarMovieclick = useCallback(() => {
+    dispatch({ type: "set reset" });
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, [dispatch]);
   return (
     <ModalWrapper ref={ref} id="card-param-modal">
       <animated.div
@@ -266,11 +274,16 @@ const placeHolder = current
                         <Adult>{current?.adult ? "U/A 13+" : "U/A 18+"}</Adult>
                       </InlineFlex>
                       {/* <Spacer /> */}
-                      <Overview>{current?.overview}</Overview>
+                      <Overview className={expand && "expand"}>
+                        {current?.overview}
+                      </Overview>
                     </Description>
                     {genres && (expand || expanded) && (
                       <Genres>
-                        <span key={'genres'} style={{ ...(!desktop && { fontWeight: 600 }) }}>
+                        <span
+                          key={"genres"}
+                          style={{ ...(!desktop && { fontWeight: 600 }) }}
+                        >
                           Genres:
                         </span>
                         {genres.map((genre, i) => {

@@ -1,19 +1,27 @@
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 import { Youtube } from "../Youtube";
 
-import { useLayoutEffect } from "react";
 import { useParams } from "react-router-dom";
 import useMedia from "../../hooks/useMedia";
+import Spinner from "../spinner";
 
 const Container = styled.div`
+  height: 100%;
+  width: 100%;
+  position:fixed;
+background-color:black;
+`;
+
+const Overlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-  background-color: black;
-  height:100vh;
-  width: 100%;
-  
 `;
 
 const Watch = () => {
@@ -24,17 +32,36 @@ const Watch = () => {
   const mobile = device === "mobile";
   const desktop = device === "desktop";
   const root = document.getElementById("root");
- 
+
+  root.style.minHeight = "-webkit-fill-available";
+  const [show, setShow] = useState();
+
+  const showCb = useCallback(({ show }) => {
+    setShow(show);
+  }, []);
 
   return (
     <Container>
       <div
         style={{
-          height: '100%',
+          height: "100%",
           width: "100%",
+          position: "relative",
         }}
       >
-        <Youtube id={id} visible={true} light={false} play={true} full />
+        <Youtube
+          cb={showCb}
+          id={id}
+          visible={true}
+          light={false}
+          play={true}
+          full
+        />
+        {!show && (
+          <Overlay>
+            <Spinner />
+          </Overlay>
+        )}
       </div>
     </Container>
   );

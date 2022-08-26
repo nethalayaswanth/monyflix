@@ -108,8 +108,8 @@ const desktop = device === "desktop";
   );
 
   const onBuffer = useCallback((e) => {
-    setShow(false);
-  }, []);
+    if(!full){ setShow(false);}
+  }, [full]);
 
   const onError = useCallback((e) => {
     setShow(false);
@@ -177,9 +177,9 @@ const desktop = device === "desktop";
               autoplay: 1,
               controls: full ? 1 : 0,
               disablekb: 1,
-              fs: full && desktop ? 1 : 0,
+              fs: full ? 1 : 0,
               loop: 1,
-              modestbranding: full && desktop ? 0 : 1,
+              modestbranding: 1,
               playlist: id,
               host: `${window.location.protocol}//www.youtube.com`,
             },
