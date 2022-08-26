@@ -6,8 +6,11 @@ import {
 } from "./queries";
 
 const endpoint =
-  process.env.NODE_ENV !== "production"?`${process.env.REACT_APP_BASE_ENDPOINT}`:`${process.env.APP_BASE_ENDPOINT}`;
+  process.env.NODE_ENV !== "production"
+    ? `${process.env.REACT_APP_BASE_ENDPOINT}`
+    : `${process.env.REACT_APP_BASE_ENDPOINT}`;
 
+  console.log(endpoint)
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
     "Content-Type": "application/json",
