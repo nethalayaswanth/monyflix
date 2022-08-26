@@ -140,13 +140,16 @@ const LandscapeCard = ({ movie: current }, ref) => {
                 visible={inView}
               />
             </Video>
-
-            {show && (
-              <Button style={{ bottom: 0, top: "auto" }} onClick={handleAudio}>
-                <AudioControls audio={audio} />
-              </Button>
-            )}
           </div>
+        )}
+
+        {show && (
+          <Button
+            style={{ bottom: 0, top: "auto", zIndex: 10 }}
+            onClick={handleAudio}
+          >
+            <AudioControls audio={audio} />
+          </Button>
         )}
         <button
           style={{

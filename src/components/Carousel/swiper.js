@@ -122,8 +122,8 @@ function Index(
           freeMode={{
             enabled: true,
             sticky: true,
-            momentumBounce: false,
-            momentumBounceRatio: 0.5,
+            
+            momentumBounceRatio: 1,
           }}
           
           keyboard={{
