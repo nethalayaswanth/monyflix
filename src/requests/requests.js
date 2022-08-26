@@ -17,13 +17,15 @@ const graphQLClient = new GraphQLClient(endpoint, {
   },
 });
 
-export function useGetMovies({ type }) {
+export function useGetMovies({ type,withImages }) {
   return useInfiniteQuery(
     ["getMovies", type],
     async ({ pageParam = 0 }) => {
+      
       const data = await graphQLClient.request(Movies, {
         type,
         after: pageParam,
+        withImages,
       });
       return data;
     },

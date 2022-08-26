@@ -23,12 +23,8 @@ const LandscapeCard = ({ movie: current }, ref) => {
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [current]);
 
-  const src = current
-    ? `https://image.tmdb.org/t/p/original/${current?.images?.filePath}`
-    : null;
-  const placeholderSrc = current
-    ? `https://image.tmdb.org/t/p/w300/${current?.images?.filePath}`
-    : null;
+  const src = current?.images?.filePath;
+ 
 
   let [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -103,7 +99,14 @@ const LandscapeCard = ({ movie: current }, ref) => {
   
 
   return (
-    <div style={{ width: "100%", height: "100%" ,borderRadius: "6px" ,overflow:'hidden'}}>
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        borderRadius: "6px",
+        overflow: "hidden",
+      }}
+    >
       <div
         style={{
           width: "100%",
@@ -122,7 +125,6 @@ const LandscapeCard = ({ movie: current }, ref) => {
         <ProgressiveImage
           style={{ borderRadius: "6px", zIndex: 1 }}
           src={src}
-          placeholderSrc={placeholderSrc}
           alt={`${current?.title}`}
         />
         {id && (

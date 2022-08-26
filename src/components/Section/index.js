@@ -11,7 +11,7 @@ const Container = styled.div`
   z-index: 1;
 `;
 
-export default function Section({ query, title }) {
+export default function Section({ query, title, children, withImages }) {
   const {
     data,
     error,
@@ -20,7 +20,7 @@ export default function Section({ query, title }) {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useGetMovies({ type: query });
+  } = useGetMovies({ type: query, withImages });
 
   const movies = useMemo(() => {
     if (data) {
@@ -35,6 +35,7 @@ export default function Section({ query, title }) {
     return [];
   }, [data]);
 
+
   return (
     <Container>
       <Header title={title} />
@@ -44,7 +45,9 @@ export default function Section({ query, title }) {
         hasMore={hasNextPage}
         isFetching={isFetchingNextPage}
         fetchMore={fetchNextPage}
-      />
+      >
+        {children && children}
+      </Carousel>
       <Divider />
     </Container>
   );

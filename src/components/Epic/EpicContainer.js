@@ -15,7 +15,7 @@ import Description from "./description";
 import { Carousel, Container, Details, Gradient } from "./views";
 
 
-export default function EpicContainer({ genre ,title:header}) {
+export default function EpicContainer({ genres ,title:header}) {
   const [state, dispatch] = useEpicState();
   
  
@@ -27,7 +27,7 @@ export default function EpicContainer({ genre ,title:header}) {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useGetMoviesByGenre({ genres: genre });
+  } = useGetMoviesByGenre({ genres });
 
   
   const movies = useMemo(() => {

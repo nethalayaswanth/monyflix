@@ -33,15 +33,13 @@ const ExpandSlide = forwardRef(({ height, style, data, onClick }, ref) => {
 
     onClick?.();
   }, [data?.data?.id, handlePrefetch, onClick, setSearchParams]);
-  const src = `https://image.tmdb.org/t/p/original/${data?.data?.posterPath}`;
-const placeholderSrc = data?.data
-  ? `https://image.tmdb.org/t/p/w300/${data?.data?.posterPath}`
-  : null;
+  const src = data?.data?.posterPath;
+
   return (
     <CardWrapper onClick={handleClick} height={height} ref={ref} style={style}>
       <AspectBox potrait>
         {data && (
-          <ProgressiveImage placeholderSrc={placeholderSrc} src={src} alt="" />
+          <ProgressiveImage  src={src} alt="" />
         )}
       </AspectBox>
     </CardWrapper>

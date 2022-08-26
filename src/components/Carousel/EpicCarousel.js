@@ -105,7 +105,7 @@ export default function EpicCarousel({
             )}
           </>
         ) : (
-          [...Array(5).fill(0)].map((movie, i) => {
+          [...Array(9).fill(0)].map((movie, i) => {
             return (
               <SwiperSlide ref={slide} key={i} index={i}>
                 <Slide />

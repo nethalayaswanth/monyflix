@@ -1,15 +1,19 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Image as Img } from "./Card/styles";
 
-const ProgressiveImage = ({ placeholderSrc, src, style, ...props }) => {
+const ProgressiveImage = ({  src, style, ...props }) => {
   const [_, render] = useState();
 
+   const Src =  `https://image.tmdb.org/t/p/original/${src}` ;
+   const placeholderSrc = `https://image.tmdb.org/t/p/w300/${src}`;
+ 
   const srcRef = useRef(null);
 
-  const current = placeholderSrc || src;
+  const current = placeholderSrc || Src;
 
   const [loading, setLoading] = useState(true);
 
+   
   useLayoutEffect(() => {
     if (!current) {
       srcRef.current = null;
@@ -24,19 +28,19 @@ const ProgressiveImage = ({ placeholderSrc, src, style, ...props }) => {
     setLoading(true);
 
     const img = new Image();
-    img.src = src;
+    img.src = Src;
     img.onload = () => {
-      srcRef.current = src;
+      srcRef.current = Src;
       render();
       setLoading(false);
     };
 
     return () => {};
-  }, [src]);
+  }, [Src]);
 
   return (
     <>
-      {srcRef.current && current ? (
+      {srcRef.current && src ? (
         <Img
           {...(current && { src: srcRef.current, ...props })}
           style={{

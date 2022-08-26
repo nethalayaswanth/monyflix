@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from "react";
 import styled from "styled-components";
-import { useGetMoviesByGenre } from "../../requests/requests";
+import { useGetMoviesByGenre, useGetMovies } from "../../requests/requests";
 import Card from "../Card";
 import Carousel from "../Carousel";
 import DetailsCard from "../DetailsCard";
@@ -67,7 +67,6 @@ function useFetch({ genres }) {
 }
 export function Index({
   movies,
-
   fetchNextPage,
   hasNextPage,
   isFetching,
@@ -117,7 +116,7 @@ export const DetailsSection = memo(({ genres, ...props }) => {
   );
 });
 
-export const ExpandCardSection = memo(({ genres, ...props }) => {
+export const ExpandCardGenreSection = memo(({ genres, ...props }) => {
   const data = useFetch({ genres: genres });
   return (
     <Section {...data} {...props}>
@@ -125,3 +124,51 @@ export const ExpandCardSection = memo(({ genres, ...props }) => {
     </Section>
   );
 });
+
+export const ExpandCardSection = memo(
+  ({ query, children, details, ...props }) => {
+
+    
+    const {
+      data,
+      error,
+      fetchNextPage,
+      hasNextPage,
+      isFetching,
+      isFetchingNextPage,
+      status,
+    } = useGetMovies({ type: query, withImages: details });
+
+    const movies = useMemo(() => {
+      if (data) {
+        var list = [];
+
+        data.pages.forEach(({ movies: { data } }, i) => {
+          list = [...list, ...data];
+        });
+
+        return list;
+      }
+      return [];
+    }, [data]);
+
+    return (
+      <Section
+        {...{
+          movies,
+          error,
+          fetchNextPage,
+          hasNextPage,
+          isFetching,
+          isFetchingNextPage,
+          status,
+        }}
+        {...(details && { slidesPerView: "auto" })}
+        {...props}
+      >
+        {children && children}
+      </Section>
+    );
+  }
+);
+

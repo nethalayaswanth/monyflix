@@ -30,6 +30,7 @@ import {
   Overview,
   Spacer,
   Title,
+  Tagline,
 } from "./styles";
 
 import { useInView } from "react-intersection-observer";
@@ -138,13 +139,8 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
   const genres = movieDetails?.movie.genres;
   const runTime = movieDetails?.movie.runtime;
 
-  const backDropPath = current
-    ? `https://image.tmdb.org/t/p/original/${current?.backdropPath}`
-    : null;
-
-  const placeHolder = current
-    ? `https://image.tmdb.org/t/p/w300/${current?.backdropPath}`
-    : null;
+   
+   const backDropPath = current?.backdropPath;
 
   const device = useMedia();
 
@@ -242,7 +238,6 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
             <ProgressiveImage
               style={{ width: "100%", height: "100%", Zindex: 5 }}
               src={backDropPath}
-              placeholderSrc={placeHolder}
               alt={``}
             />
           </AspectBox>
@@ -279,6 +274,7 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
                       <Overview className={expand && "expand"}>
                         {current?.overview}
                       </Overview>
+                      {(expand|| expanded )&& current?.tagline && <Tagline>{`"${current?.tagline}"`}</Tagline>}
                     </Description>
                     {genres && (expand || expanded) && (
                       <Genres>

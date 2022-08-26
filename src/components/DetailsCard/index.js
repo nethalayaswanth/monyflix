@@ -20,7 +20,7 @@ const DetailsCard = ({ movie: current, onClick }, ref) => {
 
     const [{ activated, expand, enabled, expanded }, dispatch] =
       useModalState();
-  const src = current
+  const src = current?.images?.filePath 
     ? `https://image.tmdb.org/t/p/original/${current?.images?.filePath}`
     : null;
   const placeholderSrc = current

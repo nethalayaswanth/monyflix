@@ -72,10 +72,14 @@ export const Movies = gql`
     $after: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
+    $withImages: Boolean = false
   ) {
     movies(type: $type, after: $after) {
       data {
         ...CoreMovieFields
+        images @include(if: $withImages) {
+          filePath
+        }
       }
       cursor
       hasMore

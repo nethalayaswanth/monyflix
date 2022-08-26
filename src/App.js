@@ -5,28 +5,23 @@ import {
   Route,
   Routes,
   useLocation,
-  useMatch,
+  useMatch
 } from "react-router-dom";
 
+import DetailsCard from "./components/DetailsCard";
 import Epic from "./components/Epic";
 import Landing from "./components/Landing";
 import Modal from "./components/Modal";
-import Section from "./components/Section";
 import {
-  DetailsSection,
-  ExpandCardSection,
-  LandScapeSection,
+  DetailsSection, ExpandCardGenreSection, ExpandCardSection, LandScapeSection
 } from "./components/Section/DetailsSection";
 import Watch from "./components/watch";
 
 import { ModalProvider, useModalState } from "./contexts/modalContext";
 
 function App() {
-  
-
   const useGesture = createUseGesture([scrollAction]);
-  const [{  expand, expanded }, dispatch] =
-    useModalState();
+  const [{ expand, expanded }, dispatch] = useModalState();
   const [scroll, setScroll] = useState();
   useEffect(() => {
     if (expand || expanded) return;
@@ -61,28 +56,34 @@ function App() {
     >
       <Landing />
 
-      <Section query={"POPULAR"} title={"Popular"} />
-      <Section query={"UPCOMING"} title={"Upcoming"} />
+      <ExpandCardSection query={"POPULAR"} title={"Popular"} />
+      <ExpandCardSection query={"UPCOMING"} title={"Upcoming"} />
+      <ExpandCardSection query={"PLAYING"} title={"Playing Now"} details={true}>
+        <DetailsCard />
+      </ExpandCardSection>
 
-      <DetailsSection genres={["Thriller"]} title={"Thrillers"} />
-      <Epic genre={["Romance", "Drama"]} title={"Romance"} />
-      <Section query={"PLAYING"} title={"Playing Now"} />
-      <DetailsSection genres={["Music"]} title={"Music"} />
+      <Epic genres={["Romance", "Drama"]} title={"Romance"} />
+      <ExpandCardGenreSection genres={["Comedy"]} title={"Comedy"} />
+      <ExpandCardGenreSection genres={["Drama"]} title={"Drama"} />
+      <DetailsSection genres={["Family"]} title={"Family"} />
       <LandScapeSection
         genres={["ScienceFiction", "Thriller"]}
         title={"Sci-Fi"}
       />
-      <ExpandCardSection genres={["Horror"]} title={"Horror"} />
-      <DetailsSection
-        genres={["Thriller", "Crime", "Mystery"]}
+      <ExpandCardGenreSection genres={["Fantasy"]} title={"Fantasy"} />
+      <DetailsSection genres={["Adventure", "Action"]} title={"Adventure"} />
+
+      <Epic genres={["Action"]} title={"Action"} />
+
+      <DetailsSection genres={["Thriller"]} title={"Thrillers"} />
+      <ExpandCardGenreSection genres={["Horror"]} title={"Horror"} />
+      <LandScapeSection
+        genres={["Mystery", "Crime", "Thriller"]}
         title={"Mystery"}
       />
-      <LandScapeSection
-        genres={["Documentary", "Mystery"]}
-        title={"Documentary"}
-      />
-      <ExpandCardSection genres={["Comedy", "Drama"]} title={"Comedy"} />
-      <DetailsSection genres={["Drama", "Adventure"]} title={"Adventure"} />
+
+      <ExpandCardGenreSection genres={["History", "War"]} title={"History"} />
+      <DetailsSection genres={["Documentary"]} title={"Documentary"} />
     </div>
   );
 }
@@ -95,39 +96,36 @@ const Index = () => {
 
   const bg = state?.backgroundState || location;
 
-  
   return (
-    
-      <ModalProvider>
-        <Routes location={bg}>
-          <Route path="/">
-            <Route index element={<Navigate to="/browse" />} />
-            <Route path="browse">
-              <Route index element={<App />} />
-            </Route>
-
-            <Route path="watch">
-              <Route path=":id" element={<Watch />} />
-            </Route>
-
-            <Route
-              path="*"
-              element={
-                <main style={{ padding: "1rem" }}>
-                  <p>There's nothing here!</p>
-                </main>
-              }
-            />
+    <ModalProvider>
+      <Routes location={bg}>
+        <Route path="/">
+          <Route index element={<Navigate to="/browse" />} />
+          <Route path="browse">
+            <Route index element={<App />} />
           </Route>
-        </Routes>
 
-        {browse && (
-          <Routes>
-            <Route path="/browse" element={<Modal />} />
-          </Routes>
-        )}
-      </ModalProvider>
-    
+          <Route path="watch">
+            <Route path=":id" element={<Watch />} />
+          </Route>
+
+          <Route
+            path="*"
+            element={
+              <main style={{ padding: "1rem" }}>
+                <p>There's nothing here!</p>
+              </main>
+            }
+          />
+        </Route>
+      </Routes>
+
+      {browse && (
+        <Routes>
+          <Route path="/browse" element={<Modal />} />
+        </Routes>
+      )}
+    </ModalProvider>
   );
 };
 

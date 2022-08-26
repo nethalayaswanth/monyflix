@@ -90,12 +90,8 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
     handlePrefetch,
   ]);
 
-  const src = movie
-    ? `https://image.tmdb.org/t/p/original/${movie?.posterPath}`
-    : null;
-  const placeholderSrc = movie
-    ? `https://image.tmdb.org/t/p/w300/${movie?.posterPath}`
-    : null;
+  const src = movie?.posterPath
+   
 
   const handleClick = useCallback(async () => {
        
@@ -133,7 +129,7 @@ const Card = forwardRef(({ id, style, movie }, ref) => {
           {movie && (
             <ProgressiveImage
               src={src}
-              placeholderSrc={placeholderSrc}
+             
               alt={`${movie?.title}`}
             />
           )}

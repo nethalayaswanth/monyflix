@@ -6,7 +6,7 @@ import { getMovieDetails, getVideosById } from "../../requests/requests";
 import AspectBox from "../AspectBox";
 import { CardWrapper, Image } from "../Card/styles";
 import { useEpicState } from "../Epic/context";
-
+import ProgressiveImage from "../ProgressiveImage";
 const Slide = forwardRef(
   ({ height, style, index, movie, onClick = {} }, ref) => {
     const { isActive } = useSwiperSlide();
@@ -45,7 +45,7 @@ const Slide = forwardRef(
       setMovie();
     }, [setMovie]);
 
-    const src = `https://image.tmdb.org/t/p/original/${movie?.posterPath}`;
+    const src = movie?.posterPath;
     return (
       <CardWrapper
         onClick={handleClick}
@@ -53,7 +53,7 @@ const Slide = forwardRef(
         ref={ref}
         style={{ ...style, cursor: "pointer" }}
       >
-        <AspectBox potrait>{src && <Image src={src} alt="" />}</AspectBox>
+        <AspectBox potrait>{<ProgressiveImage src={src} alt="" />}</AspectBox>
       </CardWrapper>
     );
   }

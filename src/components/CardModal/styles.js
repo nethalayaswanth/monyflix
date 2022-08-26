@@ -148,7 +148,7 @@ export const Spacer = styled.div`
 
 export const Title = styled(Text)`
   font-size: ${({ expand }) => (expand ? "1.7rem" : "1.5rem")};
-  line-height: 1.23;
+  line-height: 1.41667;
   font-weight: ${({ expand }) => (expand ? 600 : 500)};
   letter-spacing: 0;
   white-space: normal;
@@ -159,6 +159,11 @@ export const Title = styled(Text)`
   display: -webkit-box;
 `;
 
+export const Tagline = styled(Title)`
+  font-size: "1.5rem";
+  font-weight: "600";
+  font-style: italic;
+`;
 export const Overview = styled(Text)`
   font-size: 12px;
   line-height: 1.41667;

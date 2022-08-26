@@ -13,7 +13,7 @@ import ExpandSlide from "../ExpandCard/expandSlide";
 import ModalSection from "../ModalSection";
 import Youtube from "../Youtube";
 import {
-  Adult, Button, Close, Content, Description, Divider, Genres, Header, Image, InlineFlex, Item, ModalWrapper, Open, Overview, Spacer, Title, Up
+  Adult, Button, Close,Tagline, Content, Description, Divider, Genres, Header, Image, InlineFlex, Item, ModalWrapper, Open, Overview, Spacer, Title, Up
 } from "./styles";
 
 import { animated, useSpring } from "react-spring";
@@ -150,25 +150,11 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
   const genres = movieDetails?.movie.genres;
   const runTime = movieDetails?.movie.runtime;
 
-
-
-
   const posterPath = current
     ? `https://image.tmdb.org/t/p/original/${current?.posterPath}`
     : null;
-  const placeholderPoster = movie
-    ? `https://image.tmdb.org/t/p/w500/${current?.posterPath}`
-    : null;
-  const backDropPath = current
-    ? `https://image.tmdb.org/t/p/original/${current?.backdropPath}`
-    : null;
-  const placeHolderBackDropPath = current
-    ? `https://image.tmdb.org/t/p/w300/${movie?.backdropPath}`
-    : null;
+ const backDropPath = current?.backdropPath;
 
-    const overlayBackDrop = movie
-      ? `https://image.tmdb.org/t/p/w300/${movie?.backdropPath}`
-      : null;
 
   const [{ opacity }, api] = useSpring(() => {
     return {
@@ -201,7 +187,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
      }
      timeout = setTimeout(() => {
        setOverlay(expand);
-     }, 100);
+     }, 200);
      return () => {
        clearTimeout(timeout);
      };
@@ -251,6 +237,9 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
   const handleAudio = useCallback(() => {
     setAudio((x) => !x);
   }, []);
+
+
+
 
  
   return (
@@ -364,7 +353,6 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
                 aspectRatio: 19 / 10,
               }}
               src={backDropPath}
-              placeholderSrc={placeHolderBackDropPath}
               alt={``}
             />
           </div>
@@ -395,11 +383,13 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
                     <InlineFlex>
                       <Item>{year}</Item>
                       {runTime && <Item>{timeConversion(runTime)}</Item>}
-                      <Adult>{current.adult ? "U/A 13+" : "U/A 18+"}</Adult>
+                      <Adult>{current?.adult ? "U/A 13+" : "U/A 18+"}</Adult>
                     </InlineFlex>
                     <Overview className={expand && "expand"}>
-                      {current.overview}
+                      {current?.overview}
                     </Overview>
+                    {expand && <Tagline>{current?.tagline}</Tagline>}
+
                     {/* <Spacer /> */}
                   </Description>
                   {genres && (expand || expanded) && (
@@ -433,64 +423,71 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
                   </>
                 )}
               </Content>
-              {videoData && (expand || expanded) && (
+              {(expand || expanded) && (
                 <div style={{ flexGrow: 2, flexShrink: 0, flexBasis: "auto" }}>
-                  {videoData.videosById.clip.length !== 0 && (
-                    <ModalSection
-                      data={videoData.videosById.clip}
-                      title="Clips"
-                    />
-                  )}
-                  {videoData.videosById.trailer.length !== 0 && (
-                    <ModalSection
-                      data={videoData.videosById.trailer}
-                      title="Trailers"
-                    />
-                  )}
-                  {videoData.videosById.bts.length !== 0 && (
-                    <ModalSection
-                      data={videoData.videosById.bts}
-                      title="Behind The Scenes"
-                    />
-                  )}
-                  {videoData.videosById.featurette.length !== 0 && (
-                    <ModalSection
-                      data={videoData.videosById.featurette}
-                      title={"Featurette"}
-                    />
-                  )}
-                  {videoData.videosById.bloopers.length !== 0 && (
-                    <ModalSection
-                      data={videoData.videosById.bloopers}
-                      title="Bloopers"
-                    />
-                  )}
-                  {!recommendedMovies.isLoading && recommendedMovies?.data && (
-                    <Section
-                      title="Recommended"
-                      movies={recommendedmovies}
-                      loading={recommendedMovies.status === "loading"}
-                      hasMore={recommendedMovies.hasNextPage}
-                      isFetching={recommendedMovies.isFetchingNextPage}
-                      fetchMore={recommendedMovies.fetchNextPage}
-                      slidesPerView={"auto"}
-                      enabled={true}
-                    >
-                      <DetailsCard onClick={handleSimilarMovieclick} />
-                    </Section>
-                  )}
-                  {data && (
-                    <ModalSection
-                      title="More Like This"
-                      data={movies}
-                      loading={status === "loading"}
-                      hasMore={hasNextPage}
-                      isFetching={isFetchingNextPage}
-                      fetchMore={fetchNextPage}
-                    >
-                      <ExpandSlide onClick={handleSimilarMovieclick} />
-                    </ModalSection>
-                  )}
+                  <>
+                    {videoData && videoData?.videosById && (
+                      <>
+                        {videoData.videosById.clip.length !== 0 && (
+                          <ModalSection
+                            data={videoData.videosById.clip}
+                            title="Clips"
+                          />
+                        )}
+                        {videoData.videosById?.trailer.length !== 0 && (
+                          <ModalSection
+                            data={videoData.videosById.trailer}
+                            title="Trailers"
+                          />
+                        )}
+                        {videoData.videosById?.bts.length !== 0 && (
+                          <ModalSection
+                            data={videoData.videosById.bts}
+                            title="Behind The Scenes"
+                          />
+                        )}
+                        {videoData.videosById.featurette.length !== 0 && (
+                          <ModalSection
+                            data={videoData.videosById.featurette}
+                            title={"Featurette"}
+                          />
+                        )}
+                        {videoData.videosById.bloopers.length !== 0 && (
+                          <ModalSection
+                            data={videoData.videosById.bloopers}
+                            title="Bloopers"
+                          />
+                        )}{" "}
+                      </>
+                    )}
+                    {!recommendedMovies.isLoading &&
+                      recommendedmovies.length !== 0 && (
+                        <Section
+                          title="Recommended"
+                          movies={recommendedmovies}
+                          loading={recommendedMovies.status === "loading"}
+                          hasMore={recommendedMovies.hasNextPage}
+                          isFetching={recommendedMovies.isFetchingNextPage}
+                          fetchMore={recommendedMovies.fetchNextPage}
+                          slidesPerView={"auto"}
+                          enabled={true}
+                        >
+                          <DetailsCard onClick={handleSimilarMovieclick} />
+                        </Section>
+                      )}
+                    {data && (
+                      <ModalSection
+                        title="More Like This"
+                        data={movies}
+                        loading={status === "loading"}
+                        hasMore={hasNextPage}
+                        isFetching={isFetchingNextPage}
+                        fetchMore={fetchNextPage}
+                      >
+                        <ExpandSlide />
+                      </ModalSection>
+                    )}
+                  </>
                 </div>
               )}
             </>
