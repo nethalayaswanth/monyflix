@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useLayoutEffect, useRef,
+  memo, useCallback, useEffect, useLayoutEffect, useRef,
   useState
 } from "react";
 import { createPortal } from "react-dom";
@@ -11,11 +11,10 @@ import { getExpandStyles, getStyles } from "./utils";
 import { animated, useSpring } from "@react-spring/web";
 
 import { useHover } from "@use-gesture/react";
-
+import CardModal from "../CardModal";
 
 import { useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
-import CardModal from "../CardModal";
 
 const Wrapper = styled.div`
   box-sizing: border-box;
@@ -64,7 +63,13 @@ const ExpandModal = ({}) => {
 
   const modalRef = useRef();
 
+  const bodyStyleRef=useRef()
+
+  
+const scrollRef = useRef();
+
   const [isHovering, setHovering] = useState();
+
   const bind = useHover((state) => {
     setHovering(state.hovering);
   });
@@ -87,14 +92,36 @@ const ExpandModal = ({}) => {
     return parentEl.getBoundingClientRect();
   }, [parentRef]);
 
+  const [show, setShow] = useState();
+  const mini =miniExpand && !prevMiniExpand 
   useLayoutEffect(() => {
     if (param && !expand) {
-      dispatch({ type: "set expand", expand: true });
+
+ miniRectMesureRef.current = modalRef?.current?.getBoundingClientRect();
+  
+
+    const main = document.getElementById("app");
+       bodyStyleRef.current = document.body.style;
+       const scroll = window.scrollY;
+       scrollRef.current = window.scrollY;
+        if (!mini) {main.style.top = `-${scroll}px`;
+        main.style.position = "fixed";
+        document.body.style.overflowY = "scroll";}
      
+       setShow(true)
     }
     if (!param && expanded) dispatch({ type: "set expand", expand: false });
-  }, [expand, dispatch, param, expanded]);
+  }, [expand, dispatch, param, expanded, mini]);
 
+  useEffect(() => {
+    if (show) {
+      
+    
+
+     dispatch({ type: "set expand", expand: true });
+    }
+  }, [dispatch, show]);
+  
   useLayoutEffect(() => {
     if (isHovering || isHovering === undefined) return;
 
@@ -137,8 +164,6 @@ const ExpandModal = ({}) => {
     const { top, width, left, height } = parentRect();
     const l = window.scrollX + left;
     const t = window.scrollY + top;
-
-
     return {
       from: {
         width: width,
@@ -157,28 +182,28 @@ const ExpandModal = ({}) => {
     };
   });
 
-  // useLayoutEffect(() => {
-  //   if (expanded) {
-  //     const { top: miniTop } = miniRectMesureRef.current;
+  useLayoutEffect(() => {
+    if (expanded) {
+      const { top: miniTop } = miniRectMesureRef.current;
 
-  //     api.start({
-  //       to: async (animate) => {
-  //         const w = screen.width;
+      api.start({
+        to: async (animate) => {
+          const w = screen.width;
 
-  //         const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
-  //         await animate({
-  //           to: [
-  //             {
-  //               width: lastWidth,
-  //               y: lastWidth <= 630 ? -miniTop : 36 - miniTop,
-  //             },
-  //           ],
-  //           config: { tension: 180, mass: 3, clamp: true, friction: 40 },
-  //         });
-  //       },
-  //     });
-  //   }
-  // }, [screen, api, expanded]);
+          const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
+          await animate({
+            to: [
+              {
+                width: lastWidth,
+                y: lastWidth <= 630 ? -miniTop : 36 - miniTop,
+              },
+            ],
+            config: { tension: 180, mass: 3, clamp: true, friction: 40 },
+          });
+        },
+      });
+    }
+  }, [screen, api, expanded]);
 
   useLayoutEffect(() => {
     if (!activated) return;
@@ -196,7 +221,7 @@ const ExpandModal = ({}) => {
         toHeight,
       } = miniHoverStyles();
 
-      console.log("miniexpand")
+      
       api.start({
         to: async (animate) => {
           const show = miniExpand;
@@ -229,7 +254,7 @@ const ExpandModal = ({}) => {
 
     if (!miniExpand && prevMiniExpand) {
       const { fromWidth } = miniHoverStyles();
-console.log("minicollpase");
+
       api.start({
         to: async (animate) => {
           await animate({
@@ -271,29 +296,32 @@ console.log("minicollpase");
   const miniTranslateY = useRef();
   const miniTranslateX = useRef();
 
-  const scrollRef = useRef();
-
   useLayoutEffect(() => {
     if (expand && miniExpand && modalRef.current) {
-      scrollRef.current = window.scrollY;
-      miniRectMesureRef.current = modalRef.current.getBoundingClientRect();
+     
+
+       const main = document.getElementById("app");
+main.style.top = `-${scrollRef.current}px`;
+main.style.position = "fixed";
+document.body.style.overflowY = "scroll";
       return;
     }
 
     if (expand && parentRef) {
-      scrollRef.current = window.scrollY;
+     
       
       miniRectMesureRef.current = parentRef.getBoundingClientRect();
     }
   }, [expand, miniExpand, parentRef]);
 
-  const [resetAppStyles, setResetAppStyles] = useState(false);
+ 
 
   useLayoutEffect(() => {
     if (!miniRectMesureRef.current || !parentRef) return;
+const l = JSON.parse(JSON.stringify(miniRectMesureRef.current));
 
     if (expand && !expanded) {
-      console.log(parentRef.getBoundingClientRect(), miniRectMesureRef.current);
+      
       const {
         width: miniWidth,
         height: miniHeight,
@@ -318,11 +346,7 @@ console.log("minicollpase");
         miniTop,
       });
 
-       requestAnimationFrame(() => {
-         const main = document.getElementById("app");
-         main.style.position = "fixed";
-         main.style.top = `-${scrollRef.current}px`;
-       });
+     
       
 
       miniTranslateY.current = y.get();
@@ -334,10 +358,9 @@ console.log("minicollpase");
               scaleX: 1,
               scaleY: 1,
               x: 0,
-              y: expandWidth < 630 ? -miniTop : ey,
+              y: expandWidth < 630 ? -(miniTop) : ey,
               opacity: 1,
               fade: 1,
-              
             },
             config: { tension: 100, clamp: true },
           }).then((r) => {
@@ -350,13 +373,19 @@ console.log("minicollpase");
           scaleY: scaleY,
           x: x,
           width: expandWidth,
-          y:0,
+          y: 0,
           left: "auto",
           transformOrigin: "top center",
           opacity: 0,
           fade: 0,
         },
       });
+
+      //  window.scrollTo({
+      //    top: 0,
+      //    left: 0,
+      //    behavior: "smooth",
+      // });
 
       return;
     }
@@ -395,7 +424,7 @@ console.log("minicollpase");
               const main = document.getElementById("app");
               main.style.top = "unset";
               main.style.position = "static";
-              body.style = bodystyle;
+              body.style = bodyStyleRef.current;
               window.scroll({
                 top: scrollRef.current,
                 left: 0,
@@ -404,7 +433,7 @@ console.log("minicollpase");
             dispatch({
               type: "set reset",
             });
-            setResetAppStyles(true);
+            setShow(false)
           });
         },
       });
@@ -446,6 +475,7 @@ console.log("minicollpase");
       dispatch({
         type: "set reset",
       });
+      setShow(false);
     };
   }, [dispatch]);
 
@@ -455,11 +485,11 @@ console.log("minicollpase");
 
   const full = expand || expanded;
 
+  
+
   return activated || full
     ? createPortal(
-        <Wrapper
-          style={expand || expanded ? { height: "100.1%", width: "100%" } : {}}
-        >
+        <Wrapper style={{...(full && { height: "100%", width: "100%" })} }>
           <animated.div
             ref={refCb}
             {...bind()}

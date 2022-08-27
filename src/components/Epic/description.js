@@ -141,9 +141,6 @@ const Description = ({ movie, genre }) => {
   const handleClick = useCallback(() => {
     handlePrefetch()
     setSearchParams({ mv: movie?.id });
-    
-
-    
   }, [handlePrefetch, movie?.id, setSearchParams]);
   
   return (

@@ -20,6 +20,7 @@ import Watch from "./components/watch";
 import { ModalProvider, useModalState } from "./contexts/modalContext";
 
 function App() {
+
   const useGesture = createUseGesture([scrollAction]);
   const [
     {

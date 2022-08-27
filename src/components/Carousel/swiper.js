@@ -118,7 +118,7 @@ function Index(
             setIsBeginning(swiper.isBeginning);
             setIsEnd(swiper.isEnd);
           }}
-          preloadImages={false}
+          cssMode={true}
           freeMode={{
             enabled: true,
             sticky: true,

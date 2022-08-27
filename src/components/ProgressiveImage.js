@@ -25,6 +25,7 @@ const ProgressiveImage = ({  src, style, ...props }) => {
   }, [current]);
 
   useEffect(() => {
+    if(!src) return
     setLoading(true);
 
     const img = new Image();
@@ -36,7 +37,7 @@ const ProgressiveImage = ({  src, style, ...props }) => {
     };
 
     return () => {};
-  }, [Src]);
+  }, [Src, src]);
 
   return (
     <>

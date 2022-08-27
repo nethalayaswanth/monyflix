@@ -52,7 +52,7 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
       activated,
       miniExpand,
       miniExpanded,
-      param,
+      
       expand,
       expanded,
     },
@@ -61,7 +61,7 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
 
 
 
- 
+  const param = searchParams.get("mv");
 
   const {
     data: movieDetails,
@@ -171,13 +171,13 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
   }, []);
 
   const handleSimilarMovieclick = useCallback(() => {
-    dispatch({ type: "set reset" });
-    // window.scrollTo({
-    //   top: 0,
-    //   left: 0,
-    //   behavior: "smooth",
-    // });
-  }, [dispatch]);
+   
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, []);
 
   
   return (
@@ -359,7 +359,7 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
                           slidesPerView={"auto"}
                           enabled={true}
                         >
-                          <DetailsCard />
+                          <DetailsCard onClick={handleSimilarMovieclick} />
                         </Section>
                       )}
                     {data && (

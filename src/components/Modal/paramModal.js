@@ -1,13 +1,11 @@
 import React, {
   memo,
   useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
+  useLayoutEffect, useRef
 } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
+import usePrevious from "../../hooks/usePrevious";
 import useWindowSize from "../../hooks/useWindowSize";
 
 import { animated, useSpring } from "@react-spring/web";
@@ -54,6 +52,7 @@ const ParamModal = ({}) => {
 
   const state=useModalState()
 
+  const [prevExpand]=usePrevious(expand)
 
   
   const screen = useWindowSize();
@@ -63,7 +62,9 @@ const ParamModal = ({}) => {
   let location = useLocation();
 
    
+const bodyStyleRef = useRef();
 
+const scrollRef = useRef();
    
 
   const [hoverRef, isHovering] = useHover();
@@ -78,28 +79,32 @@ const ParamModal = ({}) => {
   );
 
   
-useLayoutEffect(() => {
-  
-  if (param) {
-    dispatch({
-      type: "set param",
-      param: param,
-    });
-  }
-}, [dispatch, param]);
+
 
   useLayoutEffect(() => {
     
-    if (param && !expand)
-    
+    if (param && !expand && !prevExpand) {
+      const scroll = window.scrollY;
+  bodyStyleRef.current = document.body.style;
+  scrollRef.current = scroll;
       dispatch({
         type: "set paramModal",
         activated: true,
-        param: param,
         expand: true,
       });
-    if (!param && expanded) dispatch({ type: "set expand", expand: false }); 
-  }, [expand, dispatch, param, expanded]);
+      requestAnimationFrame(() => {
+      
+
+        const main = document.getElementById("app");
+        main.style.position = "fixed";
+        main.style.top = `-${scroll}px`;
+        document.body.style.overflowY = "scroll";
+      });
+    }
+   
+  }, [expand, dispatch, param,prevExpand]);
+
+  useLayoutEffect(()=>{ if (!param && expanded) dispatch({ type: "set expand", expand: false }); },[dispatch, expanded, param])
 
   const refCb = useCallback(
     (node) => {
@@ -110,20 +115,6 @@ useLayoutEffect(() => {
     [hoverRef]
   );
 
-  const springInitialStyles = useMemo(() => {
-  
-    const w = document.body.clientWidth;
-    const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
-    const width = lastWidth * 0.8;
-    const height = document.body.clientHeight * 0.6;
-    const left = window.scrollX + (document.body.clientWidth - width) / 2;
-    const top = window.scrollY + (document.body.clientHeight - height) / 2;
-
-    const scale = width / lastWidth;
-    const y = 36 - top;
-
-    return { top, left, height, width, lastWidth, scale, y };
-  }, []);
 
   const [
     {
@@ -140,19 +131,20 @@ useLayoutEffect(() => {
     },
     api,
   ] = useSpring(() => {
-    const { top, width, left, height } = springInitialStyles;
+     const w = document.body.clientWidth;
+     const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
 
     return {
       from: {
-        width: width,
-        height: height,
-        scaleY: 1,
-        scaleX: 1,
+        width: lastWidth,
+
+        scaleY: 0.8,
+        scaleX: 0.8,
         left: "auto",
-        top: top,
+        top: lastWidth <= 630 ? 0 : 36,
         x: 0,
         y: 0,
-        transformOrigin: "center top",
+        transformOrigin: "50% 12.5%",
         opacity: 0,
       },
     };
@@ -160,7 +152,7 @@ useLayoutEffect(() => {
 
   useLayoutEffect(() => {
     if (expanded) {
-       const { top } = springInitialStyles;
+     
       api.start({
         to: async (animate) => {
           const w = document.body.clientWidth;
@@ -170,39 +162,26 @@ useLayoutEffect(() => {
             to: [
               {
                 width: lastWidth,
-                y:lastWidth<=630?-top:36-top
+                y:lastWidth<=630?0:36
               },
             ],
-            config: { tension: 180, mass: 3, clamp: true, friction: 40 },
+            config: { tension: 180, mass: 3, clamp: true, friction: 1 },
           });
         },
       });
     }
-  }, [screen, api, expanded, springInitialStyles]);
+  }, [screen, api, expanded]);
 
-  
- 
-
-  const scrollRef = useRef();
-
-
-    scrollRef.current = window.scrollY;
-  
-    const [scrolly]=useState(()=>(window.scrollY))
- 
      
   useLayoutEffect(() => {
     if (parentRef) return;
 
-    const { top, width, left, lastWidth, height, scale, y } =
-      springInitialStyles;
+   const w = document.body.clientWidth;
+
+   const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
     if (expand && !expanded) {
      
-      requestAnimationFrame(() => {
-        const main = document.getElementById("app");
-        main.style.position = "fixed";
-        main.style.top = `-${scrolly}px`;
-      });
+    
 
       api.start({
         to: async (animate) => {
@@ -212,8 +191,6 @@ useLayoutEffect(() => {
                 scaleX: 1,
                 scaleY: 1,
                 x: 0,
-                y: y,
-                width: lastWidth,
                 opacity: 1,
               },
             ],
@@ -228,14 +205,14 @@ useLayoutEffect(() => {
           });
         },
         from: {
-          scaleX: scale,
-          scaleY: scale,
+          scaleX: 0.8,
+          scaleY: 0.8,
           x: 0,
           y: 0,
-          width: width,
-          top: top,
+          width: lastWidth,
+          top: lastWidth <= 630 ? 0 : 36,
           left: "auto",
-          transformOrigin: "top center",
+          transformOrigin: "50% 12.5%",
           opacity: 0,
         },
       });
@@ -244,10 +221,7 @@ useLayoutEffect(() => {
     }
 
     if (!expand && expanded) {
-      const body = document.getElementsByTagName("BODY")[0];
-      let bodystyle = body.style;
-      body.style.overflowY = "scroll";
-
+     
       api.start({
         to: async (animate) => {
           await animate({
@@ -255,8 +229,8 @@ useLayoutEffect(() => {
               {
                 x: 0,
                 y: 0,
-                scaleY: scale,
-                scaleX: scale,
+                scaleY: 0.8,
+                scaleX: 0.8,
 
                 opacity: 0,
               },
@@ -267,9 +241,10 @@ useLayoutEffect(() => {
               const main = document.getElementById("app");
               main.style.top = "unset";
               main.style.position = "static";
-              body.style = bodystyle;
+              document.body.style = bodyStyleRef.current;
+            
               window.scroll({
-                top: scrolly,
+                top: scrollRef.current,
                 left: 0,
               });
             });
@@ -290,8 +265,7 @@ useLayoutEffect(() => {
     api,
     expanded,
     parentRef,
-    scrolly,
-    springInitialStyles,
+  
     param,
     searchParams,
     setSearchParams,
@@ -306,7 +280,7 @@ useLayoutEffect(() => {
        main.style.top = "unset";
        main.style.position = "static";
        window.scroll({
-         top: scrolly,
+         top: scrollRef.current,
          left: 0,
        });
      });
@@ -314,16 +288,16 @@ useLayoutEffect(() => {
        type: "set reset",
      });
    };
- }, [dispatch, scrolly]);
+ }, [dispatch]);
 
- const main = document.getElementById("app");
+
 
 
 
 
   return (activated ) &&  createPortal(
         <Wrapper
-          style={expand || expanded ? { height: "100.1%", width: "100%" } : {}}
+          style={expand || expanded ? { height: "100%", width: "100%" } : {}}
         >
           <animated.div
             ref={refCb}
