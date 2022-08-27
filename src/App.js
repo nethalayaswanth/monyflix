@@ -21,7 +21,19 @@ import { ModalProvider, useModalState } from "./contexts/modalContext";
 
 function App() {
   const useGesture = createUseGesture([scrollAction]);
-  const [{ expand, expanded }, dispatch] = useModalState();
+  const [
+    {
+      
+      expand,
+
+     
+      expanded,
+    },
+    dispatch,
+  ] = useModalState();
+
+ 
+
   const [scroll, setScroll] = useState();
   useEffect(() => {
     if (expand || expanded) return;

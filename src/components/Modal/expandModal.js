@@ -146,7 +146,7 @@ const ExpandModal = ({}) => {
         scaleY: 1,
         scaleX: 1,
         left: l,
-        top: t,
+        top:  t,
         x: 0,
         y: 0,
         transformOrigin: "center center",
@@ -157,28 +157,28 @@ const ExpandModal = ({}) => {
     };
   });
 
-  useLayoutEffect(() => {
-    if (expanded) {
-      const { top: miniTop } = miniRectMesureRef.current;
+  // useLayoutEffect(() => {
+  //   if (expanded) {
+  //     const { top: miniTop } = miniRectMesureRef.current;
 
-      api.start({
-        to: async (animate) => {
-          const w = screen.width;
+  //     api.start({
+  //       to: async (animate) => {
+  //         const w = screen.width;
 
-          const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
-          await animate({
-            to: [
-              {
-                width: lastWidth,
-                y: lastWidth <= 630 ? -miniTop : 36 - miniTop,
-              },
-            ],
-            config: { tension: 180, mass: 3, clamp: true, friction: 40 },
-          });
-        },
-      });
-    }
-  }, [screen, api, expanded]);
+  //         const lastWidth = w >= 850 ? 850 : w <= 630 ? w : w - 2 * 16;
+  //         await animate({
+  //           to: [
+  //             {
+  //               width: lastWidth,
+  //               y: lastWidth <= 630 ? -miniTop : 36 - miniTop,
+  //             },
+  //           ],
+  //           config: { tension: 180, mass: 3, clamp: true, friction: 40 },
+  //         });
+  //       },
+  //     });
+  //   }
+  // }, [screen, api, expanded]);
 
   useLayoutEffect(() => {
     if (!activated) return;
@@ -196,7 +196,7 @@ const ExpandModal = ({}) => {
         toHeight,
       } = miniHoverStyles();
 
-      
+      console.log("miniexpand")
       api.start({
         to: async (animate) => {
           const show = miniExpand;
@@ -206,7 +206,7 @@ const ExpandModal = ({}) => {
               width: toWidth,
               x: X,
               y: Y,
-              minifade:1
+              minifade: 1,
             },
             from: {
               width: fromWidth,
@@ -229,7 +229,7 @@ const ExpandModal = ({}) => {
 
     if (!miniExpand && prevMiniExpand) {
       const { fromWidth } = miniHoverStyles();
-
+console.log("minicollpase");
       api.start({
         to: async (animate) => {
           await animate({
@@ -275,18 +275,17 @@ const ExpandModal = ({}) => {
 
   useLayoutEffect(() => {
     if (expand && miniExpand && modalRef.current) {
-   
       scrollRef.current = window.scrollY;
       miniRectMesureRef.current = modalRef.current.getBoundingClientRect();
       return;
     }
 
-    if (expand) {
+    if (expand && parentRef) {
       scrollRef.current = window.scrollY;
-    
-      miniRectMesureRef.current = parentRect();
+      
+      miniRectMesureRef.current = parentRef.getBoundingClientRect();
     }
-  }, [expand, miniExpand, parentRect]);
+  }, [expand, miniExpand, parentRef]);
 
   const [resetAppStyles, setResetAppStyles] = useState(false);
 
@@ -294,6 +293,7 @@ const ExpandModal = ({}) => {
     if (!miniRectMesureRef.current || !parentRef) return;
 
     if (expand && !expanded) {
+      console.log(parentRef.getBoundingClientRect(), miniRectMesureRef.current);
       const {
         width: miniWidth,
         height: miniHeight,
@@ -318,46 +318,43 @@ const ExpandModal = ({}) => {
         miniTop,
       });
 
+       requestAnimationFrame(() => {
+         const main = document.getElementById("app");
+         main.style.position = "fixed";
+         main.style.top = `-${scrollRef.current}px`;
+       });
       
 
       miniTranslateY.current = y.get();
-
-      requestAnimationFrame(() => {
-        const main = document.getElementById("app");
-        main.style.position = "fixed";
-        main.style.top = `-${scrollRef.current}px`;
-      });
-
+           
       api.start({
         to: async (animate) => {
           await animate({
-            to: [
-              {
-                scaleX: 1,
-                scaleY: 1,
-                x: 0,
-                y: screen.width < 630 ? -miniTop : ey,
-                left: "auto",
-                opacity: 1,
-                fade:1
-              },
-            ],
+            to: {
+              scaleX: 1,
+              scaleY: 1,
+              x: 0,
+              y: expandWidth < 630 ? -miniTop : ey,
+              opacity: 1,
+              fade: 1,
+              
+            },
             config: { tension: 100, clamp: true },
           }).then((r) => {
             dispatch({ type: "set expanded", expanded: true });
           });
         },
         from: {
+          top: miniTop ,
           scaleX: scaleX,
           scaleY: scaleY,
           x: x,
-          y: 0,
           width: expandWidth,
-          top: miniTop,
+          y:0,
           left: "auto",
           transformOrigin: "top center",
           opacity: 0,
-          fade:0,
+          fade: 0,
         },
       });
 
@@ -372,11 +369,11 @@ const ExpandModal = ({}) => {
       const cy = -miniTranslateY.current;
       const leftX =
         parent.left + parent.width / 2 - document.body.clientWidth / 2;
-      const csX = parent.width / width.get();
+      const csX = parent.width / width.get(); 
 
       const body = document.getElementsByTagName("BODY")[0];
       let bodystyle = body.style;
-      body.style.overflowY = "scroll";
+     body.style.overflowY = "scroll";
 
       api.start({
         to: async (animate) => {
@@ -389,7 +386,7 @@ const ExpandModal = ({}) => {
                 scaleX: csX,
 
                 opacity: 0,
-                fade:0,
+                fade: 0,
               },
             ],
             config: { tension: 35, mass: 3, clamp: true, friction: 1 },
@@ -470,14 +467,15 @@ const ExpandModal = ({}) => {
               transformOrigin,
               position: "absolute",
               zIndex: 99999,
-              willChange: "transform",
+              willChange: "transform position top width scaleX scaleY left",
+              top,
               width,
               x,
               y,
               scaleY,
               scaleX,
               left,
-              top,
+
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",

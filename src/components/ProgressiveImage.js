@@ -56,6 +56,7 @@ const ProgressiveImage = ({  src, style, ...props }) => {
           style={{
             ...style,
           }}
+          {...props}
         />
       )}
     </>

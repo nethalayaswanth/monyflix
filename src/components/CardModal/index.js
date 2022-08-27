@@ -207,11 +207,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
 
   const handleSimilarMovieclick = useCallback(() => {
     dispatch({ type: "set reset" });
-    //  window.scrollTo({
-    //    top: 0,
-    //    left: 0,
-    //    behavior: "smooth",
-    //  });
+   
   }, [dispatch]);
 
   const device = useMedia();
@@ -252,6 +248,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
           expand &&
           opacity.to({ range: [0.8, 0.2], output: ["transparent", "white"] }),
         ...(!miniExpand && !expanded && { boxShadow: "unset" }),
+        ...(expand && mobile && { borderRadius: "0px" }),
       }}
     >
       <animated.div
@@ -484,7 +481,7 @@ const CardModal = forwardRef(({ style, width,}, ref) => {
                         isFetching={isFetchingNextPage}
                         fetchMore={fetchNextPage}
                       >
-                        <ExpandSlide />
+                        <ExpandSlide onClick={handleSimilarMovieclick} />
                       </ModalSection>
                     )}
                   </>

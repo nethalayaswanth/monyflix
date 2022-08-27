@@ -12,6 +12,7 @@ export const GlobalStyles = createGlobalStyle`
     color: #333333;
     font-size:  62.5%;
     height:100%;
+    width:100%;
     user-select:none;
     user-zoom:none
 

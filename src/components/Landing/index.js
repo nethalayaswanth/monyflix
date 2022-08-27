@@ -2,7 +2,7 @@ import React, {
   useCallback, useMemo, useRef,
   useState
 } from "react";
-
+import Shimmer from "../shimmer";
 import { useInView } from "react-intersection-observer";
 import { useQueryClient } from "react-query";
 import { useSearchParams } from "react-router-dom";
@@ -126,7 +126,7 @@ const Landing = () => {
 
 
   return (
-    <Container onClick={handleClick}  ref={refcb}>
+    <Container onClick={handleClick} ref={refcb}>
       <Picture
         style={{
           backgroundColor: "black",
@@ -136,7 +136,7 @@ const Landing = () => {
           padding: "20px",
         }}
       >
-        {
+        {!loading ? (
           <picture>
             <source
               srcSet={`https://image.tmdb.org/t/p/original/${posterPath}`}
@@ -146,13 +146,15 @@ const Landing = () => {
               srcSet={`https://image.tmdb.org/t/p/original/${backdropPath}`}
               media="(min-width:740px)"
             />
-            <img
+            <Shimmer
               className="absolute"
               src={`https://image.tmdb.org/t/p/original/${posterPath}`}
               alt=""
             />
           </picture>
-        }
+        ) : (
+          <Shimmer as="div" />
+        )}
       </Picture>
 
       <div

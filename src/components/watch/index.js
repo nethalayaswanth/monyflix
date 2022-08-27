@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import styled from "styled-components";
 import { Youtube } from "../Youtube";
 
@@ -9,8 +9,8 @@ import Spinner from "../spinner";
 const Container = styled.div`
   height: 100%;
   width: 100%;
-  position:fixed;
-background-color:black;
+  position: fixed;
+  background-color: black;
 `;
 
 const Overlay = styled.div`
@@ -31,15 +31,26 @@ const Watch = () => {
 
   const mobile = device === "mobile";
   const desktop = device === "desktop";
-  const root = document.getElementById("root");
 
-  root.style.minHeight = "-webkit-fill-available";
   const [show, setShow] = useState();
 
   const showCb = useCallback(({ show }) => {
     setShow(show);
   }, []);
 
+  useLayoutEffect(() => {
+    const root = document.getElementById("root");
+    const rootStyle = root.style;
+    root.style.minHeight = "-webkit-fill-available";
+    const bodyStyle = document.body.style;
+
+    document.body.style.backgroundColor = "black";
+
+    return () => {
+      root.style = rootStyle;
+      document.body.style = bodyStyle;
+    };
+  }, []);
   return (
     <Container>
       <div

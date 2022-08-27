@@ -59,6 +59,10 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
     dispatch,
   ] = useModalState();
 
+
+
+ 
+
   const {
     data: movieDetails,
     isLoading: movieDetailsLoading,
@@ -177,7 +181,11 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
 
   
   return (
-    <ModalWrapper ref={ref} id="card-param-modal">
+    <ModalWrapper
+      ref={ref}
+      id="card-param-modal"
+      style={{ ...((expand || expanded) && mobile && { borderRadius: "0px" }) }}
+    >
       <animated.div
         style={{
           top: 0,
@@ -274,7 +282,9 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
                       <Overview className={expand && "expand"}>
                         {current?.overview}
                       </Overview>
-                      {(expand|| expanded )&& current?.tagline && <Tagline>{`"${current?.tagline}"`}</Tagline>}
+                      {(expand || expanded) && current?.tagline && (
+                        <Tagline>{`"${current?.tagline}"`}</Tagline>
+                      )}
                     </Description>
                     {genres && (expand || expanded) && (
                       <Genres>
@@ -337,20 +347,21 @@ const ParamCardModal = forwardRef(({ style, width }, ref) => {
                         )}{" "}
                       </>
                     )}
-                    {!recommendedMovies.isLoading && recommendedMovies?.data && (
-                      <Section
-                        title="Recommended"
-                        movies={recommendedmovies}
-                        loading={recommendedMovies.status === "loading"}
-                        hasMore={recommendedMovies.hasNextPage}
-                        isFetching={recommendedMovies.isFetchingNextPage}
-                        fetchMore={recommendedMovies.fetchNextPage}
-                        slidesPerView={"auto"}
-                        enabled={true}
-                      >
-                        <DetailsCard onClick={handleSimilarMovieclick} />
-                      </Section>
-                    )}
+                    {!recommendedMovies.isLoading &&
+                      recommendedmovies.length !== 0 && (
+                        <Section
+                          title="Recommended"
+                          movies={recommendedmovies}
+                          loading={recommendedMovies.status === "loading"}
+                          hasMore={recommendedMovies.hasNextPage}
+                          isFetching={recommendedMovies.isFetchingNextPage}
+                          fetchMore={recommendedMovies.fetchNextPage}
+                          slidesPerView={"auto"}
+                          enabled={true}
+                        >
+                          <DetailsCard />
+                        </Section>
+                      )}
                     {data && (
                       <ModalSection
                         title="More Like This"
