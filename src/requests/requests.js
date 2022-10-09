@@ -14,7 +14,7 @@ import {
 
 const endpoint =
   process.env.NODE_ENV !== "production"
-    ? `${process.env.REACT_APP_BASE_ENDPOINT_LOCAL}`
+    ? `${process.env.REACT_APP_BASE}`
     : `${process.env.REACT_APP_BASE}`;
 
 const graphQLClient = new GraphQLClient(endpoint, {
