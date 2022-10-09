@@ -22,30 +22,35 @@ const Spinner = styled(Spin)`
   fill: rgba(0, 0, 0, 0.5);
 `;
 
-
 export const Loaderwrapper = styled.div`
-
-  height:80px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
+export const FullLoaderwrapper = styled(Loaderwrapper)`
+  height: 100%;
+  width:100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
-export const Loader=forwardRef(({style},ref)=>{
-
-
-  return(
-    <Loaderwrapper ref={ref} style={{...style}}>
-      <Spinner/>
+export const Loader = forwardRef(({ style }, ref) => {
+  return (
+    <Loaderwrapper ref={ref} style={{ ...style }}>
+      <Spinner />
     </Loaderwrapper>
-  )
-})
+  );
+});
 
-
-
-
-
+export const FullLoader = forwardRef(({ style }, ref) => {
+  return (
+    <FullLoaderwrapper ref={ref} style={{ ...style }}>
+      <Spinner />
+    </FullLoaderwrapper>
+  );
+});
 
 export default Spinner;

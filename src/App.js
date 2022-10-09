@@ -13,7 +13,7 @@ import Epic from "./components/Epic";
 import Landing from "./components/Landing";
 import Modal from "./components/Modal";
 import { Section } from "./components/Section";
-import { Loader } from "./components/spinner";
+import { Loader, FullLoader } from "./components/spinner";
 
 import Spinner from "./components/spinner";
 
@@ -243,7 +243,7 @@ const Index = () => {
 
   return (
     <ModalProvider>
-      <Suspense fallback={<Spinner />}>
+      <Suspense fallback={<FullLoader />}>
         <Routes>
           <Route path="/browse" element={<Modal />} />
         </Routes>
