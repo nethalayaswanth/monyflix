@@ -17,7 +17,7 @@ import ThumbnailCard from "../Cards/thumbNailCard";
 import Swiperjs from "./swiper";
 import { SwiperWrapper } from "./views";
 
-const DEFAULTBREAKPOINTS = [1500, 1350, 1000, 740, 480, 320];
+const DEFAULTBREAKPOINTS = [1500, 1350, 1000, 740, 480,420];
 const DEFAULTVALUES = [8, 7, 6, 5, 3, 2];
 const DEFAULTVALUE = 2;
 const DEFAULTMARGIN = 10;
