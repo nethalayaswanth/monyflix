@@ -8,6 +8,8 @@ const Audio = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+
+
 `;
 
 const Button = styled.button`
@@ -31,10 +33,20 @@ const Button = styled.button`
   border: 1px solid rgba(255, 255, 255, 0.9);
   color: white;
   border-radius: 50%;
-  max-height: 36px;
-  max-width: 36px;
+  max-height: 54px;
+  max-width: 54px;
   min-height: 24px;
   min-width: 24px;
+  height: 24px;
+  width: 24px;
+  @media only screen and (min-width: 420px) {
+    height: 24px;
+    width: 24px;
+  }
+  @media only screen and (min-width: 740px) {
+    height: 36px;
+    width: 36px;
+  }
 `;
 
 const Mute = styled(MuteIcon)`
@@ -43,11 +55,8 @@ const Mute = styled(MuteIcon)`
   align-items: center;
 
   justify-content: center;
-  height: min(1.8rem,10vw);
-  width: min(1.8rem,10vw);
-  
-
- 
+  height: 100%;
+  width: 100%;
   fill: white;
   color: white;
 `;
@@ -58,8 +67,8 @@ const Unmute = styled(UnmuteIcon)`
   align-items: center;
 
   justify-content: center;
-  height: 1.8rem;
-  width: 1.8rem;
+  height:100%;
+  width: 100%;
   
   fill: white;
   color: white;

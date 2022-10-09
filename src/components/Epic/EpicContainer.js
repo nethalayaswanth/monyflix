@@ -19,6 +19,7 @@ import {
   Details,
   Gradient
 } from "./views";
+import Video from "../CroppedVideo";
 
 export default function EpicContainer({ genres, title: header }) {
   const [state, dispatch] = useEpicState();
@@ -159,27 +160,9 @@ export default function EpicContainer({ genres, title: header }) {
       <Gradient />
 
       {id && (
-        <div className="absolute">
-          <div
-            style={{
-              display: "flex",
-              height: "100%",
-              width: "100%",
-              position: "relative",
-              marginTop: "-10vh",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                overflow: "hidden",
-                transform: "translate(-50%,-50%)",
-                height: "100%",
-                ...(!desktop ? { aspectRatio: 16 / 9 } : { width: "100%" }),
-              }}
-            >
+        <div className="absolute" style={{background:'rgba(0,0,0,0.8)'}}>
+         
+            <Video style={{height:'90%'}}>
               <Youtube
                 id={id}
                 play={!play}
@@ -192,8 +175,8 @@ export default function EpicContainer({ genres, title: header }) {
                 cb={showCb}
                 visible={inView}
               />
-            </div>
-          </div>
+              </Video>
+           
         </div>
       )}
     </Container>

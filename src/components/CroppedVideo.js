@@ -1,13 +1,13 @@
 import useMedia from "../hooks/useMedia";
 import { Overlay, Wrapper } from "./Landing/styles";
-const Video = ({ show, children, crop = true }) => {
+const Video = ({style, show, children, crop = true }) => {
   const device = useMedia();
 
   const mobile = device === "mobile";
   const desktop = device === "desktop";
 
   return (
-    <Wrapper>
+    <Wrapper style={{...style}}>
       <div
         style={{
           display: "flex",

@@ -23,6 +23,8 @@ import Description from "../Epic/description";
 import { Details } from "../Epic/views";
 import ProgressiveImage from "../ProgressiveImage";
 import { Container, Down, Gradient, Picture, Scroll } from "./styles";
+
+
 const types = ["CLIP", "TRAILER", "TEASER", "BLOOPERS", "BTS", "FEATURETTE"];
 
 const Youtube=lazy(()=>{ return import("../Youtube")})
@@ -44,8 +46,12 @@ const Landing = ({ queryEnabled}) => {
   const original = src ? `https://image.tmdb.org/t/p/original${src}` : null;
   const preview = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
 
-  const videoData = useGetVideosById([{ id: movie?.id, types }], {
-    enabled: !!movie?.id,
+  const videoData = useGetVideosById({
+    id: movie?.id,
+    types,
+    queryOptions: {
+      enabled: !!movie?.id,
+    },
   });
 
   const videos = videoData?.data?.videosById;
@@ -96,6 +102,7 @@ const Landing = ({ queryEnabled}) => {
 
   let [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
+
 
   useEffect(() => {
     const id = movie?.id;

@@ -126,22 +126,12 @@ const Description = ({ movie, genre }) => {
 
   let [searchParams, setSearchParams] = useSearchParams();
   
-  const queryClient = useQueryClient();
-
-  const handlePrefetch = useCallback(async () => {
-    const types = ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"];
-    await queryClient.prefetchQuery(["movie", movie?.id], async () =>
-      getMovieDetails({ id: movie?.id })
-    );
-    await queryClient.prefetchQuery(["videos", movie?.id, types], async () =>
-      getVideosById({ id: movie?.id, types })
-    );
-  }, [movie, queryClient]);
+ 
 
   const handleClick = useCallback(() => {
-    handlePrefetch()
+
     setSearchParams({ mv: movie?.id });
-  }, [handlePrefetch, movie?.id, setSearchParams]);
+  }, [ movie?.id, setSearchParams]);
   
   return (
     
