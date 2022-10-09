@@ -313,7 +313,8 @@ const CardModal = forwardRef(
               top: 0,
               left: 0,
               background: "rgba(255,255,255,0.5)",
-              opacity: isFetching ? 1 : 0,
+              opacity: isFetching && expanded ? 1 : 0,
+              transition:'opacity 0.3s',
               height: "100%",
               width: "100%",
               pointerEvents: "none",
@@ -580,7 +581,7 @@ const CardModal = forwardRef(
                               isFetching={similarMoviesQuery.isFetchingNextPage}
                               fetchMore={similarMoviesQuery.fetchNextPage}
                               card="card"
-                              breakPointValues={[5,5, 4, 4, 3, 2]}
+                              breakPointValues={[5, 5, 4, 4, 3, 2]}
                             ></Section>
                           )}
                         </>
