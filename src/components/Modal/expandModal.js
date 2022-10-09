@@ -392,8 +392,6 @@ const ExpandModal = ({}) => {
           transformOrigin: "top center",
           opacity: 0,
           fade: 0,
-          progress: 0,
-          minifade:0
         },
       });
       return;
