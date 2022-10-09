@@ -18,26 +18,11 @@ const useHover = () => {
 
   const nodeRef = useRef();
 
-     
-     
-     
-     
-     
-     
-
-     
-     
-     
-     
-     
-     
-     
-     
-
   const callbackRef = useCallback(
     (node) => {
+      
       if (!node) return;
-
+      
       if (nodeRef.current) {
         nodeRef.current.removeEventListener("mouseenter", handleMouseOver);
         nodeRef.current.removeEventListener("mouseleave", handleMouseOut);

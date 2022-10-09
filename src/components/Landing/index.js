@@ -1,53 +1,69 @@
 import React, {
-  useCallback, useMemo, useRef,
+  lazy,
+  Suspense, useCallback,
+  useEffect,
+  useMemo,
+  useRef,
   useState
 } from "react";
-import Shimmer from "../shimmer";
 import { useInView } from "react-intersection-observer";
 import { useQueryClient } from "react-query";
 import { useSearchParams } from "react-router-dom";
-import { getMovieDetails, getVideosById, useGetLatestMovie } from "../../requests/requests";
+import useMedia from "../../hooks/useMedia";
+import {
+  getMovieDetails, useGetVideosById, useLatestMovie
+} from "../../requests/requests";
 import AudioControls from "../AudioControls";
 import Video from "../CroppedVideo";
-import { Youtube } from "../Youtube";
+
 
 import { useModalState } from "../../contexts/modalContext";
-import useMedia from "../../hooks/useMedia";
+
 import Description from "../Epic/description";
 import { Details } from "../Epic/views";
-import {
-  Container, Down, Gradient, Picture, Scroll
-} from "./styles";
+import ProgressiveImage from "../ProgressiveImage";
+import { Container, Down, Gradient, Picture, Scroll } from "./styles";
+const types = ["CLIP", "TRAILER", "TEASER", "BLOOPERS", "BTS", "FEATURETTE"];
 
-const Landing = () => {
-  const { data, loading, error } = useGetLatestMovie();
+const Youtube=lazy(()=>{ return import("../Youtube")})
 
-  const scrollRef = useRef();
+const Landing = ({ queryEnabled}) => {
+  const movieData = useLatestMovie({ queryOptions: { enabled:!!queryEnabled } });
 
-     
-
-     
-     
-
-  const movie = data?.latestMovie;
+  const movie = movieData?.data?.latestMovie;
   const backdropPath = movie?.images?.filePath;
   const posterPath = movie?.posterPath;
 
+  const device = useMedia();
+
+  const mobile = device === "mobile";
+  const desktop = device === "desktop";
+
+  const src = desktop ? backdropPath : posterPath;
+
+  const original = src ? `https://image.tmdb.org/t/p/original${src}` : null;
+  const preview = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
+
+  const videoData = useGetVideosById([{ id: movie?.id, types }], {
+    enabled: !!movie?.id,
+  });
+
+  const videos = videoData?.data?.videosById;
+
+  const scrollRef = useRef();
+
   const id = useMemo(() => {
-    if (!data) return null;
-    const videos = data.latestMovie.videos;
     if (!videos) return null;
+
     const clip = videos.clip[0];
     const trailer = videos.trailer[0];
     const teaser = videos.teaser[0];
-
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
-  }, [data]);
+  }, [videos]);
 
-
-    const { ref, inView, entry } = useInView({
-      threshold: 0.95,
-    });
+  const { ref, inView, entry } = useInView({
+    threshold: 0.95,
+  });
 
   const refcb = useCallback(
     (node) => {
@@ -59,13 +75,12 @@ const Landing = () => {
       if (ref && ref.current) {
         ref.current = node;
       }
-      
     },
     [ref]
   );
 
   const handleScroll = useCallback((e) => {
-    e.stopPropagation()
+    e.stopPropagation();
     const { bottom } = scrollRef.current.getBoundingClientRect();
     const len = Math.abs(window.scrollX - bottom);
     window.scrollBy({
@@ -75,44 +90,32 @@ const Landing = () => {
     });
   }, []);
 
-  
-
-  const device = useMedia( );
-
-  const mobile = device === "mobile";
-  const desktop = device === "desktop";
-
-  const [{ activated, expand },dispatch] = useModalState();
+  const [{ activated, expand }, dispatch] = useModalState();
 
   const play = activated || expand;
-
- 
 
   let [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
-  const handlePrefetch = useCallback(async () => {
-    const types = ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"];
+  useEffect(() => {
     const id = movie?.id;
-    await queryClient.prefetchQuery(["movie", id], async () =>
-      getMovieDetails({ id: id })
-    );
-    await queryClient.prefetchQuery(["videos", id, types], async () =>
-      getVideosById({ id: id, types })
-    );
-  }, [movie, queryClient]);
+    if (!id) return;
+    (async () => {
+      await queryClient.prefetchQuery(["movie", id], async () =>
+        getMovieDetails({ id: id })
+      );
+    })();
+  }, [movie?.id, queryClient]);
 
   const handleClick = useCallback(() => {
     dispatch({
       type: "set modal",
       ...(!activated && { scroll: window.scrollY }),
     });
-    handlePrefetch();
-    setSearchParams({ mv: movie.id });
-  }, [movie, handlePrefetch, setSearchParams]);
 
-  
-     
+    setSearchParams({ mv: movie.id });
+  }, [activated, dispatch, movie?.id, setSearchParams]);
+
   const [audio, setAudio] = useState(false);
   const [show, setShow] = useState();
 
@@ -123,7 +126,6 @@ const Landing = () => {
   const handleAudio = useCallback(() => {
     setAudio((x) => !x);
   }, []);
-
 
   return (
     <Container onClick={handleClick} ref={refcb}>
@@ -136,25 +138,12 @@ const Landing = () => {
           padding: "20px",
         }}
       >
-        {!loading ? (
-          <picture>
-            <source
-              srcSet={`https://image.tmdb.org/t/p/original/${posterPath}`}
-              media="(max-width:739px)"
-            />
-            <source
-              srcSet={`https://image.tmdb.org/t/p/original/${backdropPath}`}
-              media="(min-width:740px)"
-            />
-            <Shimmer
-              className="absolute"
-              src={`https://image.tmdb.org/t/p/original/${posterPath}`}
-              alt=""
-            />
-          </picture>
-        ) : (
-          <Shimmer as="div" />
-        )}
+        <ProgressiveImage
+          className="absolute"
+          original={original}
+          preview={preview}
+          alt=""
+        />
       </Picture>
 
       <div
@@ -188,15 +177,16 @@ const Landing = () => {
           }}
         >
           <Video show={show}>
-            {" "}
-            <Youtube
-              id={id}
-              play={!play}
-              light={false}
-              audio={audio}
-              cb={showCb}
-              visible={inView}
-            />
+            <Suspense fallback={<div></div>}>
+              <Youtube
+                id={id}
+                play={!play}
+                light={false}
+                audio={audio}
+                cb={showCb}
+                visible={inView}
+              />
+            </Suspense>
           </Video>
         </div>
       )}

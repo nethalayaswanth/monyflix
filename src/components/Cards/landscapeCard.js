@@ -4,14 +4,14 @@ import { Button, Title } from "../CardModal/styles";
 import ProgressiveImage from "../ProgressiveImage";
 
 import { useInView } from "react-intersection-observer";
-import { useQueryClient } from "react-query";
 import { useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
-import { getMovieDetails, getVideosById } from "../../requests/requests";
+import useMedia from "../../hooks/useMedia";
 import Video from "../CroppedVideo";
 import { Youtube } from "../Youtube";
+import usePrefetch from "./usePrefetch";
 
-const LandscapeCard = ({ movie: current }, ref) => {
+const LandscapeCard = ({ data: current }, ref) => {
   const id = useMemo(() => {
     if (!current) return null;
     const videos = current.videos;
@@ -24,39 +24,31 @@ const LandscapeCard = ({ movie: current }, ref) => {
   }, [current]);
 
   const src = current?.images?.filePath;
- 
+
+  const original = src ? `https://image.tmdb.org/t/p/original/${src}` : null;
+  const preview = src ? `https://image.tmdb.org/t/p/w300/${src}` : null;
 
   let [searchParams, setSearchParams] = useSearchParams();
-  const queryClient = useQueryClient();
 
-  const handlePrefetch = useCallback(async () => {
-    const types = ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"];
-    const id = current?.id;
-    await queryClient.prefetchQuery(["movie", id], async () =>
-      getMovieDetails({ id: id })
-    );
-    await queryClient.prefetchQuery(["videos", id, types], async () =>
-      getVideosById({ id: id, types })
-    );
-  }, [current, queryClient]);
-
-
-  
   const [{ activated, expand }, dispatch] = useModalState();
 
+  const device = useMedia();
+
+  const mobile = device === "mobile";
+  const desktop = device === "desktop";
+  const { ref: prefetchRef, handlePrefetch } = usePrefetch({
+    id: current?.id,
+    whileInView: !desktop,
+    enabled: current?.id && !desktop,
+  });
+
   const handleClick = useCallback(() => {
-    handlePrefetch();
     dispatch({
       type: "set modal",
       ...(!activated && { scroll: window.scrollY }),
     });
     setSearchParams({ mv: current.id });
-  }, [current, dispatch,handlePrefetch, setSearchParams]);
-
-     
-     
-     
-     
+  }, [activated, current?.id, dispatch, setSearchParams]);
 
   const {
     ref: elRef,
@@ -93,10 +85,7 @@ const LandscapeCard = ({ movie: current }, ref) => {
     setAudio((x) => !x);
   }, []);
 
-
   const play = activated || expand;
-
-  
 
   return (
     <div
@@ -106,6 +95,7 @@ const LandscapeCard = ({ movie: current }, ref) => {
         borderRadius: "6px",
         overflow: "hidden",
       }}
+      ref={prefetchRef}
     >
       <div
         style={{
@@ -124,7 +114,8 @@ const LandscapeCard = ({ movie: current }, ref) => {
       >
         <ProgressiveImage
           style={{ borderRadius: "6px", zIndex: 1 }}
-          src={src}
+          original={original}
+          preview={preview}
           alt={`${current?.title}`}
         />
         {id && (

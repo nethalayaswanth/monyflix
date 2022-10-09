@@ -3,7 +3,8 @@ import React, {
   useLayoutEffect, useMemo, useRef, useState
 } from "react";
 import { BsFillPlayFill } from "react-icons/bs";
-import ReactPlayer from "react-player/lazy";
+import ReactPlayer from "react-player/youtube";
+
 import styled from "styled-components";
 import useHover from "../hooks/useHover";
 import AspectBox from "./AspectBox";
@@ -18,9 +19,6 @@ const VideoContainer = styled.div`
   display: flex;
 `;
 
-
-
-
 export function Youtube({
   id,
   style,
@@ -31,21 +29,20 @@ export function Youtube({
   interectionOptions,
   audio = true,
   cb,
-  visible = true
+  visible = true,
 }) {
   const playerRef = useRef();
 
   const [ready, setReady] = useState(false);
- 
+
   const [Play, setPlay] = useState(play);
   const [show, setShow] = useState(false);
   const [iconShow, setIconShow] = useState(false);
-  
 
-const device = useMedia();
+  const device = useMedia();
 
-const mobile = device === "mobile";
-const desktop = device === "desktop";
+  const mobile = device === "mobile";
+  const desktop = device === "desktop";
 
   const playerRefCb = useCallback((ref) => {
     playerRef.current = ref;
@@ -53,16 +50,13 @@ const desktop = device === "desktop";
 
   const [hoverRef, isHovering] = useHover();
 
-  
-
   const wrapperRefCb = useCallback(
     (ref) => {
-      
       if (light) {
         hoverRef(ref);
       }
     },
-    [ hoverRef, light]
+    [hoverRef, light]
   );
 
   const onReady = useCallback((e) => {
@@ -73,52 +67,41 @@ const desktop = device === "desktop";
 
   useLayoutEffect(() => {
     if (!ready) return;
-    
+
     setPlay(visible && play);
-   setShow(visible && play);
+    setShow(visible && play);
   }, [visible, ready, play]);
 
- 
-
-     
-     
-
-     
-      
-     
-     
-     
-     
-     
-
-  const onStart = useCallback((e) => {
-    
-  }, []);
+  const onStart = useCallback((e) => {}, []);
 
   const onEnded = useCallback((e) => {
     setShow(false);
-
   }, []);
 
   const onBufferEnd = useCallback(
     (e) => {
-       setShow(visible);
+      setShow(visible);
     },
     [visible]
   );
 
-  const onBuffer = useCallback((e) => {
-    if(!full){ setShow(false);}
-  }, [full]);
+  const onBuffer = useCallback(
+    (e) => {
+      if (!full) {
+        setShow(false);
+      }
+    },
+    [full]
+  );
 
   const onError = useCallback((e) => {
     setShow(false);
   }, []);
   const onSeek = useCallback(() => {}, []);
 
-  useLayoutEffect(()=>{cb && cb({show,audio})},[cb,audio, show])
-  
- 
+  useLayoutEffect(() => {
+    cb && cb({ show, audio });
+  }, [cb, audio, show]);
 
   useLayoutEffect(() => {
     if (isHovering === undefined) return;
@@ -139,7 +122,6 @@ const desktop = device === "desktop";
     };
   }, [full, show, light, style]);
 
- 
   return (
     <VideoContainer ref={wrapperRefCb} playerstyle={style}>
       <ReactPlayer

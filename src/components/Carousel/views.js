@@ -1,9 +1,6 @@
 import styled, { css } from "styled-components";
 
 export const SwiperWrapper = styled.div`
-  position: relative;
-  margin-bottom: 20px;
-
   .swiper {
     margin: 0 auto;
     position: relative;
@@ -14,10 +11,10 @@ export const SwiperWrapper = styled.div`
     display: flex;
     max-height: max-content;
     justify-content: flex-start;
-    overflow: hidden;
+    overflow: visible;
     top: 0;
-    padding: 0 25px;
-
+    padding: 0 0px;
+    /* 
     @media only screen and (min-width: 740px) {
       padding: 0 40px;
     }
@@ -25,10 +22,10 @@ export const SwiperWrapper = styled.div`
       desktop
         ? css`
              {
-              padding: 0px;
+              padding: 0 0px;
             }
           `
-        : ""}
+        : ""} */
   }
   .wrapper {
     position: relative;
@@ -44,8 +41,18 @@ export const SwiperWrapper = styled.div`
     height: 100%;
     width: 100%;
     box-sizing: content-box;
-    flex: auto;
+    flex-basis: auto;
+    flex-grow: 1;
     max-height: min-content;
+    position: relative;
+
+    scroll-padding-left: 20px;
+    scroll-padding-right: 20px;
+
+    @media only screen and (min-width: 740px) {
+      scroll-padding-left: 0px;
+      scroll-padding-right: 0px;
+    }
   }
 
   .swiper-slide {
@@ -53,7 +60,19 @@ export const SwiperWrapper = styled.div`
     align-items: center;
     justify-content: center;
     position: relative;
-    width: "200px";
+
+    &:last-child {
+      margin-right: ${({ desktop, padding = 20, endPadding }) =>
+        endPadding
+          ? `calc(100% - 2 * ${padding}px)`
+          : !desktop
+          ? `${padding}px`
+          : "0px"};
+    }
+
+    &:first-child {
+      margin-left: ${({ desktop, padding = 20 }) => !desktop && `${padding}px`};
+    }
   }
 `;
 

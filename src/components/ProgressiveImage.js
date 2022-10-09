@@ -1,52 +1,56 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Image as Img } from "./Card/styles";
+import { useLayoutEffect, useState } from "react";
+import styled from "styled-components";
+import Shimmer from "./shimmer";
 
-const ProgressiveImage = ({  src, style, ...props }) => {
-  const [_, render] = useState();
+export const Img = styled(Shimmer)`
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  left: 0;
+  object-fit: cover;
+  z-index: 5;
+`;
 
-   const Src =  `https://image.tmdb.org/t/p/original/${src}` ;
-   const placeholderSrc = `https://image.tmdb.org/t/p/w300/${src}`;
+const ProgressiveImage = ({original, preview, style,onFetch, ...props }) => {
+
+  const current = preview || original;
+
+  const [url, setUrl] = useState(current);
  
-  const srcRef = useRef(null);
-
-  const current = placeholderSrc || Src;
 
   const [loading, setLoading] = useState(true);
 
-   
   useLayoutEffect(() => {
-    if (!current) {
-      srcRef.current = null;
-      return;
-    }
+  
+    setUrl(current);
+     onFetch?.(current);
+  }, [current, onFetch]);
 
-    srcRef.current = current;
-    render();
-  }, [current]);
-
-  useEffect(() => {
-    if(!src) return
+  useLayoutEffect(() => {
+    if (!original) return;
     setLoading(true);
-
     const img = new Image();
-    img.src = Src;
-    img.onload = () => {
-      srcRef.current = Src;
-      render();
+    img.src = original;
+    img.onload = (e) => {
+      onFetch?.(original);
+      setUrl(original);
       setLoading(false);
     };
+  }, [onFetch, original]);
 
-    return () => {};
-  }, [Src, src]);
 
   return (
     <>
-      {srcRef.current && src ? (
+      {current ? (
         <Img
-          {...(current && { src: srcRef.current, ...props })}
+          {...(url && { src: url, ...props })}
           style={{
             ...style,
-            opacity: loading ? 0.8 : 1,
+            // opacity: loading ? 0.8 : 1,
+           
             transition: "opacity .15s linear ",
           }}
           alt={props.alt || " "}
@@ -56,6 +60,7 @@ const ProgressiveImage = ({  src, style, ...props }) => {
           as="div"
           style={{
             ...style,
+           
           }}
           {...props}
         />

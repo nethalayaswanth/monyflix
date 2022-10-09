@@ -15,7 +15,7 @@ export const CardContainer = styled.div`
 
 export const CardWrapper = styled.div`
   box-sizing: border-box;
-     
+
   overflow: hidden;
   background-color: ${({ color }) =>
     color ? `${color}` : "rgb(249, 250, 251)"};

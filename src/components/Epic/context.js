@@ -6,6 +6,9 @@ const EpicContext = createContext();
 
 function Reducer(state, action) {
   switch (action.type) {
+    case "set state": {
+      return { ...state, ...action.payload };
+    }
     case "play": {
       return { ...state, play: true };
     }
@@ -18,13 +21,13 @@ function Reducer(state, action) {
     case "pause": {
       return { ...state, pause: false };
     }
-    case "set_image": {
-      return { ...state, img: action.img};
+    case "set image": {
+      return { ...state, img: action.img };
     }
-    case "set_current": {
-      return { ...state, id:action.id};
+    case "set current": {
+      return { ...state, id: action.id };
     }
-    case "set_video": {
+    case "set video": {
       return { ...state, img: action.payload };
     }
     default: {
@@ -33,16 +36,15 @@ function Reducer(state, action) {
   }
 }
 
-const initialState={
-    play:false,
-    show:true,
-    img:null,
-    video:null,
-    title:'',
-    overview:'',
-    id:null,
-    
-}
+const initialState = {
+  play: false,
+  show: true,
+  img: null,
+  video: null,
+  title: "",
+  overview: "",
+  id: 0,
+};
 function EpicProvider({ children }) {
 
   const [state, dispatch] = useReducer(Reducer, initialState);
@@ -63,3 +65,4 @@ function useEpicState() {
 }
 
 export { useEpicState, EpicProvider };
+

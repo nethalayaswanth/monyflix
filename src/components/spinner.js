@@ -1,4 +1,6 @@
+import { forwardRef } from "react";
 import styled, { keyframes } from "styled-components";
+import { ReactComponent as Spin } from "../assets/spinner.svg";
 
 const rotate360 = keyframes`
   from {
@@ -9,18 +11,41 @@ const rotate360 = keyframes`
   }
 `;
 
-const Spinner = styled.div`
-  animation: ${rotate360} 1s linear infinite;
+const Spinner = styled(Spin)`
+  animation: ${rotate360} 2s linear infinite;
   transform: translateZ(0);
-
-  border-top: 2px solid grey;
-  border-right: 2px solid grey;
-  border-bottom: 2px solid grey;
-  border-left: 4px solid black;
   background: transparent;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  color: rgba(0, 0, 0, 0.15);
+  fill: rgba(0, 0, 0, 0.5);
 `;
+
+
+export const Loaderwrapper = styled.div`
+
+  height:80px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+`;
+
+
+export const Loader=forwardRef(({style},ref)=>{
+
+
+  return(
+    <Loaderwrapper ref={ref} style={{...style}}>
+      <Spinner/>
+    </Loaderwrapper>
+  )
+})
+
+
+
+
+
 
 export default Spinner;

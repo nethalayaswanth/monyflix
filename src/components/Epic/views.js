@@ -11,20 +11,26 @@ export const Container = styled.div`
   margin: auto;
   max-width: 100vw;
   z-index: 1;
-  min-height: calc(100vw / 0.65);
+  height: calc((110vw / 0.65));
 
   max-height: 100vh;
 
-  @media only screen and (min-width: 480px) {
+  /* @media only screen and (min-width: 480px) {
     min-height: calc(100vw / 0.85);
+  } */
+
+  @media only screen and (max-width: 100vw) {
+    width: 100%;
+    height: calc(56.25vw);
+    max-height: 95vh;
   }
 
-  @media only screen and (min-width: 650px) {
-    min-height: 520px;
+  @media only screen and (max-width: 1320px) {
+    height: calc(177vw);
+    max-height: 80vh;
   }
-
-  @media only screen and (min-width: 740px) {
-    min-height: 362px;
+  @media only screen and (max-width: 420px) {
+    height: calc((110vw / 0.65));
   }
 
   .absolute {
@@ -38,6 +44,8 @@ export const Container = styled.div`
     overflow: hidden;
   }
 `;
+
+
 
 export const Image = styled.img`
   width: 100%;

@@ -1,498 +1,600 @@
 import React, {
-  forwardRef, useCallback, useLayoutEffect, useMemo, useState
+  forwardRef, lazy,
+  Suspense, useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState
 } from "react";
-import { useQueryClient } from "react-query";
+
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AspectBox from "../AspectBox";
-   
+
 import { useModalState } from "../../contexts/modalContext";
 import {
-  useGetRecommendedMovies, useGetSimilarMovies, useGetVideosById, useMovieDetails
+  useGetRecommendedMovies,
+  useGetSimilarMovies,
+  useGetVideosById,
+  useMovieDetails
 } from "../../requests/requests";
-import ExpandSlide from "../ExpandCard/expandSlide";
-import ModalSection from "../ModalSection";
-import Youtube from "../Youtube";
+
+
+import Section from "../Section";
+
 import {
-  Adult, Button, Close,Tagline, Content, Description, Divider, Genres, Header, Image, InlineFlex, Item, ModalWrapper, Open, Overview, Spacer, Title, Up
+  Adult,
+  Button,
+  Close, Content,
+  Description,
+  Divider,
+  Genres,
+  Header, InlineFlex,
+  Item,
+  ModalWrapper,
+  Open,
+  Overview,
+  Spacer, Tagline, Title,
+  Up
 } from "./styles";
 
-import { animated, useSpring } from "react-spring";
+import { animated } from "react-spring";
 
 import useMedia from "../../hooks/useMedia";
 import AudioControls from "../AudioControls";
 import Video from "../CroppedVideo";
-import DetailsCard from "../DetailsCard";
-import ProgressiveImage from "../ProgressiveImage";
-import Section from "../Section/DetailsSection";
-import timeConversion from "./utils";
+
 import { useInView } from "react-intersection-observer";
-const CardModal = forwardRef(({ style, width,}, ref) => {
-  const [
-    {
-      movie,
-      param,
-      activate,
-      activated,
-      miniExpand,
-      miniExpanded,
-      expand,
-      expanded,
-      details
-    },
-    dispatch,
-  ] = useModalState();
+import ProgressiveImage from "../ProgressiveImage";
+import timeConversion from "./utils";
+
+const Youtube = lazy(() => {
+  return import("../Youtube");
+});
+const CardModal = forwardRef(
+  ({ style, width, fade, progress, minifade }, ref) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const param = searchParams.get("mv");
+
+    const [currentMovieId, setCurrentMovieId] = useState(param);
+
+    const [
+      {
+        movie,
+        scroll,
+        activate,
+        activated,
+        miniExpand,
+        miniExpanded,
+        expand,
+        expanded,
+        details,
+      },
+      dispatch,
+    ] = useModalState();
+
+    const movieId = currentMovieId || movie?.id;
 
 
-  const {
-    data: movieDetails,
-    isLoading: movieDetailsLoading,
-    refetch: movieDetailsRefetch,
-    status: movieDetailStatus,
-    error,
-  } = useMovieDetails({ id: movie?.id || param });
-
-  const queryClient = useQueryClient();
-
-  const {
-    data,
-
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useGetSimilarMovies({ id: movie?.id || param });
-
-  const recommendedMovies= useGetRecommendedMovies({ id: movie?.id || param });
   
 
-  const movies = useMemo(() => {
-    if (data) {
-      var list = [];
-
-      data.pages.forEach(({ similarMovies: { data } }, i) => {
-        list = [...list, ...data];
-      });
-
-      return list;
-    }
-    return [];
-  }, [data]);
-
-  const recommendedmovies = useMemo(() => {
-    const data = recommendedMovies?.data;
-    if (data) {
-      var list = [];
-
-      data.pages.forEach(({ recommendedMovies: { data } }, i) => {
-        list = [...list, ...data];
-      });
-
-      return list;
-    }
-    return [];
-  }, [recommendedMovies?.data]);
-  let [searchParams, setSearchParams] = useSearchParams();
-
-  let location = useLocation();
-  let navigate = useNavigate();
-
-  const handleExpand = useCallback(
-    (e) => {
-      e.stopPropagation();
-      setSearchParams(
-        { mv: movie?.id },
-        {
-          state: { backgroundLocation: location, miniModal: true },
-        }
-      );
-    },
-    [location, movie, setSearchParams]
-  );
-
-  const handleClose = useCallback(
-    (e) => {
-      e.stopPropagation();
-      const param = searchParams.get("mv");
-
-      if (param) {
-        searchParams.delete("mv");
-        setSearchParams(searchParams);
-      }
-    },
-    [searchParams, setSearchParams]
-  );
-
-  const {
-    isLoading,
-    error: videoError,
-    data: videoData,
-    isFetching: videoFetching,
-  } = useGetVideosById({
-    id: movie?.id || param,
-    types: ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"],
-  });
-
-  const id = useMemo(() => {
-    
-    if (!movieDetails) return null;
-    const videos = movieDetails.movie.videos;
-    if (!videos) return null;
-    const clip = videos.clip[0];
-    const trailer = videos.trailer[0];
-    const teaser = videos.teaser[0];
-
-    return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
-  }, [movieDetails]);
-
-  const current = movieDetails?.movie || movie;
-  const year = current?.releaseDate.split("-")[0];
-  const genres = movieDetails?.movie.genres;
-  const runTime = movieDetails?.movie.runtime;
-
-  const posterPath = current
-    ? `https://image.tmdb.org/t/p/original/${current?.posterPath}`
-    : null;
- const backDropPath = current?.backdropPath;
-
-
-  const [{ opacity }, api] = useSpring(() => {
-    return {
-      from: {
-        opacity: 1,
+    const {
+      data: movieDetails,
+      isLoading: movieDetailsLoading,
+      refetch: movieDetailsRefetch,
+      status: movieDetailStatus,
+      isFetching,
+      error,
+    } = useMovieDetails({
+      id: movieId,
+      queryOptions: {
+        enabled: !!movieId,
+        keepPreviousData: true,
       },
-    };
-  });
+    });
 
-  useLayoutEffect(() => {
-    if (miniExpand && activate) {
-      api.start({
-        opacity: 0,
+    const {
+      isLoading,
+      error: videoError,
+      data: videoData,
+      isFetching: videoFetching,
+    } = useGetVideosById({
+      id: movieId,
+      types: ["CLIP", "TRAILER", "BLOOPERS", "TEASER", "BTS", "FEATURETTE"],
+      queryOptions: {
+        enabled: !!movieId,
+        keepPreviousData: true,
+      },
+    });
+
+    const [renderFullList, setListRenderSize] = useState(false);
+
+    const videos = useMemo(() => {
+      const videos = videoData?.videosById;
+      if (!videos) return;
+      const clips = {
+        data: renderFullList ? videos.clip : videos.clip.slice(0, 1),
+        title: "Clips",
+        breakPointValues: [3, 3, 3, 3, 3, 1],
+      };
+      const trailers = {
+        data: renderFullList ? videos.trailer : videos.trailer.slice(0, 1),
+        title: "Trailers",
+        breakPointValues: [4, 4, 3, 3, 3, 2],
+      };
+      const teasers = {
+        data: renderFullList ? videos.teaser : videos.teaser.slice(0, 1),
+        title: "Teasers",
+        breakPointValues: [4, 4, 3, 3, 3, 2],
+      };
+      const bts = {
+        data: renderFullList ? videos.bts : videos.bts.slice(0, 1),
+        title: "Behind The Scenes",
+        breakPointValues: [4, 4, 3, 3, 3, 2],
+      };
+      const featurette = {
+        data: renderFullList
+          ? videos.featurette
+          : videos.featurette.slice(0, 1),
+        title: "Featurette",
+        breakPointValues: [4, 4, 3, 3, 3, 2],
+      };
+      const bloopers = {
+        data: renderFullList ? videos.bloopers : videos.bloopers.slice(0, 1),
+        title: "Bloopers",
+        breakPointValues: [4, 4, 3, 3, 3, 2 ],
+      };
+
+      return [clips, trailers, teasers, bts, featurette, bloopers];
+    }, [renderFullList, videoData]);
+
+    const videoId = useMemo(() => {
+      if (!movieDetails) return null;
+      const videos = movieDetails.movie.videos;
+      if (!videos) return null;
+      const clip = videos.clip[0];
+      const trailer = videos.trailer[0];
+      const teaser = videos.teaser[0];
+
+      return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
+    }, [movieDetails]);
+
+    const similarMoviesQuery = useGetSimilarMovies({
+      id: movieId,
+      size: 4,
+      queryOptions: {
+        enabled: !!movieId,
+        keepPreviousData: true,
+      },
+    });
+
+    const recommendedMoviesQuery = useGetRecommendedMovies({
+      id: movieId,
+      size: 4,
+      queryOptions: {
+        enabled: !!movieId,
+        keepPreviousData: true,
+      },
+    });
+
+    const similarMovies = useMemo(() => {
+      const data = similarMoviesQuery?.data;
+      if (data) {
+        var list = [];
+        data.pages.forEach(({ similarMovies: { data } }, i) => {
+          list = [...list, ...data];
+        });
+        if (renderFullList) return list;
+        return list.slice(0, 2);
+      }
+      return [];
+    }, [renderFullList, similarMoviesQuery?.data]);
+
+    const recommendedMovies = useMemo(() => {
+      const data = recommendedMoviesQuery?.data;
+      if (data) {
+        var list = [];
+        data.pages.forEach(({ recommendedMovies: { data } }, i) => {
+          list = [...list, ...data];
+        });
+        if (renderFullList) return list;
+        return list.slice(0, 2);
+      }
+      return [];
+    }, [recommendedMoviesQuery?.data, renderFullList]);
+
+    useLayoutEffect(() => {
+      if (param) {
+        setCurrentMovieId(param);
+      }
+    }, [param]);
+
+    useEffect(() => {
+      if (
+        (similarMoviesQuery?.data && expanded) ||
+        (recommendedMoviesQuery?.data && expanded)
+      ) {
+        setListRenderSize(true);
+      }
+    }, [expanded, recommendedMoviesQuery?.data, similarMoviesQuery?.data]);
+
+    let location = useLocation();
+    let navigate = useNavigate();
+
+    const handleExpand = useCallback(
+      (e) => {
+        e.stopPropagation();
+
+        setSearchParams(
+          { mv: movie?.id },
+          {
+            state: { backgroundLocation: location, miniModal: true },
+          }
+        );
+      },
+      [location, movie, setSearchParams]
+    );
+
+    const handleClose = useCallback(
+      (e) => {
+        e.stopPropagation();
+        const param = searchParams.get("mv");
+
+        if (param) {
+          searchParams.delete("mv");
+          setSearchParams(searchParams);
+        }
+      },
+      [searchParams, setSearchParams]
+    );
+
+    const current = movieDetails?.movie;
+    const year = current?.releaseDate.split("-")[0];
+    const genres = movieDetails?.movie.genres;
+    const runTime = movieDetails?.movie.runtime;
+
+    const posterPath = current?.posterPath
+      ? `https://image.tmdb.org/t/p/original${current?.posterPath}`
+      : null;
+    const posterPathPreview = current?.posterPath
+      ? `https://image.tmdb.org/t/p/w300${current?.posterPath}`
+      : null;
+
+    const overlay = movie?.posterPath
+      ? `https://image.tmdb.org/t/p/original${movie?.posterPath}`
+      : null;
+
+    const backDropPath = current?.backdropPath
+      ? `https://image.tmdb.org/t/p/original${current?.backdropPath}`
+      : null;
+    const backDropPathPreview = current?.backdropPath
+      ? `https://image.tmdb.org/t/p/w300${current?.backdropPath}`
+      : null;
+
+    const handleMovieClick = useCallback(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
       });
-    }
-    if (!miniExpand && !activate) {
-      api.start({
-        opacity: 1,
-      });
-    }
-  }, [activate, api, miniExpand]);
+    }, []);
 
-   const [overlay, setOverlay] = useState();
+    const device = useMedia();
 
-   useLayoutEffect(() => {
-     let timeout;
-     if (!expand || miniExpand) {
-       setOverlay(expand);
-       return;
-     }
-     timeout = setTimeout(() => {
-       setOverlay(expand);
-     }, 200);
-     return () => {
-       clearTimeout(timeout);
-     };
-   }, [expand, miniExpand]);
+    const {
+      ref: elRef,
+      inView,
+      entry,
+    } = useInView({
+      threshold: 0.95,
+      rootMargin: "100px 0px 100px 0px",
+    });
 
-  useLayoutEffect(() => {
-    if (overlay && expanded) return;
-    if (!miniExpand && overlay) {
-      api.start({ opacity: 0 });
-    }
-    if (!overlay && expanded) {
-      api.start({
-        opacity: 1,
-      });
-    }
-  }, [api, overlay, expanded, miniExpand]);
+    const mobile = device === "mobile";
+    const desktop = device === "desktop";
 
-  const handleSimilarMovieclick = useCallback(() => {
-    dispatch({ type: "set reset" });
-   
-  }, [dispatch]);
+    const [audio, setAudio] = useState(false);
+    const [show, setShow] = useState();
 
-  const device = useMedia();
+    const showCb = useCallback(({ show }) => {
+      setShow(show);
+    }, []);
 
-  const {
-    ref: elRef,
-    inView,
-    entry,
-  } = useInView({
-    threshold: 0.95,
-    rootMargin: "100px 0px 100px 0px",
-  });
-  const mobile = device === "mobile";
-  const desktop = device === "desktop";
+    const handleAudio = useCallback(() => {
+      setAudio((x) => !x);
+    }, []);
 
-  const [audio, setAudio] = useState(false);
-  const [show, setShow] = useState();
-
-  const showCb = useCallback(({ show }) => {
-    setShow(show);
-  }, []);
-
-  const handleAudio = useCallback(() => {
-    setAudio((x) => !x);
-  }, []);
-
-
-
-
- 
-  return (
-    <ModalWrapper
-      ref={ref}
-      id="card-modal"
-      style={{
-        backgroundColor:
-          !miniExpand &&
-          expand &&
-          opacity.to({ range: [0.8, 0.2], output: ["transparent", "white"] }),
-        ...(!miniExpand && !expanded && { boxShadow: "unset" }),
-        ...(expand && mobile && { borderRadius: "0px" }),
-      }}
-    >
-      <animated.div
-        style={{
-          opacity: opacity.to({
-            range: [1, 0.2],
-            output: [1, 0],
-          }),
-          width: "100%",
-          height: "100%",
-          ...(overlay && {
-            position: "absolute",
-            top: 0,
-            left: 0,
-          }),
-        }}
-      >
-        <AspectBox potrait={!details}>
-          <Image
-            style={{ width: "100%", height: "100%", Zindex: 5 }}
-            src={posterPath}
-            alt={``}
-          />
-        </AspectBox>
-      </animated.div>
-      <animated.div
-        style={{
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          opacity: opacity.to({ range: [0.8, 0.2], output: [0, 1] }),
-          ...(expand && !desktop && { minHeight: "100vh" }),
-          ...(!expand && { position: "absolute" }),
-        }}
-      >
-        <>
+    return (
+      <Suspense>
+        <div style={{ position: "relative", height: "100%", width: "100%" }}>
           <div
             style={{
               position: "absolute",
               top: 0,
               left: 0,
+              background: "rgba(255,255,255,0.5)",
+              opacity: isFetching ? 1 : 0,
+              height: "100%",
               width: "100%",
-              zIndex: 2,
-              aspectRatio: 19 / 10,
+              pointerEvents: "none",
+              zIndex: 100,
             }}
-            ref={elRef}
+          ></div>
+          <ModalWrapper
+            ref={ref}
+            id="card-modal"
+            style={{
+              backgroundColor:
+                !miniExpand &&
+                expand &&
+                fade.to({
+                  range: [0, 0.4],
+                  output: ["transparent", "white"],
+                }),
+              ...(!miniExpand && !expanded && { boxShadow: "unset" }),
+              ...(expand && mobile && { borderRadius: "0px" }),
+            }}
           >
             <animated.div
               style={{
-                width,
-                aspectRatio: 19 / 10,
-                maxHeight: "min(800px,100vh)",
-                zIndex: 2,
-                position: "absolute",
-                backgroundColor: "transparent",
+                opacity: minifade.to({
+                  range: [0, 0.4, 0.5, 0.55, 1],
+                  output: [1, 0, 0, 1, 1],
+                }),
+                width: "100%",
+                height: "100%",
+                zIndex: 3,
+                pointerEvents: "none",
+                position: expand
+                  ? progress
+                      .to({ range: [0, 0.4, 1], output: [0, 1, 1] })
+                      .to((x) => (x ? "absolute" : "relative"))
+                  : "relative",
               }}
             >
-              {id && (
-                <Video show={show} crop={false}>
-                  <Youtube
-                    id={id}
-                    light={false}
-                    play={true}
-                    audio={audio}
-                    cb={showCb}
-                    visible={inView}
-                  />
-                </Video>
-              )}
-              {
-                <>
-                  {(expand || expanded) && (
-                    <Button onClick={handleClose}>
-                      <Close style={{ fill: "white" }} />
-                    </Button>
-                  )}
-                  {show && (
-                    <Button
-                      onClick={handleAudio}
-                      style={{ bottom: 0, top: "auto" }}
-                    >
-                      <AudioControls audio={audio} />
-                    </Button>
-                  )}
-                </>
-              }
+              <AspectBox potrait={!details}>
+                <ProgressiveImage
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    Zindex: 5,
+                    background: "none",
+                  }}
+                  //original={posterPath}
+                  preview={overlay}
+                  alt={``}
+                />
+              </AspectBox>
             </animated.div>
-          </div>
-
-          <div style={{ zIndex: 1, width: "100%", aspectRatio: 19 / 10 }}>
-            <ProgressiveImage
+            <animated.div
               style={{
+                top: 0,
+                left: 0,
                 width: "100%",
-                Zindex: 5,
-                position: "relative",
-                aspectRatio: 19 / 10,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                opacity: fade.to({ range: [0, 0.4], output: [0, 1] }),
+                ...(expand && !desktop && { minHeight: "100vh" }),
+                ...(!expand && { position: "absolute" }),
               }}
-              src={backDropPath}
-              alt={``}
-            />
-          </div>
-        </>
-
-        <animated.div
-          style={{
-            position: "relative",
-            zIndex: 3,
-            backgroundColor: "inherit",
-            flex: "auto",
-            opacity: opacity.to({ range: [0.6, 0.4, 0], output: [0, 1, 1] }),
-          }}
-        >
-          {
-            <>
-              <Content expand={expand} style={{}}>
+            >
+              <>
                 <div
                   style={{
-                    display: "flex",
-                    flexDirection: desktop ? "row" : "column",
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    zIndex: 2,
+                    aspectRatio: 19 / 10,
                   }}
+                  ref={elRef}
                 >
-                  <Description expand={expand}>
-                    <Header>
-                      <Title expand={expand}>{current.title}</Title>
-                    </Header>
-                    <InlineFlex>
-                      <Item>{year}</Item>
-                      {runTime && <Item>{timeConversion(runTime)}</Item>}
-                      <Adult>{current?.adult ? "U/A 13+" : "U/A 18+"}</Adult>
-                    </InlineFlex>
-                    <Overview className={expand && "expand"}>
-                      {current?.overview}
-                    </Overview>
-                    {expand && <Tagline>{current?.tagline}</Tagline>}
-
-                    {/* <Spacer /> */}
-                  </Description>
-                  {genres && (expand || expanded) && (
-                    <Genres>
-                      <span
-                        key={"genres"}
-                        style={{ ...(!desktop && { fontWeight: 600 }) }}
-                      >
-                        Genres:
-                      </span>
-                      {genres.map((genre, i) => {
-                        const last = i === genres.length - 1;
-                        return (
-                          <span key={i}>
-                            {`${genre}`}
-                            {!last && ","}
-                          </span>
-                        );
-                      })}
-                    </Genres>
-                  )}
-                </div>
-
-                <Spacer />
-                <Divider />
-                {!(expand || expanded) && (
-                  <>
-                    <Open>
-                      <Up onClick={handleExpand} />
-                    </Open>
-                  </>
-                )}
-              </Content>
-              {(expand || expanded) && (
-                <div style={{ flexGrow: 2, flexShrink: 0, flexBasis: "auto" }}>
-                  <>
-                    {videoData && videoData?.videosById && (
+                  <animated.div
+                    style={{
+                      width,
+                      aspectRatio: 19 / 10,
+                      maxHeight: "min(800px,100vh)",
+                      zIndex: 2,
+                      position: "absolute",
+                      backgroundColor: "transparent",
+                    }}
+                  >
+                    {videoId && (
+                      <Video show={show} crop={false}>
+                        <Suspense fallback={<div></div>}>
+                          <Youtube
+                            id={videoId}
+                            light={false}
+                            play={true}
+                            audio={audio}
+                            cb={showCb}
+                            visible={inView}
+                          />
+                        </Suspense>
+                      </Video>
+                    )}
+                    {
                       <>
-                        {videoData.videosById.clip.length !== 0 && (
-                          <ModalSection
-                            data={videoData.videosById.clip}
-                            title="Clips"
-                          />
+                        {(expand || expanded) && (
+                          <Button onClick={handleClose}>
+                            <Close style={{ fill: "white" }} />
+                          </Button>
                         )}
-                        {videoData.videosById?.trailer.length !== 0 && (
-                          <ModalSection
-                            data={videoData.videosById.trailer}
-                            title="Trailers"
-                          />
+                        {show && (
+                          <Button
+                            onClick={handleAudio}
+                            style={{ bottom: 0, top: "auto" }}
+                          >
+                            <AudioControls audio={audio} />
+                          </Button>
                         )}
-                        {videoData.videosById?.bts.length !== 0 && (
-                          <ModalSection
-                            data={videoData.videosById.bts}
-                            title="Behind The Scenes"
-                          />
-                        )}
-                        {videoData.videosById.featurette.length !== 0 && (
-                          <ModalSection
-                            data={videoData.videosById.featurette}
-                            title={"Featurette"}
-                          />
-                        )}
-                        {videoData.videosById.bloopers.length !== 0 && (
-                          <ModalSection
-                            data={videoData.videosById.bloopers}
-                            title="Bloopers"
-                          />
-                        )}{" "}
                       </>
-                    )}
-                    {!recommendedMovies.isLoading &&
-                      recommendedmovies.length !== 0 && (
-                        <Section
-                          title="Recommended"
-                          movies={recommendedmovies}
-                          loading={recommendedMovies.status === "loading"}
-                          hasMore={recommendedMovies.hasNextPage}
-                          isFetching={recommendedMovies.isFetchingNextPage}
-                          fetchMore={recommendedMovies.fetchNextPage}
-                          slidesPerView={"auto"}
-                          enabled={true}
-                        >
-                          <DetailsCard onClick={handleSimilarMovieclick} />
-                        </Section>
-                      )}
-                    {data && (
-                      <ModalSection
-                        title="More Like This"
-                        data={movies}
-                        loading={status === "loading"}
-                        hasMore={hasNextPage}
-                        isFetching={isFetchingNextPage}
-                        fetchMore={fetchNextPage}
+                    }
+                  </animated.div>
+                </div>
+
+                <div style={{ zIndex: 1, width: "100%", aspectRatio: 19 / 10 }}>
+                  <ProgressiveImage
+                    style={{
+                      width: "100%",
+                      Zindex: 5,
+                      position: "relative",
+                      aspectRatio: 19 / 10,
+                    }}
+                    original={backDropPath}
+                    preview={backDropPathPreview}
+                    alt={``}
+                  />
+                </div>
+              </>
+              <animated.div
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  backgroundColor: "inherit",
+                  flex: "auto",
+                  opacity: fade.to({
+                    range: [0.6, 0.4, 0],
+                    output: [0, 1, 1],
+                  }),
+                }}
+              >
+                {
+                  <>
+                    <Content expand={expand} style={{}}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: desktop ? "row" : "column",
+                        }}
                       >
-                        <ExpandSlide onClick={handleSimilarMovieclick} />
-                      </ModalSection>
+                        <Description expand={expand}>
+                          <Header>
+                            <Title expand={expand}>{current?.title}</Title>
+                          </Header>
+                          <InlineFlex>
+                            <Item>{year}</Item>
+                            {runTime && <Item>{timeConversion(runTime)}</Item>}
+                            <Adult>
+                              {current?.adult ? "U/A 13+" : "U/A 18+"}
+                            </Adult>
+                          </InlineFlex>
+                          <Overview className={expand && "expand"}>
+                            {current?.overview}
+                          </Overview>
+                          {expand && <Tagline>{current?.tagline}</Tagline>}
+                        </Description>
+                        {genres && (expand || expanded) && (
+                          <Genres>
+                            <span
+                              key={"genres"}
+                              style={{ ...(!desktop && { fontWeight: 600 }) }}
+                            >
+                              Genres:
+                            </span>
+                            {genres.map((genre, i) => {
+                              const last = i === genres.length - 1;
+                              return (
+                                <span key={i}>
+                                  {`${genre}`}
+                                  {!last && ","}
+                                </span>
+                              );
+                            })}
+                          </Genres>
+                        )}
+                      </div>
+
+                      <Spacer />
+                      <Divider />
+                      {!(expand || expanded) && (
+                        <>
+                          <Open>
+                            <Up onClick={handleExpand} />
+                          </Open>
+                        </>
+                      )}
+                    </Content>
+                    {(expand || expanded) && (
+                      <div
+                        style={{
+                          flexGrow: 2,
+                          flexShrink: 0,
+                          flexBasis: "auto",
+                        }}
+                      >
+                        <>
+                          {videoData && videos && (
+                            <>
+                              {videos.map((type, i) => {
+                                if (type.data.length === 0) return null;
+
+                                return (
+                                  <Section
+                                    key={i}
+                                    data={type.data}
+                                    title={type.title}
+                                    card="thumbnail"
+                                    breakPointValues={type.breakPointValues}
+                                  />
+                                );
+                              })}
+                            </>
+                          )}
+
+                          {recommendedMovies.length !== 0 && (
+                            <Section
+                              title="Recommended"
+                              data={recommendedMovies}
+                              loading={
+                                recommendedMoviesQuery.status === "loading"
+                              }
+                              hasMore={
+                                recommendedMoviesQuery.hasNextPage &&
+                                expanded &&
+                                renderFullList
+                              }
+                              isFetching={
+                                recommendedMoviesQuery.isFetchingNextPage
+                              }
+                              fetchMore={recommendedMoviesQuery.fetchNextPage}
+                              slidesPerView={"auto"}
+                              enabled={true}
+                              card="detail"
+                              breakPointValues={[4, 4, 4, 3, 1.5, 1.5]}
+                              onClick={handleMovieClick}
+                            ></Section>
+                          )}
+                          {similarMovies && (
+                            <Section
+                              title="More Like This"
+                              data={similarMovies}
+                              loading={similarMoviesQuery.status === "loading"}
+                              hasMore={
+                                similarMoviesQuery.hasNextPage &&
+                                expanded &&
+                                renderFullList
+                              }
+                              isFetching={similarMoviesQuery.isFetchingNextPage}
+                              fetchMore={similarMoviesQuery.fetchNextPage}
+                              card="card"
+                              breakPointValues={[5,5, 4, 4, 3, 2]}
+                            ></Section>
+                          )}
+                        </>
+                      </div>
                     )}
                   </>
-                </div>
-              )}
-            </>
-          }
-        </animated.div>
-      </animated.div>
-    </ModalWrapper>
-  );
-});
+                }
+              </animated.div>
+            </animated.div>
+          </ModalWrapper>
+        </div>
+      </Suspense>
+    );
+  }
+);
 
 export default CardModal;

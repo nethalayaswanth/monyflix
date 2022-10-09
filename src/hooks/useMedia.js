@@ -1,31 +1,45 @@
-import { useEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 
-const Queries = 
-  ["(min-width: 740px)", "(min-width: 480px)", "(min-width: 300px)"]
-;
+const breakpointsDefault = [740, 480, 300];
 
-const Values= ["desktop", "tablet", "mobile"];
+const queryStrings = (breakpoints = []) =>
+  breakpoints.map((breakPoint) => `(min-width:${breakPoint}px)`);
 
-const defaultalue = "desktop";
+const defaultValues = ["desktop", "tablet", "mobile"];
 
- function useMedia(
-   queries = Queries,
-   values = Values,
-   defaultValue = defaultalue
- ) {
-   const mediaQueryLists = queries.map((q) => window.matchMedia(q));
-   const getValue = () => {
-     const index = mediaQueryLists.findIndex((mql) => mql.matches);
-     return typeof values[index] !== "undefined" ? values[index] : defaultValue;
-   };
-   const [value, setValue] = useState(getValue);
+const defaultvalue = "desktop";
 
-   useEffect(() => {
-     const handler = () => setValue(getValue);
-     mediaQueryLists.forEach((mql) => mql.addListener(handler));
-     return () => mediaQueryLists.forEach((mql) => mql.removeListener(handler));
-   }, []);
-   return value;
- }
+function useMedia({
+  breakPoints = breakpointsDefault,
+  breakPointValues = defaultValues,
+  defaultValue = defaultvalue,
+} = {}) {
+  const queries = queryStrings(breakPoints);
+  const mediaQueryLists = queries.map((q) => window.matchMedia(q));
+
+  const getValue = () => {
+   
+    const index = mediaQueryLists.findIndex((mql) => mql.matches);
+    return typeof breakPointValues[index] !== "undefined"
+      ? breakPointValues[index]
+      : defaultValue;
+  };
+  const [value, setValue] = useState(getValue);
+
+  useLayoutEffect(() => {
+    const handler = () => {
+      setValue(getValue);
+    };
+
+    mediaQueryLists.forEach((mql) => {
+      mql.addEventListener("change", handler);
+    });
+    return () =>
+      mediaQueryLists.forEach((mql) => {
+        mql.removeEventListener("change", handler);
+      });
+  }, []);
+  return value;
+}
 
 export default useMedia;

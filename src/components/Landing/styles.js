@@ -16,14 +16,13 @@ export const Container = styled.div`
 
   @media only screen and (max-width: 100vw) {
     width: 100%;
-    height: calc(56.25vw );
+    height: calc(56.25vw);
     max-height: 100vh;
-       
   }
-  @media only screen and (max-width: 739px) {
+  @media only screen and (max-width: 740px) {
     height: calc((110vw / 0.65));
   }
-     
+
   .absolute {
     height: 100%;
     width: 100%;
@@ -37,6 +36,7 @@ export const Container = styled.div`
 `;
 
 export const Picture = styled(Container)``;
+
 export const Wrapper = styled.div`
   -o-object-fit: cover;
   object-fit: cover;

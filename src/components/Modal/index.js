@@ -1,7 +1,7 @@
+import { ErrorBoundary } from "react-error-boundary";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
 import ExpandModal from "./expandModal";
-import ParamModal from "./paramModal";
 
 
 const Modal = () => {
@@ -11,9 +11,30 @@ const Modal = () => {
 
   let location = useLocation();
 
-  const [{ activate, parent, activated }, dispatch] = useModalState();
+  const [{ activate, parent, activated,expanded }, dispatch] = useModalState();
 
-  return (!parent && param ) ? <ParamModal /> : parent ? <ExpandModal /> : null;
+  
+
+  return parent || param || expanded ? (
+    <ErrorBoundary
+      //onReset={reset}
+      fallbackRender={({ resetErrorBoundary, error }) => {
+        
+
+        return (
+          <div>
+            There was an error!
+            <button onClick={() => resetErrorBoundary()}>Try again</button>
+          </div>
+        );
+      }}
+    >
+      {" "}
+      <ExpandModal />
+    </ErrorBoundary>
+  ) : null;
+
+
 
   
      

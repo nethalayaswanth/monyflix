@@ -29,4 +29,5 @@ const styles = css`
 export const Shimmer = styled.img`
   ${styles}
 `;
+
 export default Shimmer;

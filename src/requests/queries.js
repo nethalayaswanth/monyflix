@@ -34,16 +34,6 @@ export const CORE_MOVIE_FIELDS = gql`
   }
 `;
 
-   
-   
-   
-   
-   
-
-   
-   
-   
-
 export const MovieGenre = gql`
   ${CORE_MOVIE_FIELDS}
   query MovieGenre(
@@ -125,11 +115,12 @@ export const similarMovies = gql`
   ${CORE_MOVIE_FIELDS}
   query similarMovies(
     $id: ID!
+    $size:Int
     $after: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
   ) {
-    similarMovies(id: $id, after: $after) {
+    similarMovies(id: $id, after: $after,size:$size) {
       data {
         ...CoreMovieFields
       }
@@ -142,11 +133,12 @@ export const recommendedMovies = gql`
   ${CORE_MOVIE_FIELDS}
   query recommendedMovies(
     $id: ID!
+    $size: Int
     $after: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
   ) {
-    recommendedMovies(id: $id, after: $after) {
+    recommendedMovies(id: $id, after: $after, size: $size) {
       data {
         ...CoreMovieFields
         images {
@@ -163,12 +155,12 @@ export const recommendedMovies = gql`
 export const latestMovie = gql`
   ${CORE_MOVIE_FIELDS}
   query latestMovie(
-    $withVideo: Boolean = true
+    $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
   ) {
     latestMovie {
       ...CoreMovieFields
-      images{
+      images {
         filePath
       }
     }
@@ -177,9 +169,21 @@ export const latestMovie = gql`
 
 export const trendingMovies = gql`
   ${CORE_MOVIE_FIELDS}
-  query trendingMovies {
-    trendingMovies {
-      ...CoreMovieFields
+  query trendingMovies(
+    $after: Int
+    $withVideo: Boolean = false
+    $withImages: Boolean = false
+    $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
+  ) {
+    trendingMovies(after: $after) {
+      data {
+        ...CoreMovieFields
+        images @include(if: $withImages) {
+          filePath
+        }
+      }
+      cursor
+      hasMore
     }
   }
 `;
@@ -194,6 +198,8 @@ export const seriesList = gql`
     }
   }
 `;
+
+
 
 export const videosById = gql`
   ${CORE_VIDEO_FIELDS}
