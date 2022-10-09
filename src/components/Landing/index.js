@@ -177,7 +177,6 @@ const Landing = ({ queryEnabled}) => {
             width: "100%",
             height: "100%",
             aspectRatio: "19/10",
-            maxHeight: "800px",
             zIndex: 2,
             position: "absolute",
             backgroundColor: "transparent",
