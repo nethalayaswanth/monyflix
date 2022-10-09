@@ -102,7 +102,7 @@ const LandscapeCard = ({ data: current }, ref) => {
           width: "100%",
           height: "auto",
           aspectRatio: "19/10",
-          maxHeight: "min(800px,100vh))",
+          maxHeight: "min(800px,95vh)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -113,7 +113,11 @@ const LandscapeCard = ({ data: current }, ref) => {
         ref={refcb}
       >
         <ProgressiveImage
-          style={{ borderRadius: "6px", zIndex: 1 }}
+          style={{
+            borderRadius: "6px",
+            zIndex: 1,
+            maxHeight: "min(800px,95vh)",
+          }}
           original={original}
           preview={preview}
           alt={`${current?.title}`}
