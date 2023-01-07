@@ -7,8 +7,11 @@ import React, {
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "swiper/css/virtual";
 import { Swiper } from "swiper/react";
+import { Virtual } from "swiper";
 import { Backward, Forward } from "../Controller";
+
 
 
 import { FreeMode, Keyboard, Mousewheel } from "swiper";
@@ -39,12 +42,11 @@ function Index(
   }, []);
 
 
-  const slidesPerView=props.slidesPerView
+  const slidesPerView= props.slidesPerView
+
   const params = {
     mousewheel: { forceToAxis: true },
   };
-
-  
 
 
   return (
@@ -71,12 +73,12 @@ function Index(
           enabled: true,
           onlyInViewport: false,
         }}
+     
         {...(transitionEvents && transitionEvents)}
         {...params}
         {...props}
-        slidesPerView='auto'
+        slidesPerView="auto"
       >
-        {" "}
         {children}
       </Swiper>
       <Backward

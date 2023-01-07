@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Shimmer from "./shimmer";
 
@@ -23,13 +23,13 @@ const ProgressiveImage = ({original, preview, style,onFetch, ...props }) => {
 
   const [loading, setLoading] = useState(true);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
   
     setUrl(current);
      onFetch?.(current);
   }, [current, onFetch]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!original) return;
     setLoading(true);
     const img = new Image();

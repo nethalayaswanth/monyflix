@@ -22,6 +22,8 @@ import { useIsFetching } from "react-query";
 import { ModalProvider, useModalState } from "./contexts/modalContext";
 import useMedia from "./hooks/useMedia";
 import usePrevious from "./hooks/usePrevious";
+import { TrailSection } from "./components/Section/trail";
+import { useScroll } from "./hooks/useScroll";
 
 const Watch = lazy(() => import("./components/watch"));
 
@@ -36,7 +38,8 @@ function App() {
 
   const fetchingParamMovieData = isFetchingMovie || isFetchingMovieVideos;
 
-  const [paramMovieDataFetched] = usePrevious(fetchingParamMovieData);
+  const paramMovieDataFetched = usePrevious(fetchingParamMovieData);
+  
   const queryEnabled = paramMovieDataFetched || !param;
 
   const {
@@ -74,6 +77,8 @@ function App() {
     dispatch({ type: "set enabled", enabled: !scroll });
   }, [dispatch, expand, expanded, mobile, scroll]);
 
+
+  useScroll()
   useGesture(
     {
       onScrollStart: (state) => {
@@ -85,7 +90,6 @@ function App() {
     },
     {
       target: window,
-
       eventOptions: { passive: true },
     }
   );
@@ -236,8 +240,6 @@ function App() {
 const Index = () => {
   let location = useLocation();
   let state = location?.state;
-
-  const browse = useMatch("/browse");
 
   const bg = state?.backgroundState || location;
 

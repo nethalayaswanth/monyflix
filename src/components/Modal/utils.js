@@ -55,14 +55,8 @@ export const getExpandStyles = ({
   miniTop,
 }) => {
   const w = document.body.clientWidth;
-
-  
   const lastWidth = w >= 850 ? 850 : w<=630?w: w-2*16;
   const lastHeight = 850;
-  
-
- 
-
   const scale=miniWidth/lastWidth
   const translateX = miniLeft - document.body.clientWidth / 2 + miniWidth / 2;
  

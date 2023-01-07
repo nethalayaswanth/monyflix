@@ -1,15 +1,16 @@
-
-
 import React, { memo, useCallback, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useInView } from "react-intersection-observer";
 import styled from "styled-components";
 import {
-  useMovies, useMoviesByGenre, useTrendingMovies
+  useMovies,
+  useMoviesByGenre,
+  useTrendingMovies,
 } from "../../requests/requests";
 import Carousel from "../Carousel";
 import Divider from "../Divider";
 import Header from "../Header";
+import TrailCarousel from "../Carousel/trailCarousel";
 
 const Container = styled.div`
   width: 100%;
@@ -41,7 +42,7 @@ export const Wrapper = memo(
       <Container ref={refCb}>
         <Header title={title} />
         <div style={{ position: "relative", marginBottom: "20px" }}>
-          <Carousel
+          <TrailCarousel
             data={data}
             loading={isLoading}
             hasMore={hasNextPage}
@@ -50,7 +51,7 @@ export const Wrapper = memo(
             {...props}
           >
             {children && children}
-          </Carousel>
+          </TrailCarousel>
         </div>
         <Divider />
       </Container>
@@ -59,9 +60,6 @@ export const Wrapper = memo(
 );
 
 export default Wrapper;
-
-
-
 
 export const SectionWrapper = ({
   query,
@@ -81,18 +79,19 @@ export const SectionWrapper = ({
     triggerOnce: true,
   });
 
-  const refCb=useCallback((node)=>{
+  const refCb = useCallback(
+    (node) => {
+      if (node) {
+        inViewRef(node);
+      }
+    },
+    [inViewRef]
+  );
 
-    if(node){
-      inViewRef(node)
-    }
-  },[inViewRef])
-
-  
   const useQuery = useMemo(() => queryHandlers[query], [query]);
-  
-  const details=card==='detail'
-  const fetchQuery = whileInView ? (!!queryEnabled && inView) : !!queryEnabled;
+
+  const details = card === "detail";
+  const fetchQuery = whileInView ? !!queryEnabled && inView : !!queryEnabled;
   const {
     data,
     error,
@@ -118,7 +117,7 @@ export const SectionWrapper = ({
       return list;
     }
     return [];
-  }, [data]); 
+  }, [data]);
 
   return (
     <Wrapper
@@ -142,7 +141,7 @@ export const SectionWrapper = ({
   );
 };
 
-export const Section = memo((props) => {
+export const TrailSection = memo((props) => {
   return (
     <ErrorBoundary
       fallbackRender={({ resetErrorBoundary, error }) => {
@@ -158,5 +157,3 @@ export const Section = memo((props) => {
     </ErrorBoundary>
   );
 });
-
-

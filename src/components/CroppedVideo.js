@@ -1,9 +1,23 @@
 import useMedia from "../hooks/useMedia";
-import { Overlay, Wrapper } from "./Landing/styles";
+import { Overlay } from "./Landing/styles";
+import styled from "styled-components";
+
+
+export const Wrapper = styled.div`
+  -o-object-fit: cover;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;`
+
+
 const Video = ({style, show, children, crop = true }) => {
   const device = useMedia();
 
-  const mobile = device === "mobile";
+ 
   const desktop = device === "desktop";
 
   return (
@@ -19,7 +33,6 @@ const Video = ({style, show, children, crop = true }) => {
       >
         {show && (
           <>
-            {" "}
             <Overlay />
           </>
         )}
@@ -35,7 +48,7 @@ const Video = ({style, show, children, crop = true }) => {
             justifyContent: "center",
             zIndex: 2,
             aspectRatio: 16 / 9,
-            height: "calc(150% )",
+            height: "calc(150%)",
           }}
         >
           <div

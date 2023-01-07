@@ -1,8 +1,4 @@
-import React, {
-  cloneElement,
-  useEffect, useRef,
-  useState
-} from "react";
+import React, { cloneElement, useEffect, useRef, useState } from "react";
 import { SwiperSlide } from "swiper/react";
 
 import { useHover } from "@use-gesture/react";
@@ -17,8 +13,29 @@ import ThumbnailCard from "../Cards/thumbNailCard";
 import Swiperjs from "./swiper";
 import { SwiperWrapper } from "./views";
 import SwiperTrail from "./trail";
+import styled from "styled-components";
 
-const DEFAULTBREAKPOINTS = [1500, 1350, 1000, 740, 480,420];
+
+const Slide = styled.div`
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+`;
+
+
+
+const DEFAULTBREAKPOINTS = [1500, 1350, 1000, 740, 480, 420];
 const DEFAULTVALUES = [8, 7, 6, 5, 3, 2];
 const DEFAULTVALUE = 2;
 const DEFAULTMARGIN = 10;
@@ -32,7 +49,7 @@ export const Cards = {
   landscape: <LandscapeCard />,
 };
 
-export default function Carousel({
+export default function TrailCarousel({
   data,
   loading,
   style,
@@ -66,6 +83,7 @@ export default function Carousel({
 
   useEffect(() => {
     if (data === undefined || isFetching) return;
+
     if (visible && hasMore) {
       fetchMore();
     }
@@ -125,7 +143,7 @@ export default function Carousel({
         endPadding={endPadding}
         padding={padding}
       >
-        <Swiperjs
+        <SwiperTrail
           ref={swiper}
           transitionEvents={transitionEvents}
           enabled={enabled || !activated}
@@ -140,12 +158,14 @@ export default function Carousel({
               {data.map((current, index) => {
                 const first = index === 0;
                 const last = index === data.length - 1;
- return (
-                  <SwiperSlide
+
+                return (
+                  <Slide
                     style={{
                       width: `calc((100% - 2 *  ${
                         !desktop ? padding : 0
                       }px  - ${value - 1} * ${margin}px) / ${value})`,
+                      
                     }}
                     key={`${index}`}
                   >
@@ -156,11 +176,11 @@ export default function Carousel({
                           index,
                           onClick,
                         })}
-                  </SwiperSlide>
+                  </Slide>
                 );
               })}
-              {hasMore && !loading && (
-                <SwiperSlide
+              {hasMore && !loading ? (
+                <Slide
                   style={{
                     width: `calc((100% - 2 * ${!desktop ? padding : 0}px  - ${
                       value - 1
@@ -179,15 +199,15 @@ export default function Carousel({
                   {children
                     ? children({ ref: elRef, onClick })
                     : cloneElement(component, { ref: elRef, onClick })}
-                </SwiperSlide>
-              )}
+                </Slide>
+              ):null}
             </>
           ) : (
             placeHolder.map((data, index) => {
               const first = index === 0;
               const last = index === placeHolder.length - 1;
               return (
-                <SwiperSlide
+                <Slide
                   style={{
                     width: `calc((100% - 2 *  ${!desktop ? padding : 0}px  - ${
                       value - 1
@@ -209,11 +229,11 @@ export default function Carousel({
                   {children
                     ? children({ data, index, onClick })
                     : cloneElement(component)}
-                </SwiperSlide>
+                </Slide>
               );
             })
           )}
-        </Swiperjs>
+        </SwiperTrail>
       </SwiperWrapper>
     </>
   );

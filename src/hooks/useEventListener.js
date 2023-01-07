@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import useLatest from "./useLatest";
 
 export default function useEventListener({
   event,
@@ -6,21 +7,17 @@ export default function useEventListener({
   options,
   element = window,
 }) {
-  const savedHandler = useRef();
-
-  useEffect(() => {
-    savedHandler.current = listener;
-  }, [listener]);
+  const savedHandler = useLatest(listener)
   useEffect(() => {
     const isSupported = element && element.addEventListener;
     if (!isSupported) return;
 
-    const eventListener = (event) => savedHandler.current(event);
+    const eventListener = (event) => savedHandler(event);
 
-    element.addEventListener(event, eventListener);
+    element.addEventListener(event, eventListener, options);
 
     return () => {
       element.removeEventListener(event, eventListener, options);
     };
-  }, [event, element, options]);
+  }, [event, element, options, savedHandler]);
 }

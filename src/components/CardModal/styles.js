@@ -258,3 +258,20 @@ export const Genres = styled.div`
     opacity: 0.8;
   }
 `;
+
+
+export const LoadingOverlay = styled.div`
+  position: absolute;
+              top: 0;
+              left: 0;
+              background: rgba(255,255,255,0.5);
+              opacity:${({ visible }) =>
+                visible ? 1 : 0};
+              transition: "opacity 0.3s";
+              height: 100%;
+              width: 100%;
+              pointerEvents: none;
+              zIndex: 100;
+`;
+
+export const Modal = { LoadingOverlay };

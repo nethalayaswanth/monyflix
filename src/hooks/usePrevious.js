@@ -10,12 +10,7 @@ export default function usePrevious(value) {
 
   const current = ref.current.value;
 
-const reset=useCallback(()=>{
-  ref.current = {
-    value: null,
-    prev: null,
-  }
-},[])
+
 
   if (value !== current) {
     ref.current = {
@@ -25,4 +20,4 @@ const reset=useCallback(()=>{
   }
 
   
-  return [ref.current.prev, reset];}
+  return ref.current.prev}

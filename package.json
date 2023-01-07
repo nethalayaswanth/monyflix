@@ -51,6 +51,7 @@
     ]
   },
   "devDependencies": {
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "use-resize-observer": "^9.1.0"
   }
 }

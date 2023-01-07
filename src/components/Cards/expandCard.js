@@ -105,18 +105,18 @@ const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
     if (top < 0) return;
 
     const timeOut = setTimeout(async () => {
-      dispatch({
-        type: "set modal",
-        payload: {
-          movie: movie,
-          parent: miniRef.current,
-          activate: true,
-          hovered: true,
-          open: true,
-          scroll: window.scrollY,
-        },
-      });
-    }, 200);
+      // dispatch({
+      //   type: "set modal",
+      //   payload: {
+      //     movie: movie,
+      //     parent: miniRef.current,
+      //     activate: true,
+      //     hovered: true,
+      //     open: true,
+      //     scroll: window.scrollY,
+      //   },
+      // });
+    }, 100);
 
     return () => {
       clearTimeout(timeOut);

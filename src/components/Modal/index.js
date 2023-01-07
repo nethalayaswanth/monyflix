@@ -2,6 +2,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
 import ExpandModal from "./expandModal";
+import TrailExpandModal from './trail'
 
 
 const Modal = () => {
@@ -19,8 +20,6 @@ const Modal = () => {
     <ErrorBoundary
       //onReset={reset}
       fallbackRender={({ resetErrorBoundary, error }) => {
-        
-
         return (
           <div>
             There was an error!
@@ -29,8 +28,8 @@ const Modal = () => {
         );
       }}
     >
-      {" "}
-      <ExpandModal />
+     
+      <TrailExpandModal />
     </ErrorBoundary>
   ) : null;
 

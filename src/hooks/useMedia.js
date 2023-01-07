@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 const breakpointsDefault = [740, 480, 300];
 
@@ -13,12 +13,12 @@ function useMedia({
   breakPoints = breakpointsDefault,
   breakPointValues = defaultValues,
   defaultValue = defaultvalue,
+
 } = {}) {
   const queries = queryStrings(breakPoints);
   const mediaQueryLists = queries.map((q) => window.matchMedia(q));
 
   const getValue = () => {
-   
     const index = mediaQueryLists.findIndex((mql) => mql.matches);
     return typeof breakPointValues[index] !== "undefined"
       ? breakPointValues[index]

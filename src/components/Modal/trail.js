@@ -1,6 +1,10 @@
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef,
-  useState
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
 } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
@@ -15,6 +19,8 @@ import CardModal from "../CardModal";
 
 import { useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
+import TrailModal from "../CardModal/trail";
+
 
 const Wrapper = styled.div`
   box-sizing: border-box;
@@ -26,9 +32,7 @@ const Wrapper = styled.div`
   will-change: scroll-position;
 `;
 
-const ExpandModal = ({}) => {
-
-  
+const TrailExpandModal = ({}) => {
   const portalEl = document.getElementById("root");
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,7 +47,8 @@ const ExpandModal = ({}) => {
       miniExpand,
       expand,
       miniExpanded,
-      hovered,clicked,
+      hovered,
+      clicked,
       expanded,
     },
     dispatch,
@@ -53,13 +58,13 @@ const ExpandModal = ({}) => {
 
   const [isHovering, setHovering] = useState();
 
-   const bind = useHover((state) => {
-     setHovering(state.hovering);
-   });
+  const bind = useHover((state) => {
+    setHovering(state.hovering);
+  });
 
-   const hoverAway = useHover((state) => {
-     setHovering(!state.hovering);
-   });
+  const hoverAway = useHover((state) => {
+    setHovering(!state.hovering);
+  });
 
   const prevActivated = usePrevious(activated);
   const prevMiniExpanded = usePrevious(miniExpanded);
@@ -89,27 +94,24 @@ const ExpandModal = ({}) => {
 
   const parentRect = useCallback(() => {
     if (!parentRef) return null;
-    const parentEl = parentRef;
-    return parentEl.getBoundingClientRect();
+    return parentRef.getBoundingClientRect();
   }, [parentRef]);
+
 
   const [show, setShow] = useState();
 
   const mini = miniExpand && !prevMiniExpand;
 
-
-
   useLayoutEffect(() => {
     if (param && !expand) {
-      
       miniRectMesureRef.current = modalRef?.current?.getBoundingClientRect();
       const main = document.getElementById("app");
       bodyStyleRef.current = document.body.style;
       const scroll = window.scrollY;
       scrollRef.current = window.scrollY;
       if (!mini) {
-       main.style.top = `-${scroll}px`;
-       main.style.position = "fixed";
+        main.style.top = `-${scroll}px`;
+        main.style.position = "fixed";
         document.body.style.overflowY = "scroll";
       }
       setShow(true);
@@ -179,28 +181,23 @@ const ExpandModal = ({}) => {
     };
   });
 
-   useLayoutEffect(() => {
-     if (!prevActivate && activate) {
-       dispatch({ type: "set modal",payload: {activated: true} });
-       return;
-     }
-     if (prevActivate && !activate) {
-       dispatch({
-         type: "set modal",
-         payload: { miniExpand: false },
-       });
-       return;
-     }
-   }, [prevActivate, activate, dispatch]);
-
-  
+  useLayoutEffect(() => {
+    if (!prevActivate && activate) {
+      dispatch({ type: "set modal", payload: { activated: true } });
+      return;
+    }
+    if (prevActivate && !activate) {
+      dispatch({
+        type: "set modal",
+        payload: { miniExpand: false },
+      });
+      return;
+    }
+  }, [prevActivate, activate, dispatch]);
 
   useLayoutEffect(() => {
-    
     if (expanded) {
-
-      const  miniTop = miniRectMesureRef.current?.top;
-    
+      const miniTop = miniRectMesureRef.current?.top;
 
       api.start({
         to: async (animate) => {
@@ -227,8 +224,6 @@ const ExpandModal = ({}) => {
     if (!parentRef) return;
 
     if (miniExpand && !prevMiniExpand) {
-
-    
       const {
         fromHeight,
         fromWidth,
@@ -242,7 +237,6 @@ const ExpandModal = ({}) => {
 
       api.start({
         to: async (animate) => {
-          const show = miniExpand;
 
           await animate({
             to: {
@@ -250,7 +244,7 @@ const ExpandModal = ({}) => {
               x: X,
               y: Y,
               minifade: 0.5,
-              fade:1
+              fade: 1,
             },
             from: {
               width: fromWidth,
@@ -261,10 +255,10 @@ const ExpandModal = ({}) => {
               left: fromLeft,
               top: fromTop,
               minifade: 0,
-              fade:0,
+              fade: 0,
               transformOrigin: "center center",
             },
-            config: { tension: 100 },
+            config: { tension: 100, friction: 15, clamp: true },
           }).then(() => {
             dispatch({ type: "set miniExpanded", miniExpanded: miniExpand });
           });
@@ -283,9 +277,9 @@ const ExpandModal = ({}) => {
               x: 0,
               y: 0,
               minifade: 1,
-              fade:0
+              fade: 0,
             },
-            config: { tension: 300, mass: 3, clamp: true },
+            config: { tension: 100, mass: 1, clamp: true },
           }).then(() => {
             dispatch({ type: "set reset" });
           });
@@ -318,10 +312,12 @@ const ExpandModal = ({}) => {
   useLayoutEffect(() => {
     if (expand && miniExpand && modalRef.current) {
       const main = document.getElementById("app");
-      requestAnimationFrame(()=>{ main.style.top = `-${scrollRef.current}px`;
-      main.style.position = "fixed";
-      document.body.style.overflowY = "scroll";})
-     
+      requestAnimationFrame(() => {
+        main.style.top = `-${scrollRef.current}px`;
+        main.style.position = "fixed";
+        document.body.style.overflowY = "scroll";
+      });
+
       return;
     }
 
@@ -330,14 +326,11 @@ const ExpandModal = ({}) => {
     }
   }, [expand, miniExpand, parentRef]);
 
- 
-
   useLayoutEffect(() => {
     if (!miniRectMesureRef.current || !parentRef) return;
     const l = JSON.parse(JSON.stringify(miniRectMesureRef.current));
 
     if (expand && !expanded) {
-       
       const {
         width: miniWidth,
         height: miniHeight,
@@ -374,7 +367,7 @@ const ExpandModal = ({}) => {
               opacity: 1,
               fade: 1,
               progress: 1,
-              minifade:0.5
+              minifade: 0.5,
             },
             config: { tension: 100, clamp: true },
           }).then((r) => {
@@ -398,7 +391,6 @@ const ExpandModal = ({}) => {
     }
 
     if (!expand && expanded) {
-     
       const modal = modalRef.current.getBoundingClientRect();
       const parent = parentRef.getBoundingClientRect();
       const { top: miniTop } = miniRectMesureRef.current;
@@ -410,7 +402,9 @@ const ExpandModal = ({}) => {
 
       const body = document.getElementsByTagName("BODY")[0];
       let bodystyle = body.style;
-      requestAnimationFrame(() => {body.style.overflowY = "scroll";});
+      requestAnimationFrame(() => {
+        body.style.overflowY = "scroll";
+      });
       api.start({
         to: async (animate) => {
           await animate({
@@ -420,10 +414,10 @@ const ExpandModal = ({}) => {
                 y: cy,
                 scaleY: csX,
                 scaleX: csX,
-                progress:0,
+                progress: 0,
                 opacity: 0,
                 fade: 0,
-                minifade:1
+                minifade: 1,
               },
             ],
             config: { tension: 35, mass: 3, clamp: true, friction: 1 },
@@ -475,10 +469,9 @@ const ExpandModal = ({}) => {
                 scaleY: 1,
                 x: 0,
                 opacity: 1,
-                progress:1,
-                minifade:0.5,
-                fade:1,
-
+                progress: 1,
+                minifade: 0.5,
+                fade: 1,
               },
             ],
             config: { tension: 500, mass: 5, clamp: true },
@@ -501,9 +494,9 @@ const ExpandModal = ({}) => {
           left: "auto",
           transformOrigin: "50% 12.5%",
           opacity: 0,
-          progress:0,
-          minifade:0,
-          fade:0
+          progress: 0,
+          minifade: 0,
+          fade: 0,
         },
       });
       return;
@@ -520,9 +513,9 @@ const ExpandModal = ({}) => {
                 scaleY: 0.8,
                 scaleX: 0.8,
                 opacity: 0,
-                progress:0,
-                minifade:1,
-                fade:1
+                progress: 0,
+                minifade: 1,
+                fade: 1,
               },
             ],
             config: { tension: 170, mass: 3, clamp: true, friction: 1 },
@@ -561,9 +554,6 @@ const ExpandModal = ({}) => {
     setSearchParams,
   ]);
 
- 
-
-
   useLayoutEffect(() => {
     return () => {
       dispatch({
@@ -573,10 +563,8 @@ const ExpandModal = ({}) => {
     };
   }, [dispatch]);
 
-
-
   const full = expand || expanded;
-  
+
   return activated || full
     ? createPortal(
         <Wrapper style={{ ...(full && { height: "100%", width: "100%" }) }}>
@@ -595,13 +583,13 @@ const ExpandModal = ({}) => {
               scaleY,
               scaleX,
               left,
-              
+
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",
             }}
           >
-            <CardModal
+            <TrailModal
               width={width}
               progress={progress}
               fade={fade}
@@ -628,4 +616,4 @@ const ExpandModal = ({}) => {
     : null;
 };
 
-export default memo(ExpandModal);
+export default memo(TrailExpandModal);
