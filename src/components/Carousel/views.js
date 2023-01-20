@@ -61,7 +61,7 @@ export const SwiperWrapper = styled.div`
     justify-content: center;
     position: relative;
 
-    &:last-child {
+/* &:last-child {
       margin-right: ${({ desktop, padding = 20, endPadding }) =>
         endPadding
           ? `calc(100% - 2 * ${padding}px)`
@@ -72,7 +72,7 @@ export const SwiperWrapper = styled.div`
 
     &:first-child {
       margin-left: ${({ desktop, padding = 20 }) => !desktop && `${padding}px`};
-    }
+    } */
   }
 `;
 

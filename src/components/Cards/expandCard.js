@@ -1,6 +1,7 @@
 import React, {
   forwardRef,
   useCallback,
+  useLayoutEffect,
   useEffect,
   useRef,
   useState,
@@ -62,6 +63,34 @@ const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
 
   const miniRef = useRef();
   const [isHovering, setHovering] = useState();
+  const timeOutRef=useRef()
+  const handleHovering=useCallback(()=>{
+
+     if (!isHovering || activated || !enabled || !desktop || !movie) return;
+
+     const { top } = miniRef.current.getBoundingClientRect();
+
+     if (top < 0) return;
+      if (timeOutRef.current) {
+        clearTimeout(timeOutRef.current);
+      }
+
+     timeOutRef.current = setTimeout(async () => {
+       dispatch({
+         type: "set modal",
+         payload: {
+           movie: movie,
+           parent: miniRef.current,
+           activate: true,
+           hovered: true,
+           mini:true,
+           open: true,
+           scroll: window.scrollY,
+         },
+       });
+     }, 100);
+  },[activated, desktop, dispatch, enabled, isHovering, movie])
+
   const bind = useHover((state) => {
     if (movie) {
       setHovering(state.hovering);
@@ -95,31 +124,32 @@ const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
     enabled: movie?.id,
   });
 
-  useEffect(() => {
-    if (isHovering === undefined || activated || !enabled || !desktop || !movie)
+  useLayoutEffect(() => {
+    if (!isHovering || activated || !enabled || !desktop || !movie)
       return;
-    if (!isHovering) return;
 
     const { top } = miniRef.current.getBoundingClientRect();
 
     if (top < 0) return;
 
-    const timeOut = setTimeout(async () => {
-      // dispatch({
-      //   type: "set modal",
-      //   payload: {
-      //     movie: movie,
-      //     parent: miniRef.current,
-      //     activate: true,
-      //     hovered: true,
-      //     open: true,
-      //     scroll: window.scrollY,
-      //   },
-      // });
+     timeOutRef.current = setTimeout(async () => {
+      dispatch({
+        type: "set modal",
+        payload: {
+          movie: movie,
+          parent: miniRef.current,
+          activate: true,
+          hovered: true,
+          open: true,
+          mini:true,
+          scroll: window.scrollY,
+        },
+      });
     }, 100);
 
     return () => {
-      clearTimeout(timeOut);
+      if (timeOutRef.current){
+       clearTimeout(timeOutRef.current);}
     };
   }, [dispatch, isHovering, activated, desktop, movie, enabled]);
 
@@ -150,7 +180,7 @@ export const CardHolder = ({ style, index }) => {
         marginBottom: "8px",
         overflow: "hidden",
         borderRadius: "6px",
-        width: "200px",
+       // width: "200px",
         ...style,
       }}
       potrait

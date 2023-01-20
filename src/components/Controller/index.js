@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
 import styled from "styled-components";
 import { ReactComponent as Arrow } from "../../assets/prev.svg";
@@ -53,10 +53,10 @@ const Next = styled(NavButton)`
 
 
 
-export const Backward = ({ next = false, onClick, disable,visible,dark,style }) => {
+export const Backward = forwardRef(({ next = false, onClick, disable,visible,dark,style },ref) => {
   
   return (
-    <Prev style={{ ...style,backgroundColor:dark?"transparent":"white" }} onClick={onClick}>
+    <Prev ref={ref} style={{ ...style,backgroundColor:dark?"transparent":"white" }} onClick={onClick}>
       <Svg
         className="controller"
         style={{
@@ -67,12 +67,13 @@ export const Backward = ({ next = false, onClick, disable,visible,dark,style }) 
       />
     </Prev>
   );
-}; 
+})
 
 
-export const Forward = ({ next = false, onClick, disable, visible, dark, style  }) => {
+export const Forward = forwardRef(({ next = false, onClick, disable, visible, dark, style  },ref) => {
   return (
     <Next
+    ref={ref}
       style={{ ...style, backgroundColor: dark ? "transparent" : "white" }}
       onClick={onClick}
     >
@@ -85,7 +86,7 @@ export const Forward = ({ next = false, onClick, disable, visible, dark, style  
         }}
       />
     </Next>
-  );
-}; 
+  )
+}) 
 
 

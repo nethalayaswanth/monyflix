@@ -14,7 +14,6 @@ function useDevice({
   defaultValue = defaultvalue,
   observeDimensions=false,
   ref = document.body,
-
 } = {}) {
 
 const [value, setValue] = useState(defaultValue);
@@ -22,7 +21,6 @@ const [value, setValue] = useState(defaultValue);
     ref,
     onResize:
       ({ width,height }) => {
-     
         for (let i = 0; i < breakPoints.length; i++) {
           if (width <= breakPoints) {
             setValue(breakPointValues[i]);

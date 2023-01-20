@@ -17,6 +17,8 @@ const VideoContainer = styled.div`
   position: relative;
   z-index: 1;
   display: flex;
+  justify-content:center;
+  align-items:center
 `;
 
 export function Youtube({
@@ -110,20 +112,24 @@ export function Youtube({
 
   const styles = useMemo(() => {
     return {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      ...(!full && { pointerEvents: "none" }),
-      opacity: show || light ? 1 : 0,
-      transition: "opacity 0.5s",
-      overflow: "hidden",
-      aspectRatio: 16 / 9,
-      ...style,
+       position: "absolute",
+      // top: 0,
+       left: 0,
+      // ...(!full && { pointerEvents: "none" }),
+      // opacity: show || light ? 1 : 0,
+      // transition: "opacity 0.5s",
+      // overflow: "hidden",
+      
+      // aspectRatio: 16 / 9,
+      // ...style,
+
+      
     };
   }, [full, show, light, style]);
 
   return (
-    <VideoContainer ref={wrapperRefCb} playerstyle={style}>
+    <VideoContainer ref={wrapperRefCb} >
+     
       <ReactPlayer
         className="react-player"
         ref={playerRefCb}
@@ -141,8 +147,8 @@ export function Youtube({
         onSeek={onSeek}
         onError={onError}
         style={styles}
-        width="100%"
-        height="100%"
+        width={"100%"}
+        height={"200%"}
         playIcon={
           <BsFillPlayFill
             fill={"white"}
@@ -163,7 +169,8 @@ export function Youtube({
               loop: 1,
               modestbranding: 1,
               playlist: id,
-              host: `${window.location.protocol}//www.youtube.com`,
+
+              // host: `${window.location.protocol}//www.youtube.com`,
             },
           },
         }}

@@ -45,6 +45,7 @@ const TrailExpandModal = ({}) => {
       parent: parentRef,
       activated,
       miniExpand,
+      mini,
       expand,
       miniExpanded,
       hovered,
@@ -60,10 +61,32 @@ const TrailExpandModal = ({}) => {
 
   const bind = useHover((state) => {
     setHovering(state.hovering);
+    console.log(state)
   });
 
   const hoverAway = useHover((state) => {
-    setHovering(!state.hovering);
+
+
+    if (state.hovering) {
+      const { fromWidth ,fromHeight} = miniHoverStyles();
+      api.start({
+        to: async (animate) => {
+          await animate({
+            to: {
+              width: fromWidth,
+              height:fromHeight,
+              x: 0,
+              y: 0,
+              minifade: 1,
+              fade: 0,
+            },
+            config: { tension: 100, mass: 1, clamp: true },
+          }).then(() => {
+            dispatch({ type: "set reset" });
+          });
+        },
+      });
+    }
   });
 
   const prevActivated = usePrevious(activated);
@@ -72,6 +95,8 @@ const TrailExpandModal = ({}) => {
   const prevExpand = usePrevious(expand);
   const prevMiniExpand = usePrevious(miniExpand);
   const prevActivate = usePrevious(activate);
+
+   const prevMini = usePrevious(mini);
 
   const wrapref = useRef();
 
@@ -100,7 +125,7 @@ const TrailExpandModal = ({}) => {
 
   const [show, setShow] = useState();
 
-  const mini = miniExpand && !prevMiniExpand;
+  const min = miniExpand && !prevMiniExpand;
 
   useLayoutEffect(() => {
     if (param && !expand) {
@@ -109,7 +134,7 @@ const TrailExpandModal = ({}) => {
       bodyStyleRef.current = document.body.style;
       const scroll = window.scrollY;
       scrollRef.current = window.scrollY;
-      if (!mini) {
+      if (!min) {
         main.style.top = `-${scroll}px`;
         main.style.position = "fixed";
         document.body.style.overflowY = "scroll";
@@ -117,7 +142,7 @@ const TrailExpandModal = ({}) => {
       setShow(true);
     }
     if (!param && expanded) dispatch({ type: "set expand", expand: false });
-  }, [expand, dispatch, param, expanded, mini]);
+  }, [expand, dispatch, param, expanded, min]);
 
   useEffect(() => {
     if (show) {
@@ -125,13 +150,13 @@ const TrailExpandModal = ({}) => {
     }
   }, [dispatch, show]);
 
-  useLayoutEffect(() => {
-    if (isHovering || isHovering === undefined) return;
+  // useLayoutEffect(() => {
+  //   if (isHovering || isHovering === undefined) return;
 
-    if (expand || expanded) return;
+  //   if (expand || expanded) return;
 
-    dispatch({ type: "set activate", activate: false });
-  }, [dispatch, expand, expanded, isHovering]);
+  //   dispatch({ type: "set modal", payload: { mini: false} });
+  // }, [dispatch, expand, expanded, isHovering]);
 
   const refCb = useCallback((node) => {
     if (!node) return;
@@ -162,38 +187,75 @@ const TrailExpandModal = ({}) => {
     },
     api,
   ] = useSpring(() => {
+     const {
+        fromHeight,
+        fromWidth,
+        fromTop,
+        fromLeft,
+        X,
+        Y,
+        toWidth,
+        toHeight,
+      } = miniHoverStyles();
+
+    
     return {
+      // to: {
+      //   width: toWidth,
+      //   height:toHeight,
+      //   x: X,
+      //   y: Y,
+      //   minifade: 0.5,
+      //   fade: 1,
+      // },
       from: {
-        width: 0,
-        height: 0,
+        width: fromWidth,
         scaleY: 1,
         scaleX: 1,
-        left: 0,
-        top: 0,
+        height:fromHeight,
         x: 0,
         y: 0,
-        transformOrigin: "center center",
-        opacity: 0,
-        fade: 0,
+        left: fromLeft,
+        top: fromTop,
         minifade: 0,
-        progress: 0,
+        fade: 0,
+        transformOrigin: "center center",
       },
+      config: { tension: 100, friction: 15, clamp: true },
     };
+           
+    // return {
+    //   from: {
+    //     width: 0,
+    //     height: 0,
+    //     scaleY: 1,
+    //     scaleX: 1,
+    //     left: 0,
+    //     top: 0,
+    //     x: 0,
+    //     y: 0,
+    //     transformOrigin: "center center",
+    //     opacity: 0,
+    //     fade: 0,
+    //     minifade: 0,
+    //     progress: 0,
+    //   },
+    // };
   });
 
-  useLayoutEffect(() => {
-    if (!prevActivate && activate) {
-      dispatch({ type: "set modal", payload: { activated: true } });
-      return;
-    }
-    if (prevActivate && !activate) {
-      dispatch({
-        type: "set modal",
-        payload: { miniExpand: false },
-      });
-      return;
-    }
-  }, [prevActivate, activate, dispatch]);
+  // useLayoutEffect(() => {
+  //   if (!prevActivate && activate) {
+  //     dispatch({ type: "set modal", payload: { activated: true } });
+  //     return;
+  //   }
+  //   if (prevActivate && !activate) {
+  //     dispatch({
+  //       type: "set modal",
+  //       payload: { miniExpand: false },
+  //     });
+  //     return;
+  //   }
+  // }, [prevActivate, activate, dispatch]);
 
   useLayoutEffect(() => {
     if (expanded) {
@@ -219,91 +281,116 @@ const TrailExpandModal = ({}) => {
     }
   }, [screen, api, expanded]);
 
-  useLayoutEffect(() => {
-    if (!activated) return;
-    if (!parentRef) return;
+   useLayoutEffect(() => {
+    //  if (!activated) return;
+     if (!parentRef) return;
 
-    if (miniExpand && !prevMiniExpand) {
-      const {
-        fromHeight,
-        fromWidth,
-        fromTop,
-        fromLeft,
-        X,
-        Y,
-        toWidth,
-        toHeight,
-      } = miniHoverStyles();
+     if (!mini && prevMini) {
+       const { fromWidth } = miniHoverStyles();
+       api.start({
+         to: async (animate) => {
+           await animate({
+             to: {
+               width: fromWidth,
+               x: 0,
+               y: 0,
+               minifade: 1,
+               fade: 0,
+             },
+             config: { tension: 100, mass: 1, clamp: true },
+           }).then(() => {
+             dispatch({ type: "set reset" });
+           });
+         },
+       });
+     }
+   }, [activated, api, dispatch, mini, miniExpand, miniHoverStyles, parentRef, prevMini, prevMiniExpand]);
 
-      api.start({
-        to: async (animate) => {
+  // useLayoutEffect(() => {
+  //   if (!activated) return;
+  //   if (!parentRef) return;
 
-          await animate({
-            to: {
-              width: toWidth,
-              x: X,
-              y: Y,
-              minifade: 0.5,
-              fade: 1,
-            },
-            from: {
-              width: fromWidth,
-              scaleY: 1,
-              scaleX: 1,
-              x: 0,
-              y: 0,
-              left: fromLeft,
-              top: fromTop,
-              minifade: 0,
-              fade: 0,
-              transformOrigin: "center center",
-            },
-            config: { tension: 100, friction: 15, clamp: true },
-          }).then(() => {
-            dispatch({ type: "set miniExpanded", miniExpanded: miniExpand });
-          });
-        },
-      });
-    }
+  //   if (miniExpand && !prevMiniExpand) {
+  //     const {
+  //       fromHeight,
+  //       fromWidth,
+  //       fromTop,
+  //       fromLeft,
+  //       X,
+  //       Y,
+  //       toWidth,
+  //       toHeight,
+  //     } = miniHoverStyles();
 
-    if (!miniExpand && prevMiniExpand) {
-      const { fromWidth } = miniHoverStyles();
+  //     api.start({
+  //       to: async (animate) => {
 
-      api.start({
-        to: async (animate) => {
-          await animate({
-            to: {
-              width: fromWidth,
-              x: 0,
-              y: 0,
-              minifade: 1,
-              fade: 0,
-            },
-            config: { tension: 100, mass: 1, clamp: true },
-          }).then(() => {
-            dispatch({ type: "set reset" });
-          });
-        },
-      });
-    }
-  }, [
-    activated,
-    api,
-    dispatch,
-    miniExpand,
-    miniHoverStyles,
-    parentRef,
-    prevMiniExpand,
-  ]);
+  //         await animate({
+  //           to: {
+  //             width: toWidth,
+  //             x: X,
+  //             y: Y,
+  //             minifade: 0.5,
+  //             fade: 1,
+  //           },
+  //           from: {
+  //             width: fromWidth,
+  //             scaleY: 1,
+  //             scaleX: 1,
+  //             x: 0,
+  //             y: 0,
+  //             left: fromLeft,
+  //             top: fromTop,
+  //             minifade: 0,
+  //             fade: 0,
+  //             transformOrigin: "center center",
+  //           },
+  //           config: { tension: 100, friction: 15, clamp: true },
+  //         }).then(() => {
+  //           dispatch({ type: "set miniExpanded", miniExpanded: miniExpand });
+  //         });
+  //       },
+  //     });
+  //   }
 
-  useLayoutEffect(() => {
-    if (!prevActivated && activated && parentRef && hovered && !clicked) {
-      dispatch({
-        type: "set miniExpand",
-        miniExpand: true,
-      });
-    }
-  }, [activated, clicked, dispatch, hovered, parentRef, prevActivated]);
+  //   if (!miniExpand && prevMiniExpand) {
+  //     const { fromWidth } = miniHoverStyles();
+
+  //     api.start({
+  //       to: async (animate) => {
+  //         await animate({
+  //           to: {
+  //             width: fromWidth,
+  //             x: 0,
+  //             y: 0,
+  //             minifade: 1,
+  //             fade: 0,
+  //           },
+  //           config: { tension: 100, mass: 1, clamp: true },
+  //         }).then(() => {
+  //           dispatch({ type: "set reset" });
+  //         });
+  //       },
+  //     });
+  //   }
+  // }, [
+  //   activated,
+  //   api,
+  //   dispatch,
+  //   miniExpand,
+  //   miniHoverStyles,
+  //   parentRef,
+  //   prevMiniExpand,
+  // ]);
+
+  // useLayoutEffect(() => {
+  //   if (!prevActivated && activated && parentRef && hovered && !clicked) {
+  //     dispatch({
+  //       type: "set miniExpand",
+  //       miniExpand: true,
+  //     });
+  //   }
+  // }, [activated, clicked, dispatch, hovered, parentRef, prevActivated]);
 
   const miniRectMesureRef = useRef();
   const miniTranslateY = useRef();
@@ -328,8 +415,7 @@ const TrailExpandModal = ({}) => {
 
   useLayoutEffect(() => {
     if (!miniRectMesureRef.current || !parentRef) return;
-    const l = JSON.parse(JSON.stringify(miniRectMesureRef.current));
-
+  
     if (expand && !expanded) {
       const {
         width: miniWidth,
@@ -548,7 +634,6 @@ const TrailExpandModal = ({}) => {
     api,
     expanded,
     parentRef,
-
     param,
     searchParams,
     setSearchParams,
@@ -564,8 +649,12 @@ const TrailExpandModal = ({}) => {
   }, [dispatch]);
 
   const full = expand || expanded;
+  const modal = mini || expand;
 
-  return activated || full
+  console.log({mini, top, width, x, y, scaleY, scaleX, left});
+
+
+  return modal || full
     ? createPortal(
         <Wrapper style={{ ...(full && { height: "100%", width: "100%" }) }}>
           <animated.div
@@ -583,7 +672,6 @@ const TrailExpandModal = ({}) => {
               scaleY,
               scaleX,
               left,
-
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",
@@ -594,6 +682,7 @@ const TrailExpandModal = ({}) => {
               progress={progress}
               fade={fade}
               minifade={minifade}
+              miniHeight={height}
             />
           </animated.div>
           <animated.div

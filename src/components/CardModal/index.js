@@ -518,7 +518,7 @@ const CardModal = forwardRef(
                         </>
                       )}
                     </Content>
-                    {(expand || expanded) && (
+                    {/* {(expand || expanded) && (
                       <div
                         style={{
                           flexGrow: 2,
@@ -586,7 +586,7 @@ const CardModal = forwardRef(
                           )}
                         </>
                       </div>
-                    )}
+                    )} */}
                   </>
                 }
               </animated.div>

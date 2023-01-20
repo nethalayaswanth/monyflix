@@ -12,10 +12,11 @@ import {
   videosById
 } from "./queries";
 
-const endpoint =
-  process.env.NODE_ENV !== "production"
-    ? `${process.env.REACT_APP_BASE_ENDPOINT}`
-    : `${process.env.REACT_APP_BASE_ENDPOINT}`;
+const endpoint = `https://movies-server-eta.vercel.app`;
+
+ // process.env.NODE_ENV !== "production"
+  //  ? `${process.env.REACT_APP_BASE_ENDPOINT}`
+  //  : `${process.env.REACT_APP_BASE_ENDPOINT}`;
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {

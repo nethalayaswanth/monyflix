@@ -57,7 +57,7 @@ const Youtube = lazy(() => {
   return import("../Youtube");
 });
 const TrailModal = forwardRef(
-  ({ style, width, fade, progress, minifade }, ref) => {
+  ({ style, width, miniHeight, fade, progress, minifade }, ref) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const param = searchParams.get("mv");
@@ -72,6 +72,7 @@ const TrailModal = forwardRef(
         activated,
         miniExpand,
         miniExpanded,
+        mini,
         expand,
         expanded,
         details,
@@ -310,13 +311,89 @@ const TrailModal = forwardRef(
     return (
       <Suspense>
         <div style={{ position: "relative", height: "100%", width: "100%" }}>
-          <Modal.LoadingOverlay visible={isFetching && expanded}></Modal.LoadingOverlay>
-          <ModalWrapper
+          <Modal.LoadingOverlay
+            visible={isFetching && expanded}
+          ></Modal.LoadingOverlay>
+          <animated.div
+            style={{ height: miniHeight, backgroundColor: `white` }}
+          >
+            <AspectBox
+              style={{ position: "absolute", height: "100%", width: "100%" }}
+              potrait={!details}
+            >
+              <ProgressiveImage
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  Zindex: 5,
+                  background: "none",
+                }}
+                //original={posterPath}
+                preview={overlay}
+                alt={``}
+              />
+            </AspectBox>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                zIndex: 2,
+                aspectRatio: 19 / 10,
+              }}
+              ref={elRef}
+            >
+              <animated.div
+                style={{
+                  width,
+                  aspectRatio: 19 / 10,
+                  maxHeight: "min(800px,100vh)",
+                  zIndex: 2,
+                  position: "absolute",
+                  backgroundColor: "transparent",
+                }}
+              >
+                {videoId && (
+                  <Suspense fallback={<div></div>}>
+                    <Youtube
+                      id={videoId}
+                      light={false}
+                      play={true}
+                      audio={audio}
+                      cb={showCb}
+                      visible={inView}
+                    />
+                  </Suspense>
+                  // <Video show={show} crop={false}>
+
+                  // </Video>
+                )}
+                {/* {
+                  <>
+                    {(expand || expanded) && (
+                      <Button onClick={handleClose}>
+                        <Close style={{ fill: "white" }} />
+                      </Button>
+                    )}
+                    {show && (
+                      <Button
+                        onClick={handleAudio}
+                        style={{ bottom: 0, top: "auto" }}
+                      >
+                        <AudioControls audio={audio} />
+                      </Button>
+                    )}
+                  </>
+                } */}
+              </animated.div>
+            </div>
+          </animated.div>
+          {/* <ModalWrapper
             ref={ref}
             id="card-modal"
             style={{ 
-              
-              backgroundColor:
+                backgroundColor:
                 !miniExpand &&
                 expand &&
                 fade.to({  
@@ -366,7 +443,7 @@ const TrailModal = forwardRef(
                 width: "100%",
                 display: "flex",
                 flexDirection: "column",
-              aspectRatio:'2/3',
+                aspectRatio:'2/3',
                 opacity: fade.to({ range: [0, 0.4], output: [0, 1] }),
                 ...(expand && !desktop && { minHeight: "100vh" }),
                 // ...(!expand && { position: "absolute" }),
@@ -454,9 +531,9 @@ const TrailModal = forwardRef(
                   }),
                 }}
               >
-                {
-                  <>
-                    {/* <Content expand={expand} style={{}}>
+       {
+                  <>         
+                    <Content expand={expand} style={{}}>
                       <div
                         style={{
                           display: "flex",
@@ -509,8 +586,8 @@ const TrailModal = forwardRef(
                           </Open>
                         </>
                       )}
-                    </Content> */}
-                    {/* {(expand || expanded) && (
+                    </Content>
+                    {(expand || expanded) && (
                       <div
                         style={{
                           flexGrow: 2,
@@ -578,12 +655,12 @@ const TrailModal = forwardRef(
                           )}
                         </>
                       </div>
-                    )} */}
+                    )}
                   </>
                 }
               </animated.div>
             </animated.div>
-          </ModalWrapper>
+          </ModalWrapper> */}
         </div>
       </Suspense>
     );

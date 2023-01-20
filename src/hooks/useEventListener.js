@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import useLatest from "./useLatest";
 
 export default function useEventListener({
@@ -7,7 +7,8 @@ export default function useEventListener({
   options,
   element = window,
 }) {
-  const savedHandler = useLatest(listener)
+  const savedHandler = useLatest(listener);
+
   useEffect(() => {
     const isSupported = element && element.addEventListener;
     if (!isSupported) return;

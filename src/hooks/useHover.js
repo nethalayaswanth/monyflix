@@ -1,19 +1,26 @@
 import { useCallback, useRef, useState } from "react";
-
+import usePrevious from "./usePrevious"
 const useHover = () => {
   const [isHovering, setIsHovering] = useState();
+  
+ const prevHoveringState= usePrevious(isHovering)
   const handleMouseOver = useCallback(
     (e) => {
-      setIsHovering(true);
+     if(!prevHoveringState){
+setIsHovering(true);
+     }
+      
     },
-    [setIsHovering]
+    [setIsHovering,prevHoveringState]
   );
 
   const handleMouseOut = useCallback(
     (e) => {
-      setIsHovering(false);
+       if(prevHoveringState){
+setIsHovering(false);
+     }
     },
-    [setIsHovering]
+    [setIsHovering,prevHoveringState]
   );
 
   const nodeRef = useRef();

@@ -26,7 +26,7 @@ const Wrapper = styled.div`
   will-change: scroll-position;
 `;
 
-const ExpandModal = ({}) => {
+const ExpandModal = () => {
 
   
   const portalEl = document.getElementById("root");
@@ -41,6 +41,7 @@ const ExpandModal = ({}) => {
       parent: parentRef,
       activated,
       miniExpand,
+      mini,
       expand,
       miniExpanded,
       hovered,clicked,
@@ -95,27 +96,26 @@ const ExpandModal = ({}) => {
 
   const [show, setShow] = useState();
 
-  const mini = miniExpand && !prevMiniExpand;
+  const min = miniExpand && !prevMiniExpand;
 
 
 
   useLayoutEffect(() => {
     if (param && !expand) {
-      
       miniRectMesureRef.current = modalRef?.current?.getBoundingClientRect();
       const main = document.getElementById("app");
       bodyStyleRef.current = document.body.style;
       const scroll = window.scrollY;
       scrollRef.current = window.scrollY;
-      if (!mini) {
-       main.style.top = `-${scroll}px`;
-       main.style.position = "fixed";
+      if (!min) {
+        main.style.top = `-${scroll}px`;
+        main.style.position = "fixed";
         document.body.style.overflowY = "scroll";
       }
       setShow(true);
     }
     if (!param && expanded) dispatch({ type: "set expand", expand: false });
-  }, [expand, dispatch, param, expanded, mini]);
+  }, [expand, dispatch, param, expanded, min]);
 
   useEffect(() => {
     if (show) {
@@ -242,26 +242,25 @@ const ExpandModal = ({}) => {
 
       api.start({
         to: async (animate) => {
-          const show = miniExpand;
-
+         
           await animate({
             to: {
               width: toWidth,
               x: X,
               y: Y,
               minifade: 0.5,
-              fade:1
+              fade: 1,
             },
             from: {
               width: fromWidth,
               scaleY: 1,
               scaleX: 1,
-              x: 0,
-              y: 0,
-              left: fromLeft,
-              top: fromTop,
+              x: fromLeft,
+              y: fromTop,
+              // left: fromLeft,
+              // top: fromTop,
               minifade: 0,
-              fade:0,
+              fade: 0,
               transformOrigin: "center center",
             },
             config: { tension: 100 },
@@ -334,8 +333,7 @@ const ExpandModal = ({}) => {
 
   useLayoutEffect(() => {
     if (!miniRectMesureRef.current || !parentRef) return;
-    const l = JSON.parse(JSON.stringify(miniRectMesureRef.current));
-
+  
     if (expand && !expanded) {
        
       const {
@@ -576,8 +574,9 @@ const ExpandModal = ({}) => {
 
 
   const full = expand || expanded;
+  const modal=mini || expand
   
-  return activated || full
+  return modal || full
     ? createPortal(
         <Wrapper style={{ ...(full && { height: "100%", width: "100%" }) }}>
           <animated.div
@@ -595,7 +594,7 @@ const ExpandModal = ({}) => {
               scaleY,
               scaleX,
               left,
-              
+
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",
@@ -615,6 +614,7 @@ const ExpandModal = ({}) => {
               position: "fixed",
               top: 0,
               left: 0,
+              zIndex: 99998,
               width: "100%",
               height: "100%",
               backdropFilter: "blur(2px)",

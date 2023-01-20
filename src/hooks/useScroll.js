@@ -1,40 +1,46 @@
-import throttle from "lodash/throttle";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import useEventListener from "./useEventListener";
 import useLatest from "./useLatest";
 
-export const useScroll = (options) => {
+export const useScroll = (options = {}) => {
+  const {
+    wait = 250,
+    element = window,
+    onScrollStart,
+    onScrollEnd,
+  } = useLatest(options);
 
-   
-  const { wait = 250, element = window,  onScrollStart, onScrollEnd } = useLatest(options);
-
-  const [isScrolling,setScrolling]=useState()
+  const [isScrolling, setScrolling] = useState();
 
   const scrolling = useRef(false);
   const timeoutRef = useRef();
 
-console.log(`%c${isScrolling}`,'color:red')
-
-  const handleScroll = useCallback((e) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (scrolling.current === false) {
-      if (onScrollStart) {
-        onScrollStart(e);
-      } else {
-        setScrolling(true);
-      }
-      scrolling.current = true;
- 
-      timeoutRef.current = setTimeout(() => {
-        if (onScrollEnd) {
-          onScrollEnd(e);
+  const handleScroll = useCallback(
+    (e) => {
+      if (scrolling.current === false) {
+        if (onScrollStart) {
+          onScrollStart(e);
         } else {
-          setScrolling(false);
+          console.log(`%cstart`, "color:red");
+          setScrolling(true);
         }
-        scrolling.current = false;
-      }, 0);
-    }
-  }, [onScrollEnd, onScrollStart]);
+        scrolling.current = true;
+      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        if (scrolling.current === true) {
+          if (onScrollEnd) {
+            onScrollEnd(e);
+          } else {
+           console.log(`%cend`, "color:green");
+            setScrolling(false);
+          }
+          scrolling.current = false;
+        }
+      }, 100);
+    },
+    [onScrollEnd, onScrollStart]
+  );
 
   // const handleScroll = useMemo(
   //   () =>
@@ -44,11 +50,10 @@ console.log(`%c${isScrolling}`,'color:red')
 
   useEventListener({
     event: "scroll",
-    handler: handleScroll,
+    listener: handleScroll,
     element,
     options: { passive: true },
   });
 
-
-  return isScrolling
+  return isScrolling;
 };

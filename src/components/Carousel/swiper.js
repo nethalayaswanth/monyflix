@@ -1,7 +1,9 @@
 import React, {
+  Children,
   forwardRef,
-  useCallback, useRef,
-  useState
+  useCallback,
+  useRef,
+  useState,
 } from "react";
 
 import "swiper/css";
@@ -9,25 +11,20 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/virtual";
 import { Swiper } from "swiper/react";
-import { Virtual } from "swiper";
 import { Backward, Forward } from "../Controller";
 
-
-
 import { FreeMode, Keyboard, Mousewheel } from "swiper";
-
-
 
 function Index(
   {
     children,
-    style, 
+    style,
     dark,
-    breakpoints,
     transitionEvents,
     enabled = true,
-    mobile,desktop,isHovering,
-    
+    mobile,
+    desktop,
+    isHovering,
     ...props
   },
   ref
@@ -36,13 +33,14 @@ function Index(
   const [isBeginning, setIsBeginning] = useState(() => true);
   const [isEnd, setIsEnd] = useState(() => false);
 
+  const nextEl = useRef();
+  const prevEl = useRef();
 
   const onSwiperReady = useCallback((instance) => {
     swiper.current = instance;
   }, []);
 
-
-  const slidesPerView= props.slidesPerView
+  const slidesPerView = props.slidesPerView;
 
   const params = {
     mousewheel: { forceToAxis: true },
@@ -73,7 +71,6 @@ function Index(
           enabled: true,
           onlyInViewport: false,
         }}
-     
         {...(transitionEvents && transitionEvents)}
         {...params}
         {...props}
@@ -85,6 +82,7 @@ function Index(
         onClick={() => {
           swiper.current.slidePrev();
         }}
+        ref={nextEl}
         disable={isBeginning}
         visible={isHovering}
         dark={dark}
@@ -93,6 +91,7 @@ function Index(
       <Forward
         key="next"
         next
+        ref={prevEl}
         onClick={() => {
           swiper.current.slideNext();
         }}

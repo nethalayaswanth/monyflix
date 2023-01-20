@@ -1,7 +1,9 @@
 import React, {
   cloneElement,
-  useEffect, useRef,
-  useState
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { SwiperSlide } from "swiper/react";
 
@@ -16,20 +18,20 @@ import LandscapeCard from "../Cards/landscapeCard";
 import ThumbnailCard from "../Cards/thumbNailCard";
 import Swiperjs from "./swiper";
 import { SwiperWrapper } from "./views";
-import SwiperTrail from "./trail";
 
-const DEFAULTBREAKPOINTS = [1500, 1350, 1000, 740, 480,420];
+const DEFAULTBREAKPOINTS = [1500, 1350, 1000, 740, 480, 420];
 const DEFAULTVALUES = [8, 7, 6, 5, 3, 2];
 const DEFAULTVALUE = 2;
 const DEFAULTMARGIN = 10;
 const DEFAULTPARENTPADDING = 20;
+const DEFAULTCONTROLLERWIDTH = 40;
 
 export const Cards = {
-  expand: <ExpandCard />,
-  thumbnail: <ThumbnailCard />,
-  detail: <DetailsCard />,
-  card: <Card />,
-  landscape: <LandscapeCard />,
+  expand: ExpandCard ,
+  thumbnail: ThumbnailCard ,
+  detail: DetailsCard ,
+  card: Card ,
+  landscape: LandscapeCard ,
 };
 
 export default function Carousel({
@@ -49,6 +51,7 @@ export default function Carousel({
   defaultBreakPointValue = DEFAULTVALUE,
   margin = DEFAULTMARGIN,
   padding = DEFAULTPARENTPADDING,
+  controllerWidth=DEFAULTCONTROLLERWIDTH,
   endPadding,
   card = "expand",
   onClick,
@@ -73,24 +76,19 @@ export default function Carousel({
 
   const [{ activated }, dispatch] = useModalState();
 
-  const [modalEnabled, setModalEnabled] = useState(true);
-
-  // useLayoutEffect(() => {
-  //   dispatch({ type: "set enabled", enabled: modalEnabled });
-  // }, [dispatch, modalEnabled]);
 
   const transitionEvents = {
     onTransitionStart: () => {
-      setModalEnabled((x) => (x ? !x : x));
+      dispatch({ type: "set enabled", enabled: false });
     },
     onTransitionEnd: () => {
-      setModalEnabled((x) => (x ? x : !x));
+        dispatch({ type: "set enabled", enabled: true });
     },
     onTouchStart: () => {
-      setModalEnabled((x) => (x ? !x : x));
+     dispatch({ type: "set enabled", enabled: false });
     },
     onTouchEnd: () => {
-      setModalEnabled((x) => (x ? x : !x));
+      dispatch({ type: "set enabled", enabled: true });
     },
   };
 
@@ -105,7 +103,23 @@ export default function Carousel({
     defaultValue: defaultBreakPointValue,
   });
 
-  const component = Cards[card];
+  const Component = Cards[card];
+
+  const { width, marginRight, marginLeft } = useMemo(() => {
+    const width = `calc((100% - 2 * ${!desktop ? padding : 0}px  - ${
+      value - 1
+    } * ${margin}px) / ${value})`;
+
+    const marginRight = endPadding
+      ? `${width} * ${value - 1} + ${
+          value - 1
+        } * ${margin}px + ${padding}px)`
+      : `${padding}px`;
+
+    const marginLeft = `${padding}px`;
+
+    return { width, marginRight, marginLeft };
+  }, [desktop, endPadding, margin, padding, value]);
 
   const placeHolder = Array(8).fill(0);
 
@@ -117,7 +131,7 @@ export default function Carousel({
           ...style,
           overflow: "visible",
           position: "relative",
-          padding: desktop ? "0 40px" : "",
+          padding: desktop ? `0  ${controllerWidth}px` : "",
         }}
         mobile={mobile}
         desktop={desktop}
@@ -140,45 +154,40 @@ export default function Carousel({
               {data.map((current, index) => {
                 const first = index === 0;
                 const last = index === data.length - 1;
- return (
+                return (
                   <SwiperSlide
                     style={{
-                      width: `calc((100% - 2 *  ${
-                        !desktop ? padding : 0
-                      }px  - ${value - 1} * ${margin}px) / ${value})`,
+                      width,
+                      ...(first && { marginLeft }),
+                      ...(last && {
+                        marginRight,
+                      }),
                     }}
                     key={`${index}`}
                   >
-                    {children
+                    <Component data={current} />
+                    {/* {children
                       ? children({ data: current, index, onClick })
                       : cloneElement(component, {
                           data: current,
                           index,
                           onClick,
-                        })}
+                        })} */}
                   </SwiperSlide>
                 );
               })}
               {hasMore && !loading && (
                 <SwiperSlide
                   style={{
-                    width: `calc((100% - 2 * ${!desktop ? padding : 0}px  - ${
-                      value - 1
-                    } * ${margin}px) / ${value})`,
-
-                    marginRight: endPadding
-                      ? `calc(((100% - 2 *  ${!desktop ? padding : 0}px - ${
-                          value - 1
-                        } * ${margin}px)/${value}) * ${value - 1} + ${
-                          value - 1
-                        } * ${margin}px + ${padding}px)`
-                      : `${padding}px`,
+                    width,
+                    marginRight,
                   }}
                   key={"loading"}
                 >
-                  {children
+                  <Component ref={elRef} />
+                  {/* {children
                     ? children({ ref: elRef, onClick })
-                    : cloneElement(component, { ref: elRef, onClick })}
+                    : cloneElement(component, { ref: elRef, onClick })} */}
                 </SwiperSlide>
               )}
             </>
@@ -189,26 +198,19 @@ export default function Carousel({
               return (
                 <SwiperSlide
                   style={{
-                    width: `calc((100% - 2 *  ${!desktop ? padding : 0}px  - ${
-                      value - 1
-                    } * ${margin}px) / ${value})`,
-                    ...(first && { marginLeft: `${padding}px` }),
+                    width,
+                    ...(first && { marginLeft }),
                     ...(last && {
-                      marginRight: endPadding
-                        ? `calc(((100% - 2 *  ${!desktop ? padding : 0}px - ${
-                            value - 1
-                          } * ${margin}px)/${value})*${value - 1} + ${
-                            value - 1
-                          }*${margin}px + ${padding}px)`
-                        : `${padding}px`,
+                      marginRight,
                     }),
                   }}
                   key={index}
                   index={index}
                 >
-                  {children
+                  <Component />
+                  {/* {children
                     ? children({ data, index, onClick })
-                    : cloneElement(component)}
+                    : cloneElement(component)} */}
                 </SwiperSlide>
               );
             })

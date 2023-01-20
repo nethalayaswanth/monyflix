@@ -17,11 +17,12 @@ const Container = styled.div`
   z-index: 1;
 `;
 
+
 const queryHandlers = {
   moviesByType: useMovies,
   trendingMovies: useTrendingMovies,
   moviesByGenre: useMoviesByGenre,
-};
+}
 
 export const Wrapper = memo(
   ({
@@ -92,7 +93,7 @@ export const SectionWrapper = ({
   const useQuery = useMemo(() => queryHandlers[query], [query]);
   
   const details=card==='detail'
-  const fetchQuery = whileInView ? (!!queryEnabled && inView) : !!queryEnabled;
+  const fetchQuery =queryEnabled ? whileInView ? inView : queryEnabled :false
   const {
     data,
     error,

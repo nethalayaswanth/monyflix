@@ -28,7 +28,6 @@ import { useScroll } from "./hooks/useScroll";
 const Watch = lazy(() => import("./components/watch"));
 
 function App() {
-  const useGesture = createUseGesture([scrollAction]);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const param = searchParams.get("mv");
@@ -57,42 +56,6 @@ function App() {
     }
   }, [inView]);
 
-  const [
-    {
-      expand,
-
-      expanded,
-    },
-    dispatch,
-  ] = useModalState();
-
-  const device = useMedia();
-
-  const mobile = device === "mobile";
-
-  const [scroll, setScroll] = useState();
-
-  useEffect(() => {
-    if (expand || expanded || mobile ) return;
-    dispatch({ type: "set enabled", enabled: !scroll });
-  }, [dispatch, expand, expanded, mobile, scroll]);
-
-
-  useScroll()
-  useGesture(
-    {
-      onScrollStart: (state) => {
-        setScroll(state.scrolling);
-      },
-      onScrollEnd: (state) => {
-        setScroll(false);
-      },
-    },
-    {
-      target: window,
-      eventOptions: { passive: true },
-    }
-  );
 
   return (
     <div
