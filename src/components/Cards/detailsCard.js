@@ -13,32 +13,87 @@ import {
   Title,
 } from "../CardModal/styles";
 import timeConversion from "../CardModal/utils";
-import ProgressiveImage from "../ProgressiveImage";
-import { useModalState } from "../../contexts/modalContext";
+import ProgressiveImage from "../cachedImage";
+import { useModalDispatch } from "../../contexts/modalContext";
 import { useHover } from "@use-gesture/react";
 import usePrefetch from "./usePrefetch";
 import useMedia from "../../hooks/useMedia";
 import { mergeRefs } from "../../utils";
 
 const DetailsCard = ({ data: current, onClick }, ref) => {
-  const [{ activated, expand, enabled, expanded }, dispatch] = useModalState();
+  const dispatch = useModalDispatch();
 
   const miniRef = useRef();
 
  
   let [searchParams, setSearchParams] = useSearchParams();
-  
-  const [isHovering, setHovering] = useState();
-  const bind = useHover((state) => {
-    if (current) {
-      setHovering(state.hovering);
-    }
-  });
+ 
+
+  const src = current?.images?.filePath;
+
+  const original = src ? `https://image.tmdb.org/t/p/w780${src}` : null;
+  const preview = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
+
+  const year = current?.releaseDate?.split("-")[0];
+  const runTime = current?.runtime;
 
    const device = useMedia();
 
    const mobile = device === "mobile";
    const desktop = device === "desktop";
+
+     const timeOutRef = useRef();
+
+     const clearTimer = useCallback(() => {
+       if (timeOutRef.current) {
+         clearTimeout(timeOutRef.current);
+       }
+     }, []);
+
+     const setTimer = useCallback(
+       (cb) => {
+         clearTimer();
+         timeOutRef.current = setTimeout(() => {
+           cb();
+         }, 100);
+       },
+       [clearTimer]
+     );
+
+     const handleHovering = useCallback(
+       (hovering) => {
+         if (!hovering) {
+           clearTimer();
+           return;
+         }
+         const showMini = () => {
+           dispatch({
+             type: "set modal",
+             payload: {
+               movie: current,
+               parent: miniRef.current,
+               mini: true,
+               overlay:original,
+               aspectRatio:16/9
+             },
+           });
+         };
+
+        //  if (mini) {
+        //    showMini();
+        //    return;
+        //  }
+
+         setTimer(showMini);
+       },
+       [ setTimer, clearTimer, dispatch, current, preview]
+     );
+
+      const bind = useHover((state) => {
+        if (current && desktop) {
+          handleHovering(state.hovering);
+        }
+      });
 
    const { ref: prefetchRef, handlePrefetch } = usePrefetch({
      id: current?.id,
@@ -52,12 +107,12 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
     handlePrefetch();
     dispatch({
       type: "set modal",
-      ...(!activated && { scroll: window.scrollY }),
+      // ...(!activated && { scroll: window.scrollY }),
     });
     setSearchParams({ mv: current?.id });
     onClick?.();
   }, [
-    activated,
+  
     current?.id,
     dispatch,
     handlePrefetch,
@@ -66,13 +121,7 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
   ]);
 
 
-   const src = current?.images?.filePath;
-
-   const original = src ? `https://image.tmdb.org/t/p/original/${src}` : null;
-   const preview = src ? `https://image.tmdb.org/t/p/w300/${src}` : null;
-
-   const year = current?.releaseDate?.split("-")[0];
-   const runTime = current?.runtime;
+   
 
   return (
     <div
@@ -86,7 +135,7 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
         cursor: "pointer",
       }}
     >
-      <AspectBox ref={miniRef}>
+      <AspectBox {...bind()} ref={miniRef}>
         <ProgressiveImage
           style={{ borderRadius: "6px" }}
           original={original}
@@ -109,17 +158,7 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
           {current?.overview}
         </Overview>
       </Description>
-      {/* <button
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          zIndex: 3,
-        }}
-        onClick={handleClick}
-      /> */}
+     
     </div>
   );
 };

@@ -31,7 +31,7 @@ export const Grid = styled.div`
   }};
 `;
 
-export const Flex = styled.div`
+export const Flex = styled(animated.div)`
   box-sizing: border-box;
   position: relative;
   width: 100%;
@@ -51,16 +51,18 @@ export const Flex = styled.div`
 export const Content = styled(Flex)`
   padding: 0 10px;
   flex: 1;
-  ${({ expand }) =>
-    expand
-      ? css`
-          padding: 0 25px;
-
-          @media only screen and (min-width: 740px) {
-            padding: 0 40px;
-          }
-        `
-      : ``}
+  min-height: 0;
+  flex-direction: ${({ desktop }) => desktop?'row':'column'};
+  overflow:hidden;
+    ${({ expand }) =>
+      expand
+        ? css`
+            padding: 0 25px;
+            @media only screen and (min-width: 740px) {
+              padding: 0 40px;
+            }
+          `
+        : ``};
 `;
 
 export const Header = styled.div`
@@ -84,6 +86,20 @@ export const Block = styled(animated.div)`
   flex: auto;
 `;
 
+export const Wrapper = styled(Block)`
+  box-sizing: border-box;
+  box-shadow: 2px 2.8px 2.2px rgba(0, 0, 0, 0.034),
+    0 6.7px 5.3px rgba(0, 0, 0, 0.048), 0 12.5px 10px rgba(0, 0, 0, 0.06),
+    0 22.3px 17.9px rgba(0, 0, 0, 0.072), 0 41.8px 33.4px rgba(0, 0, 0, 0.086),
+    0 100px 80px rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  margin: 0;
+  flex-direction: column;
+  background-color: white;
+  display: flex;
+   overflow: hidden; 
+`;
+
 export const ModalWrapper = styled(Block)`
   box-sizing: border-box;
   box-shadow: 2px 2.8px 2.2px rgba(0, 0, 0, 0.034),
@@ -91,7 +107,6 @@ export const ModalWrapper = styled(Block)`
     0 22.3px 17.9px rgba(0, 0, 0, 0.072), 0 41.8px 33.4px rgba(0, 0, 0, 0.086),
     0 100px 80px rgba(0, 0, 0, 0.12);
   border-radius: 6px;
-  z-index: 9;
   margin: 0;
   flex-direction: column;
   background-color: white;
@@ -126,9 +141,7 @@ export const Text = styled.p`
 export const Item = styled.div`
   margin-right: 0.5em;
   overflow: hidden;
-
   text-overflow: ellipsis;
-
   font-size: 12px;
   font-weight: 400;
 `;
@@ -223,24 +236,27 @@ export const VideoWrapper = styled.div`
   z-index: 6;
 `;
 
-export const Open = styled(InlineFlex)`
+export const Footer = styled(InlineFlex)`
   padding: 0;
-  margin-bottom: 0.3em;
-  justify-content: flex-end;
-  margin-top: 0.5em;
+  justify-content: space-between;
+  flex: 0;
+  flex-basis: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
 `;
 
 export const Up = styled(IoChevronForwardCircleOutline)`
   cursor: pointer;
-  height: 36px;
+  height:  36px;
   width: 36px;
   transform: rotate(-90deg);
   opacity: 0.7;
-  stroke-width: "1";
+  
 `;
 
 export const Description = styled(Flex)`
   height: unset;
+  
   padding-right: ${({ expand }) => expand && "2rem"};
 `;
 
@@ -274,4 +290,25 @@ export const LoadingOverlay = styled.div`
               zIndex: 100;
 `;
 
-export const Modal = { LoadingOverlay };
+export const Modal = {
+  LoadingOverlay,
+  Adult,
+  Button,
+  Close,
+  Content,
+  Description,
+  Divider,
+  Genres,
+  Header,
+  InlineFlex,
+  Item,
+  Wrapper,
+  Footer,
+  Overview,
+  Spacer,
+  Tagline,
+  Title,
+  Up,
+  ModalWrapper,
+};
+

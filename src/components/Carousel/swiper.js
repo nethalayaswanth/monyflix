@@ -1,17 +1,11 @@
-import React, {
-  Children,
-  forwardRef,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useCallback, useRef, useState } from "react";
 
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/virtual";
-import { Swiper } from "swiper/react";
-import { Backward, Forward } from "../Controller";
+import { Swiper as ReactSwiper } from "swiper/react";
+import {  Nav } from "./views";
 
 import { FreeMode, Keyboard, Mousewheel } from "swiper";
 
@@ -24,42 +18,49 @@ function Index(
     enabled = true,
     mobile,
     desktop,
-    isHovering,
+    SlidesPerView,
     ...props
   },
   ref
 ) {
   const swiper = useRef();
-  const [isBeginning, setIsBeginning] = useState(() => true);
-  const [isEnd, setIsEnd] = useState(() => false);
+  const [prevEnabled, setPrev] = useState(false);
+  const [nextEnabled, setNext] = useState(true);
 
   const nextEl = useRef();
   const prevEl = useRef();
 
   const onSwiperReady = useCallback((instance) => {
     swiper.current = instance;
-  }, []);
 
-  const slidesPerView = props.slidesPerView;
+    if (instance.isLocked) {
+      setPrev(false);
+      setNext(false);
+      return
+    }
+     setPrev(swiper.activeIndex > 0);
+  }, []);
 
   const params = {
     mousewheel: { forceToAxis: true },
   };
 
+  const onSlideChange = (swiper) => {
+    setPrev(swiper.activeIndex > 0);
+
+    setNext(swiper.activeIndex < swiper.slides.length - SlidesPerView);
+  };
 
   return (
     <>
-      <Swiper
+      <ReactSwiper
         className="Carousel"
         direction={"horizontal"}
         spaceBetween={10}
         enabled={enabled}
         modules={[Mousewheel, FreeMode, Keyboard]}
         onSwiper={onSwiperReady}
-        onSlideChange={(swiper) => {
-          setIsBeginning(swiper.isBeginning);
-          setIsEnd(swiper.isEnd);
-        }}
+        onSlideChange={onSlideChange}
         cssMode={true}
         passiveListeners={true}
         freeMode={{
@@ -77,32 +78,30 @@ function Index(
         slidesPerView="auto"
       >
         {children}
-      </Swiper>
-      <Backward
+      </ReactSwiper>
+      <Nav
         onClick={() => {
           swiper.current.slidePrev();
         }}
         ref={nextEl}
-        disable={isBeginning}
-        visible={isHovering}
+        enable={prevEnabled}
         dark={dark}
-        style={{ opacity: desktop ? 1 : 0 }}
+        // style={{ opacity: desktop ? 1 : 0 }}
       />
-      <Forward
+      <Nav
         key="next"
         next
         ref={prevEl}
         onClick={() => {
           swiper.current.slideNext();
         }}
-        disable={isEnd}
-        visible={isHovering}
+        enable={nextEnabled}
         dark={dark}
-        style={{ opacity: desktop ? 1 : 0 }}
+        // style={{ opacity: desktop ? 1 : 0 }}
       />
     </>
   );
 }
-const Swiperjs = forwardRef(Index);
+const Swiper = forwardRef(Index);
 
-export default Swiperjs;
+export default Swiper;

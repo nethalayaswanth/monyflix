@@ -1,24 +1,24 @@
 import { ErrorBoundary } from "react-error-boundary";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useModalState } from "../../contexts/modalContext";
-import ExpandModal from "./expandModal";
-import TrailExpandModal from './trail'
+
+import Modal from './modal'
 
 
-const Modal = () => {
+const ModalWrapper = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const param = searchParams.get("mv");
 
   let location = useLocation();
 
-  const [{ activate, parent, activated,expanded }, dispatch] = useModalState();
+  const [{ activate, parent, activated,expand }, dispatch] = useModalState();
 
+  const mount=parent || param || expand
   
 
-  return parent || param || expanded ? (
+  return  mount? (
     <ErrorBoundary
-      //onReset={reset}
       fallbackRender={({ resetErrorBoundary, error }) => {
         return (
           <div>
@@ -28,8 +28,7 @@ const Modal = () => {
         );
       }}
     >
-     
-      <TrailExpandModal />
+      <Modal />
     </ErrorBoundary>
   ) : null;
 
@@ -39,4 +38,4 @@ const Modal = () => {
      
 };
 
-export default Modal;
+export default ModalWrapper;

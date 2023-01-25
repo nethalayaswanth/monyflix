@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import Shimmer from "../shimmer";
+ 
 export const CardContainer = styled.div`
   box-sizing: border-box;
   box-shadow: 0 4px 7px rgb(0 0 0 / 25%);

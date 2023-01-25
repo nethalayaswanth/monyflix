@@ -1,11 +1,9 @@
-import { useLayoutEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import useResizeObserver from "use-resize-observer";
 
-const breakpointsDefault = [740, 480, 300];
+const breakpointsDefault = [300, 480, 740];
 
-const queryStrings = (breakpoints = []) =>
-  breakpoints.map((breakPoint) => `(min-width:${breakPoint}px)`);
-
-const defaultValues = ["desktop", "tablet", "mobile"];
+const defaultValues = ["mobile", "tablet", "desktop"];
 
 const defaultvalue = "desktop";
 
@@ -13,32 +11,35 @@ function useMedia({
   breakPoints = breakpointsDefault,
   breakPointValues = defaultValues,
   defaultValue = defaultvalue,
-
+  ref = document.body,
 } = {}) {
-  const queries = queryStrings(breakPoints);
-  const mediaQueryLists = queries.map((q) => window.matchMedia(q));
+  const getValue = useCallback(
+    (width) => {
+      const index = [...breakPoints].reverse().findIndex((bp) => bp <= width);
 
-  const getValue = () => {
-    const index = mediaQueryLists.findIndex((mql) => mql.matches);
-    return typeof breakPointValues[index] !== "undefined"
-      ? breakPointValues[index]
-      : defaultValue;
-  };
-  const [value, setValue] = useState(getValue);
+      return index !== -1
+        ? [...breakPointValues].reverse()[index]
+        : defaultValue;
+    },
+    [breakPointValues, breakPoints, defaultValue]
+  );
+
+  const [value, setValue] = useState(() => getValue(document.body.clientWidth));
+  const valueRef = useRef();
+
+  const { width } = useResizeObserver({
+    ref,
+  });
 
   useLayoutEffect(() => {
-    const handler = () => {
-      setValue(getValue);
-    };
+    if (!width) return;
+    const value = getValue(width);
 
-    mediaQueryLists.forEach((mql) => {
-      mql.addEventListener("change", handler);
-    });
-    return () =>
-      mediaQueryLists.forEach((mql) => {
-        mql.removeEventListener("change", handler);
-      });
-  }, []);
+    if (valueRef.current !== value) {
+      valueRef.current = value;
+      setValue(value);
+    }
+  }, [breakPointValues, breakPoints, defaultValue, getValue, width]);
   return value;
 }
 

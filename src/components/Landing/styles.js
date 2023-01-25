@@ -1,8 +1,6 @@
 import styled from "styled-components";
 import down from "../../assets/down.png";
 
-
-
 export const Container = styled.div`
   position: relative;
   display: flex;
@@ -14,13 +12,11 @@ export const Container = styled.div`
 
   z-index: 1;
 
-  @media only screen and (max-width: 100vw) {
-    width: 100%;
+  width: 100%;
+  height: calc((110vw / 0.65));
+  @media only screen and (min-width: 740px) {
     height: calc(56.25vw);
     max-height: 100vh;
-  }
-  @media only screen and (max-width: 740px) {
-    height: calc((110vw / 0.65));
   }
 
   .absolute {
@@ -35,8 +31,6 @@ export const Container = styled.div`
   }
 `;
 
-export const Picture = styled(Container)``;
-
 export const Wrapper = styled.div`
   -o-object-fit: cover;
   object-fit: cover;
@@ -46,7 +40,6 @@ export const Wrapper = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
-  
 
   /* @media only screen and (max-width: 100vw) {
     width: 100%;
@@ -60,7 +53,7 @@ export const Wrapper = styled.div`
 
 export const Gradient = styled.div`
   position: absolute;
-  
+
   width: 100%;
   height: 100%;
   z-index: 3;
@@ -89,9 +82,9 @@ export const Gradient = styled.div`
 `;
 
 export const TopGradient = styled(Gradient)`
-top:-10px ;
-bottom:auto;
-background-image: linear-gradient(
+  top: -10px;
+  bottom: auto;
+  background-image: linear-gradient(
     0deg,
     hsla(0, 0%, 8%, 0) 0,
     hsla(0, 0%, 8%, 0.15) 15%,
@@ -100,7 +93,6 @@ background-image: linear-gradient(
     #141414 88%,
     #141414
   );
-  
 `;
 
 export const Overlay = styled.div`
@@ -110,7 +102,7 @@ export const Overlay = styled.div`
   pointer-events: none;
   -webkit-backdrop-filter: blur(30px) saturate(50%) opacity(100%);
   backdrop-filter: blur(30px) saturate(50%) opacity(100%);
-  background-color: rgba(0, 0, 0,0.9);
+  background-color: rgba(0, 0, 0, 0.9);
 `;
 
 export const Down = styled.div`
@@ -133,7 +125,7 @@ export const Scroll = styled.button`
   width: 100%;
   height: 10%;
   transition: all 1000ms;
-  z-index:30;
+  z-index: 30;
   &:hover {
     bottom: -4px;
     scale: 1.1em;

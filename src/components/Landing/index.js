@@ -11,7 +11,9 @@ import { useQueryClient } from "react-query";
 import { useSearchParams } from "react-router-dom";
 import useMedia from "../../hooks/useMedia";
 import {
-  getMovieDetails, useGetVideosById, useLatestMovie
+  getMovieDetails,
+  useVideosById,
+  useLatestMovie,
 } from "../../requests/requests";
 import AudioControls from "../AudioControls";
 import Video from "../CroppedVideo";
@@ -38,7 +40,6 @@ const Landing = ({ queryEnabled}) => {
 
   const device = useMedia();
 
-  const mobile = device === "mobile";
   const desktop = device === "desktop";
 
   const src = desktop ? backdropPath : posterPath;
@@ -46,7 +47,7 @@ const Landing = ({ queryEnabled}) => {
   const original = src ? `https://image.tmdb.org/t/p/original${src}` : null;
   const preview = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
 
-  const videoData = useGetVideosById({
+  const videoData = useVideosById({
     id: movie?.id,
     types,
     queryOptions: {
@@ -136,22 +137,14 @@ const Landing = ({ queryEnabled}) => {
 
   return (
     <Container onClick={handleClick} ref={refcb}>
-      <Picture
-        style={{
-          backgroundColor: "black",
-          borderRadius: "initial",
-          marginBottom: 0,
-          zIndex: 0,
-          padding: "20px",
-        }}
-      >
+      
         <ProgressiveImage
           className="absolute"
           original={original}
           preview={preview}
           alt=""
         />
-      </Picture>
+  
 
       <div
         style={{

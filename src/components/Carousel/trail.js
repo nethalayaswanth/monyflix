@@ -5,7 +5,7 @@ import styled from "styled-components";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
 // import { Swiper } from "swiper/react";
-import { Backward, Forward } from "../Controller";
+
 import flattenChildren from "react-keyed-flatten-children";
 
 import TrailSwiper from "./swiperTrail";
@@ -64,7 +64,7 @@ function Index(
   return (
     <>
       <TrailSwiper ref={swiper} onSlideChange={(swiper)=>{console.log(swiper)}}>{children}</TrailSwiper>
-      <Backward
+      {/* <Backward
         onClick={() => {
           swiper.current.prev();
         }}
@@ -83,7 +83,7 @@ function Index(
         visible={isHovering}
         dark={dark}
         style={{ opacity: desktop ? 1 : 0 }}
-      />
+      /> */}
     </>
   );
 }

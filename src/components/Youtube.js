@@ -112,7 +112,7 @@ export function Youtube({
 
   const styles = useMemo(() => {
     return {
-       position: "absolute",
+      // position: "absolute",
       // top: 0,
        left: 0,
       // ...(!full && { pointerEvents: "none" }),
@@ -148,7 +148,7 @@ export function Youtube({
         onError={onError}
         style={styles}
         width={"100%"}
-        height={"200%"}
+        height={"100%"}
         playIcon={
           <BsFillPlayFill
             fill={"white"}
@@ -188,4 +188,4 @@ export  function Player(args) {
   );
 }
 
-export default memo(Player);
+export default memo(Youtube);

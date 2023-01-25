@@ -87,7 +87,6 @@ function App() {
           queryEnabled={queryEnabled}
           title={"Upcoming"}
           card={"detail"}
-          breakPointValues={[6, 6, 4, 3, 1.5, 1.5]}
           variables={{ type: "UPCOMING" }}
         />
 
@@ -115,7 +114,6 @@ function App() {
               title={"Family"}
               whileInView={true}
               card={"detail"}
-              breakPointValues={[6, 6, 4, 3, 1.5, 1.5]}
             />
           </>
         )}
@@ -128,8 +126,6 @@ function App() {
               variables={{ genres: ["ScienceFiction", "Thriller"] }}
               title={"Sci-Fi"}
               card="landscape"
-              breakPointValues={[1]}
-              defaultBreakPointValue={1}
               whileInView={true}
             />
             <Section
@@ -146,7 +142,6 @@ function App() {
               title={"Adventure"}
               whileInView={true}
               card={"detail"}
-              breakPointValues={[6, 6, 4, 3, 1.5, 1.5]}
             />
           </>
         )}
@@ -167,8 +162,7 @@ function App() {
               variables={{ genres: ["Mystery", "Crime", "Thriller"] }}
               title={"Mystery"}
               whileInView={true}
-              breakPointValues={[1]}
-              defaultBreakPointValue={1}
+            
               card={"landscape"}
             />
           </>
@@ -190,7 +184,7 @@ function App() {
               title={"Documentary"}
               whileInView={true}
               card={"detail"}
-              breakPointValues={[6, 6, 4, 3, 1.5, 1.5]}
+             
             />
           </>
         )}

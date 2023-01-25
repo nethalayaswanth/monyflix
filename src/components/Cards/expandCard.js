@@ -12,10 +12,10 @@ import AspectBox from "../AspectBox";
 import { useHover } from "@use-gesture/react";
 
 import { useSearchParams } from "react-router-dom";
-import { useModalState } from "../../contexts/modalContext";
+import { useModalState, useModalDispatch } from "../../contexts/modalContext";
 import useMedia from "../../hooks/useMedia";
 import { mergeRefs } from "../../utils";
-import ProgressiveImage from "../ProgressiveImage";
+import ProgressiveImage from "../cachedImage";
 import { CardWrapper as CardOuter } from "./styles";
 import usePrefetch from "./usePrefetch";
 
@@ -53,8 +53,7 @@ const CardView = forwardRef(
 );
 
 const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
-  const [{ activated, expand, open, enabled, expanded }, dispatch] =
-    useModalState();
+  const dispatch = useModalDispatch();
 
   const device = useMedia();
 
@@ -62,42 +61,66 @@ const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
   const desktop = device === "desktop";
 
   const miniRef = useRef();
-  const [isHovering, setHovering] = useState();
-  const timeOutRef=useRef()
-  const handleHovering=useCallback(()=>{
 
-     if (!isHovering || activated || !enabled || !desktop || !movie) return;
+  const timeOutRef = useRef();
 
-     const { top } = miniRef.current.getBoundingClientRect();
+    const src = movie?.posterPath;
 
-     if (top < 0) return;
-      if (timeOutRef.current) {
-        clearTimeout(timeOutRef.current);
+    const original = src ? `https://image.tmdb.org/t/p/w342${src}` : null;
+    const preview = src ? `https://image.tmdb.org/t/p/w92${src}` : null;
+
+  const clearTimer = useCallback(() => {
+    if (timeOutRef.current) {
+      clearTimeout(timeOutRef.current);
+    }
+  }, []);
+
+  const setTimer = useCallback(
+    (cb) => {
+      clearTimer();
+      timeOutRef.current = setTimeout(() => {
+        cb();
+      }, 100);
+    },
+    [clearTimer]
+  );
+
+  const handleHovering = useCallback(
+    (hovering) => {
+      if (!hovering) {
+        clearTimer();
+        return;
       }
+      const showMini = () => {
+        dispatch({
+          type: "set modal",
+          payload: {
+            movie: movie,
+            parent: miniRef.current,
+            mini: true,
+            aspectRatio: 2 / 3,
+            overlay: original,
+          },
+        });
+      };
 
-     timeOutRef.current = setTimeout(async () => {
-       dispatch({
-         type: "set modal",
-         payload: {
-           movie: movie,
-           parent: miniRef.current,
-           activate: true,
-           hovered: true,
-           mini:true,
-           open: true,
-           scroll: window.scrollY,
-         },
-       });
-     }, 100);
-  },[activated, desktop, dispatch, enabled, isHovering, movie])
+      // if (mini) {
+      //   showMini();
+      //   return;
+      // }
+
+      setTimer(showMini);
+    },
+    [clearTimer, dispatch, movie, original, setTimer]
+  );
 
   const bind = useHover((state) => {
-    if (movie) {
-      setHovering(state.hovering);
+    if (movie && desktop) {
+      handleHovering(state.hovering);
     }
   });
 
-  let [searchParams, setSearchParams] = useSearchParams();
+  // let [searchParams, setSearchParams] = useSearchParams();
 
   const miniRefCb = useCallback((node) => {
     if (!node) return;
@@ -112,11 +135,10 @@ const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
         movie: movie,
         parent: miniRef.current,
         clicked: true,
-        ...(!activated && { scroll: window.scrollY }),
       },
     });
-    setSearchParams({ mv: movie?.id });
-  }, [activated, desktop, dispatch, movie, setSearchParams]);
+    // setSearchParams({ mv: movie?.id });
+  }, [ desktop, dispatch, movie, ]);
 
   const { ref: prefetchRef, handlePrefetch } = usePrefetch({
     id: movie?.id,
@@ -124,39 +146,7 @@ const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
     enabled: movie?.id,
   });
 
-  useLayoutEffect(() => {
-    if (!isHovering || activated || !enabled || !desktop || !movie)
-      return;
 
-    const { top } = miniRef.current.getBoundingClientRect();
-
-    if (top < 0) return;
-
-     timeOutRef.current = setTimeout(async () => {
-      dispatch({
-        type: "set modal",
-        payload: {
-          movie: movie,
-          parent: miniRef.current,
-          activate: true,
-          hovered: true,
-          open: true,
-          mini:true,
-          scroll: window.scrollY,
-        },
-      });
-    }, 100);
-
-    return () => {
-      if (timeOutRef.current){
-       clearTimeout(timeOutRef.current);}
-    };
-  }, [dispatch, isHovering, activated, desktop, movie, enabled]);
-
-  const src = movie?.posterPath;
-
-  const original = src ? `https://image.tmdb.org/t/p/original${src}` : null;
-  const preview = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
 
   const cardProps = {
     original,
@@ -180,7 +170,6 @@ export const CardHolder = ({ style, index }) => {
         marginBottom: "8px",
         overflow: "hidden",
         borderRadius: "6px",
-       // width: "200px",
         ...style,
       }}
       potrait

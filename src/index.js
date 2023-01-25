@@ -9,20 +9,23 @@ import reportWebVitals from "./reportWebVitals";
 
 
 import { BrowserRouter } from "react-router-dom";
+import { ImagesClient, ImagesProvider } from './contexts/imageCachingContext';
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const queryClient = new QueryClient();
+const imagesClient=new ImagesClient()
+
 root.render(
-  
-    <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <ImagesProvider client={imagesClient}>
       <BrowserRouter>
         <App />
         <GlobalStyles />
       </BrowserRouter>
 
       <ReactQueryDevtools initialIsOpen />
-    </QueryClientProvider>
- 
+    </ImagesProvider>
+  </QueryClientProvider>
 );
 
    

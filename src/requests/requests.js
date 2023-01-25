@@ -44,7 +44,7 @@ export function useMovies({ type, withImages, queryOptions }) {
   );
 }
 
-export function useGetSimilarMovies({ id, size ,queryOptions}) {
+export function useSimilarMovies({ id, size ,queryOptions}) {
   return useInfiniteQuery(
     ["similarMovies", id],
     async ({ pageParam = 0 }) => {
@@ -63,7 +63,7 @@ export function useGetSimilarMovies({ id, size ,queryOptions}) {
     }
   );
 }
-export function useGetRecommendedMovies({ id, size, queryOptions }) {
+export function useRecommendedMovies({ id, size, queryOptions }) {
   return useInfiniteQuery(
     ["recommendedMovies", id],
     async ({ pageParam = 0 }) => {
@@ -182,7 +182,7 @@ export const getVideosById = async ({ id, types, size ,}) => {
   return data;
 };
 
-export function useGetVideosById({ id, types, size, queryOptions }) {
+export function useVideosById({ id, types, size, queryOptions }) {
   return useQuery(
     ["videos", id, types],
     () => getVideosById({ id, types, size }),

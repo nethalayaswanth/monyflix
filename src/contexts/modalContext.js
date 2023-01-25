@@ -1,25 +1,16 @@
 import React, { createContext, useContext, useMemo, useReducer } from "react";
 
-const ModalContext = createContext();
+const ModalStateContext = createContext();
+const ModalDispatchContext = createContext();
 
 const initialState = {
-  miniExpand: false,
-  expand: false,
-  blob:null,
+  
+  expand: false, 
   parent: null,
-  isHovering: false,
-  miniExpanded: false,
-  clicked:false,
-  hovered:false,
-  expanded: false,
-  activate: false,
-  open:false,
-  activated: false,
   details:false,
   movie: null,
   param: null,
-  enabled: true,
-  scroll:null
+  mini:false
 };
 
 function Reducer(state, action) {
@@ -123,6 +114,7 @@ function Reducer(state, action) {
         clicked:false,
         movie: null,
         param: null,
+        mini:false
       };
     }
 
@@ -149,23 +141,40 @@ function Reducer(state, action) {
 }
 
 function ModalProvider({ children }) {
-  const [currentState, dispatch] = useReducer(Reducer, initialState);
+  const [state, dispatch] = useReducer(Reducer, initialState);
 
-  const state = useMemo(() => currentState, [currentState]);
-  const value = { state, dispatch };
+
+  const value = [state, dispatch];
+  value.state=state
+  value.dispatch=dispatch
+
   return (
-    <ModalContext.Provider value={value}>{children}</ModalContext.Provider>
+    <ModalStateContext.Provider value={value}>
+      <ModalDispatchContext.Provider value={dispatch}>
+        {children}
+      </ModalDispatchContext.Provider>
+    </ModalStateContext.Provider>
   );
 }
 
 function useModalState() {
-  const context = useContext(ModalContext);
+  const context = useContext(ModalStateContext);
   if (context === undefined) {
     throw new Error("useModalState must be used within a ModalProvider");
   }
-  const { state, dispatch } = context;
-  return [state, dispatch];
+
+  return context;
 }
 
-export { useModalState, ModalProvider };
+function useModalDispatch() {
+  const context = useContext(ModalDispatchContext);
+  if (context === undefined) {
+    throw new Error("useModalDispatch must be used within a ModalProvider");
+  }
+  
+  return context;
+}
+
+
+export { useModalState,useModalDispatch, ModalProvider };
 
