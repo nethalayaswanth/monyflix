@@ -4,17 +4,19 @@ import down from "../../assets/down.png";
 export const Container = styled.div`
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
   background-color: rgb(4, 0, 0);
   margin: auto;
   max-width: 100vw;
+  align-items:center;
+  justify-content:center;
 
   z-index: 1;
 
   width: 100%;
   height: calc((110vw / 0.65));
-  @media only screen and (min-width: 740px) {
+  @media only screen and (min-width: 430px) {
     height: calc(56.25vw);
     max-height: 100vh;
   }

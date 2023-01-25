@@ -137,14 +137,12 @@ const Landing = ({ queryEnabled}) => {
 
   return (
     <Container onClick={handleClick} ref={refcb}>
-      
-        <ProgressiveImage
-          className="absolute"
-          original={original}
-          preview={preview}
-          alt=""
-        />
-  
+      <ProgressiveImage
+        className="absolute"
+        original={original}
+        preview={preview}
+        alt=""
+      />
 
       <div
         style={{
@@ -167,26 +165,27 @@ const Landing = ({ queryEnabled}) => {
       {id && (
         <div
           style={{
-            width: "100%",
-            height: "100%",
-            aspectRatio: "19/10",
+            height: "150%",
+            aspectRatio: "16/9 ",
             zIndex: 2,
             position: "absolute",
             backgroundColor: "transparent",
+            top: "50%",
+            left: "50%",
+            overflow: "hidden",
+            transform: "translate(-50%,-50%) ",
           }}
         >
-          <Video show={show}>
-            <Suspense fallback={<div></div>}>
-              <Youtube
-                id={id}
-                play={!play}
-                light={false}
-                audio={audio}
-                cb={showCb}
-                visible={inView}
-              />
-            </Suspense>
-          </Video>
+          <Suspense fallback={<div></div>}>
+            <Youtube
+              id={id}
+              play={!play}
+              light={false}
+              audio={audio}
+              cb={showCb}
+              visible={inView}
+            />
+          </Suspense>
         </div>
       )}
 
