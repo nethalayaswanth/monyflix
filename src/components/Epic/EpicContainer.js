@@ -9,7 +9,7 @@ import { useMoviesByGenre } from "../../requests/requests";
 import AudioControls from "../AudioControls";
 
 import Carousel from "../Carousel";
-import ProgressiveImage from "../ProgressiveImage";
+import ProgressiveImage from "../cachedImage";
 import { Youtube } from "../Youtube";
 import { useEpicState } from "./context";
 import Description from "./description";
@@ -28,8 +28,7 @@ export default function EpicContainer({ genres, title: header }) {
 
   const onSlideChange = useCallback(({activeIndex}) => {
 
-    console.log(activeIndex);
-    
+   
     dispatch({
       type: "set state",
       payload: {
@@ -47,7 +46,7 @@ export default function EpicContainer({ genres, title: header }) {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useMoviesByGenre({ genres });
+  } = useMoviesByGenre({ genres, withLandscapePosterPath:true });
 
   const movies = useMemo(() => {
     if (data) {
@@ -65,9 +64,9 @@ export default function EpicContainer({ genres, title: header }) {
   const title = movies[state.id]?.title;
 
   
-  console.log(movies[state.id]);
+  
    const original = backdropPath
-     ? `https://image.tmdb.org/t/p/original/${backdropPath}`
+     ? `https://image.tmdb.org/t/p/w780/${backdropPath}`
      : null;
    const preview = backdropPath
      ? `https://image.tmdb.org/t/p/w300/${backdropPath}`
@@ -105,19 +104,12 @@ export default function EpicContainer({ genres, title: header }) {
     setAudio((x) => !x);
   }, []);
 
-  const {
-    ref: elRef,
-    inView,
-    entry,
-  } = useInView({
-    threshold: 0.7,
-  });
+  
 
   return (
-    <Container ref={elRef}>
+    <Container >
       <div
         style={{
-          borderRadius: "initial",
           width: "100%",
           zIndex: 0,
         }}
@@ -135,12 +127,12 @@ export default function EpicContainer({ genres, title: header }) {
           zIndex: 8,
         }}
       >
-        {movies[state.id] && (
+        {/* {movies[state.id] && (
           <Details>
             <Description movie={movies[state.id]} genre={header} />
             {show && <AudioControls cb={handleAudio} audio={audio} />}
           </Details>
-        )}
+        )} */}
         <Carousel
           dark={true}
           data={movies}
@@ -149,10 +141,9 @@ export default function EpicContainer({ genres, title: header }) {
           isFetching={isFetchingNextPage}
           fetchMore={fetchNextPage}
           style={{ margin: 0 }}
-          card="card"
-          breakPointValues={[9, 8, 7, 6, 4, 3]}
+          card="landscape"
+          breakPointValues={[3,4,5,6,7,8,9]}
           onSlideChange={onSlideChange}
-          centerSlides={true}
           endPadding={true}
         />
       </CarouselWrapper>
@@ -162,20 +153,15 @@ export default function EpicContainer({ genres, title: header }) {
       {id && (
         <div className="absolute" style={{background:'rgba(0,0,0,0.8)'}}>
          
-            <Video style={{height:'90%'}}>
+         
               <Youtube
                 id={id}
                 play={!play}
-                light={false}
-                interectionOptions={{
-                  rootMargin: "200px 0px 200px 0px",
-                  threshold: 0.7,
-                }}
+                
                 audio={audio}
-                cb={showCb}
-                visible={inView}
+              
               />
-              </Video>
+          
            
         </div>
       )}

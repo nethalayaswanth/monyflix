@@ -1,174 +1,136 @@
-import { forwardRef, useCallback, useMemo, useState } from "react";
-import AudioControls from "../AudioControls";
-import { Button, Title } from "../CardModal/styles";
-import ProgressiveImage from "../ProgressiveImage";
+import { forwardRef, useCallback, useMemo } from "react";
+import ProgressiveImage from "../cachedImage";
+import { Title } from "../CardModal/styles";
 
-import { useInView } from "react-intersection-observer";
 import { useSearchParams } from "react-router-dom";
-import { useModalState } from "../../contexts/modalContext";
 import useMedia from "../../hooks/useMedia";
-import Video from "../CroppedVideo";
 import { Youtube } from "../Youtube";
+import { CardWrapper, CardContainer, AspectBox } from "./styles";
 import usePrefetch from "./usePrefetch";
+import { useSwiper, useSwiperSlide } from "swiper/react";
+import { Details } from "../Landing/Details";
 
-const LandscapeCard = ({ data: current }, ref) => {
-  const id = useMemo(() => {
-    if (!current) return null;
-    const videos = current.videos;
-    if (!videos) return null;
-    const clip = videos.clip[0];
-    const trailer = videos.trailer[0];
-    const teaser = videos.teaser[0];
+const LandscapeCard = ({ data: current,card }, ref) => {
+ 
 
-    return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
-  }, [current]);
+  const device = useMedia();
+  const mobile = device === "mobile";
+  const desktop = device === "desktop";
 
-  const src = current?.images?.filePath;
+   const id = useMemo(() => {
+     if (!current) return null;
+     const videos = current.videos;
+     if (!videos) return null;
+     const clip = videos.clip[0];
+     const trailer = videos.trailer[0];
+     const teaser = videos.teaser[0];
+     const video = [clip, trailer, teaser].find((x) => !!x);
+     return video ? video.key : null;
+   }, [current]);
 
-  const original = src ? `https://image.tmdb.org/t/p/original/${src}` : null;
-  const preview = src ? `https://image.tmdb.org/t/p/w300/${src}` : null;
+   const landscapePosterPath =
+     current?.landscapePosterPath ?? current?.backdropPath;
+   const backdropPath = current?.backdropPath;
+   const posterPath = current?.posterPath;
+
+  const posterOriginal = posterPath
+    ? `https://image.tmdb.org/t/p/original${posterPath}`
+    : null;
+  const posterPreview = posterPath
+    ? `https://image.tmdb.org/t/p/w92${posterPath}`
+    : null;
+  const backdropOriginal = backdropPath
+    ? `https://image.tmdb.org/t/p/original/${backdropPath}`
+    : null;
+  const backdropPreview = backdropPath
+    ? `https://image.tmdb.org/t/p/w300/${backdropPath}`
+    : null;
+  const landscapeOriginal = landscapePosterPath
+    ? `https://image.tmdb.org/t/p/original/${landscapePosterPath}`
+    : null;
+  const landscapePreview = landscapePosterPath
+    ? `https://image.tmdb.org/t/p/w300/${landscapePosterPath}`
+    : null;
+
+     const landscape = card ==='landscape'
+  const backdrop = { original: backdropOriginal, preview: backdropPreview }
+    // ? { original: landscapeOriginal, preview: landscapePreview }
+    // : { original: backdropOriginal, preview: backdropPreview };
+  const poster = { original: posterOriginal, preview: posterPreview };
+
+  const titlePoster = { original: landscapeOriginal, preview: landscapePreview };
+
+
+  const bg=desktop?backdrop:poster
+
+  const title = current?.title;
+  const overview = current?.overview;
 
   let [searchParams, setSearchParams] = useSearchParams();
 
-  const [{ activated, expand }, dispatch] = useModalState();
-
-  const device = useMedia();
-
-  const mobile = device === "mobile";
-  const desktop = device === "desktop";
-  const { ref: prefetchRef, handlePrefetch } = usePrefetch({
+  const { ref: prefetchRef } = usePrefetch({
     id: current?.id,
     whileInView: !desktop,
     enabled: current?.id && !desktop,
   });
 
   const handleClick = useCallback(() => {
-    dispatch({
-      type: "set modal",
-      ...(!activated && { scroll: window.scrollY }),
-    });
-    setSearchParams({ mv: current.id });
-  }, [activated, current?.id, dispatch, setSearchParams]);
-
-  const {
-    ref: elRef,
-    inView,
-    entry,
-  } = useInView({
-    threshold: 0.95,
-    rootMargin: "100px 0px 100px 0px",
-  });
-
-  const refcb = useCallback(
-    (node) => {
-      elRef(node);
-
-      if (typeof ref === "function") {
-        ref(node);
-        return;
-      }
-      if (ref && ref.current) {
-        ref.current = node;
-      }
-    },
-    [elRef, ref]
-  );
-
-  const [audio, setAudio] = useState(false);
-  const [show, setShow] = useState();
-
-  const showCb = useCallback(({ show }) => {
-    setShow(show);
+    // dispatch({
+    //   type: "set modal",
+    //   ...(!activated && { scroll: window.scrollY }),
+    // });
+    // setSearchParams({ mv: current.id });
   }, []);
 
-  const handleAudio = useCallback(() => {
-    setAudio((x) => !x);
-  }, []);
+  // const play = activated || expand;
 
-  const play = activated || expand;
+  const slide = useSwiperSlide();
+  const swiper = useSwiper();
+  const onVideoEnded = useCallback(() => {
+    swiper.slideNext();
+  }, [swiper]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        borderRadius: "6px",
-        overflow: "hidden",
-      }}
-      ref={prefetchRef}
-    >
-      <div
-        style={{
-          width: "100%",
-          height: "auto",
-          aspectRatio: "19/10",
-          maxHeight: "min(800px,95vh)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-
-          position: "relative",
-        }}
-        ref={refcb}
-      >
-        <ProgressiveImage
-          style={{
-            borderRadius: "6px",
-            zIndex: 1,
-            maxHeight: "min(800px,95vh)",
-          }}
-          original={original}
-          preview={preview}
-          alt={`${current?.title}`}
-        />
-        {id && (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              aspectRatio: "19/10",
-              maxHeight: "800px",
-              zIndex: 2,
-              position: "absolute",
-              backgroundColor: "transparent",
-            }}
-          >
-            <Video show={show} crop={false}>
-              <Youtube
-                id={id}
-                play={!play}
-                light={false}
-                audio={audio}
-                cb={showCb}
-                visible={inView}
-              />
-            </Video>
-          </div>
+    <CardContainer ref={prefetchRef}>
+      <CardWrapper className={landscape ? "landscape" : "landing"}>
+        <AspectBox>
+          <ProgressiveImage
+            original={bg.original}
+            preview={bg.preview}
+            alt={`${title}`}
+          />
+        </AspectBox>
+        {desktop && (
+          <Details
+            title={title}
+            overview={overview}
+            landscapePosterPath={landscapePosterPath}
+            active={slide.isActive}
+          />
         )}
-
-        {show && (
-          <Button
-            style={{ bottom: 0, top: "auto", zIndex: 10 }}
-            onClick={handleAudio}
-          >
-            <AudioControls audio={audio} />
-          </Button>
+        {id && desktop && (
+          <Youtube
+            id={id}
+            light={false}
+            absolute
+            play={slide.isActive}
+            onVideoEnded={onVideoEnded}
+          />
         )}
-        <button
+        {/* <button
           style={{
             width: "100%",
             height: "100%",
             position: "absolute",
             top: 0,
             left: 0,
-            zIndex: 3,
+            zIndex: -1,
           }}
           onClick={handleClick}
-        />
-      </div>
-      <Title>{current?.title}</Title>
-    </div>
+        /> */}
+      </CardWrapper>
+      {/* <Title>{title}</Title> */}
+    </CardContainer>
   );
 };
 

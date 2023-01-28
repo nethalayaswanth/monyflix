@@ -1,11 +1,13 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect,useRef, useState } from "react";
 import styled from "styled-components";
 import { useImage } from "../contexts/imageCachingContext";
 import Shimmer from "./shimmer";
+import { animated, useTransition } from "react-spring";
 
-export const Img = styled(Shimmer)`
-  object-fit: contain;
+
+export const Img = styled(animated(Shimmer))`
+
   position: absolute;
   top: 0;
   width: 100%;
@@ -16,25 +18,31 @@ export const Img = styled(Shimmer)`
 `;
 
 
-const ProgressiveImage = ({ original, preview, style, onFetch, ...props }) => {
+const ProgressiveImage = ({ original,landing, preview, style, onFetch, ...props }) => {
+ 
  
 const {data,isLoading}= useImage({src:original,preview})
 
-console.log(data)
+  const [transitions, api] = useTransition(data, () => ({
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: { opacity: 0 },
+  }));
 
 
-  return (
-    <Img
-      src={data}
-      as={!data?"div":'img'}
-      style={{
-        ...style,
-        opacity: isLoading ? 0.8 : 1,
+  return  transitions(
+    (transitionStyles, item) =>{ 
+    return (
+          <Img
+            key={item}
+            src={item}
+            style={{ ...style, ...transitionStyles }}
+            alt={props.alt || " "}
+            {...props}
+          />
+        );}
+  )
 
-        transition: "opacity .15s linear ",
-      }}
-      alt={props.alt || " "}
-    />
-  );
+    
 };
 export default ProgressiveImage;

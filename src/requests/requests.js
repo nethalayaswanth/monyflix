@@ -24,14 +24,14 @@ const graphQLClient = new GraphQLClient(endpoint, {
   },
 });
 
-export function useMovies({ type, withImages, queryOptions }) {
+export function useMovies({ type, withLandscapePosterPath, queryOptions }) {
   return useInfiniteQuery(
     ["movies", type],
     async ({ pageParam = 0 }) => {
       const data = await graphQLClient.request(Movies, {
         type,
         after: pageParam,
-        withImages,
+        withLandscapePosterPath,
       });
       return data;
     },
@@ -82,7 +82,7 @@ export function useRecommendedMovies({ id, size, queryOptions }) {
     }
   );
 }
-export function useMoviesByGenre({ genres, queryOptions }) {
+export function useMoviesByGenre({ genres, queryOptions, withLandscapePosterPath=false }) {
   const ids = {
     Romance: 10749,
     Drama: 18,
@@ -104,13 +104,7 @@ export function useMoviesByGenre({ genres, queryOptions }) {
     Documentary: 99,
   };
 
- 
-
-
-
- const genreIds = genres.map((genre) => `${ids[genre]}`);
-
- 
+  const genreIds = genres.map((genre) => `${ids[genre]}`);
 
   return useInfiniteQuery(
     ["moviesByGenre", ...genres],
@@ -118,6 +112,7 @@ export function useMoviesByGenre({ genres, queryOptions }) {
       const data = await graphQLClient.request(MovieGenre, {
         genres: genreIds,
         after: pageParam,
+        withLandscapePosterPath
       });
       return data;
     },
@@ -147,19 +142,24 @@ export function useLatestMovie({queryOptions}) {
   );
 }
 
-export function useTrendingMovies({ type, withImages, size,queryOptions }) {
+export function useTrendingMovies({
+  type,
+  withLandscapePosterPath,
+  size,
+  queryOptions,
+}) {
   return useInfiniteQuery(
     ["trendingMovies"],
     async ({ pageParam = 0 }) => {
       const data = await graphQLClient.request(trendingMovies, {
         type,
         after: pageParam,
-        withImages,
+        withLandscapePosterPath,
       });
       return data;
     },
-    { 
-      ...queryOptions&&queryOptions,
+    {
+      ...(queryOptions && queryOptions),
       getNextPageParam: ({ trendingMovies: { cursor, hasMore } }, pages) => {
         return hasMore ? cursor : undefined;
       },

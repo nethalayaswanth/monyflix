@@ -9,28 +9,20 @@ export const Container = styled.div`
   overflow: hidden;
   background-color: rgb(0, 0, 0);
   margin: auto;
-  max-width: 100vw;
   z-index: 1;
-  height: calc((110vw / 0.65));
 
   max-height: 100vh;
+  min-height: 500px;
 
-  /* @media only screen and (min-width: 480px) {
-    min-height: calc(100vw / 0.85);
-  } */
-
-  @media only screen and (max-width: 100vw) {
-    width: 100%;
-    height: calc(56.25vw);
-    max-height: 95vh;
+  @media only screen and (min-width: 550px) {
+    min-height: 750px;
   }
 
-  @media only screen and (max-width: 1320px) {
-    height: calc(177vw);
-    max-height: 80vh;
+  @media only screen and (min-width: 650px) {
+    min-height: 950px;
   }
-  @media only screen and (max-width: 420px) {
-    height: calc((110vw / 0.65));
+  @media only screen and (min-width: 740px) {
+    min-height: 555px;
   }
 
   .absolute {

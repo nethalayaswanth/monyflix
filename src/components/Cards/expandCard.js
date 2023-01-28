@@ -16,7 +16,7 @@ import { useModalState, useModalDispatch } from "../../contexts/modalContext";
 import useMedia from "../../hooks/useMedia";
 import { mergeRefs } from "../../utils";
 import ProgressiveImage from "../cachedImage";
-import { CardWrapper as CardOuter } from "./styles";
+import { CardContainer as CardOuter } from "./styles";
 import usePrefetch from "./usePrefetch";
 
 const CardView = forwardRef(
@@ -63,7 +63,7 @@ const ExpandCard = forwardRef(({ id, style, data: movie }, ref) => {
   const miniRef = useRef();
 
   const timeOutRef = useRef();
-
+ 
     const src = movie?.posterPath;
 
     const original = src ? `https://image.tmdb.org/t/p/w342${src}` : null;

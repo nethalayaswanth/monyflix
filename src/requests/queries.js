@@ -19,6 +19,7 @@ export const CORE_MOVIE_FIELDS = gql`
     adult
     popularity
     releaseDate
+    landscapePosterPath @include(if: $withLandscapePosterPath)
 
     videos(types: $videoTypes) @include(if: $withVideo) {
       clip {
@@ -41,13 +42,12 @@ export const MovieGenre = gql`
     $after: Int
     $withVideo: Boolean = true
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
+    $withLandscapePosterPath: Boolean = false
   ) {
     MovieGenre(genres: $genres, after: $after) {
       data {
         ...CoreMovieFields
-        images{
-          filePath
-        }
+        
       }
       cursor
       hasMore
@@ -62,14 +62,12 @@ export const Movies = gql`
     $after: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
-    $withImages: Boolean = false
+    $withLandscapePosterPath: Boolean = false
   ) {
     movies(type: $type, after: $after) {
       data {
-        ...CoreMovieFields
-        images @include(if: $withImages) {
-          filePath
-        }
+        ...CoreMovieFields 
+         
       }
       cursor
       hasMore
@@ -78,35 +76,18 @@ export const Movies = gql`
 `;
 
 export const Movie = gql`
-  ${CORE_VIDEO_FIELDS}
+  ${CORE_MOVIE_FIELDS}
   query Query(
     $id: ID!
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
     $withVideo: Boolean = true
+    $withLandscapePosterPath: Boolean = false
   ) {
     movie(id: $id) {
-      tagline
+      ...CoreMovieFields
       runtime
       genres
-      backdropPath
-      posterPath
-      id
-      overview
-      title
-      adult
-      popularity
-      releaseDate
-      videos(types: $videoTypes) @include(if: $withVideo) {
-        clip {
-          ...CoreVideoFields
-        }
-        trailer {
-          ...CoreVideoFields
-        }
-        teaser {
-          ...CoreVideoFields
-        }
-      }
+      tagline
     }
   }
 `;
@@ -115,12 +96,13 @@ export const similarMovies = gql`
   ${CORE_MOVIE_FIELDS}
   query similarMovies(
     $id: ID!
-    $size:Int
+    $size: Int
     $after: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
+    $withLandscapePosterPath: Boolean = false
   ) {
-    similarMovies(id: $id, after: $after,size:$size) {
+    similarMovies(id: $id, after: $after, size: $size) {
       data {
         ...CoreMovieFields
       }
@@ -137,13 +119,11 @@ export const recommendedMovies = gql`
     $after: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
+    $withLandscapePosterPath: Boolean = false
   ) {
     recommendedMovies(id: $id, after: $after, size: $size) {
       data {
         ...CoreMovieFields
-        images {
-          filePath
-        }
       }
       cursor
       hasMore
@@ -157,12 +137,10 @@ export const latestMovie = gql`
   query latestMovie(
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
+    $withLandscapePosterPath: Boolean = true
   ) {
     latestMovie {
-      ...CoreMovieFields
-      images {
-        filePath
-      }
+      ...CoreMovieFields 
     }
   }
 `;
@@ -172,15 +150,12 @@ export const trendingMovies = gql`
   query trendingMovies(
     $after: Int
     $withVideo: Boolean = false
-    $withImages: Boolean = false
+    $withLandscapePosterPath: Boolean = false
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
   ) {
     trendingMovies(after: $after) {
       data {
         ...CoreMovieFields
-        images @include(if: $withImages) {
-          filePath
-        }
       }
       cursor
       hasMore

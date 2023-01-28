@@ -27,9 +27,8 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
 
  
   let [searchParams, setSearchParams] = useSearchParams();
- 
 
-  const src = current?.images?.filePath;
+  const src = current?.landscapePosterPath;
 
   const original = src ? `https://image.tmdb.org/t/p/w780${src}` : null;
   const preview = src ? `https://image.tmdb.org/t/p/w300${src}` : null;

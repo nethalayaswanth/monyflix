@@ -6,6 +6,7 @@ import {
   useRef,
 } from "react";
 import usePrevious from "../hooks/usePrevious";
+import isEqual from "lodash/isEqual";
 
 export const ImagesContext = createContext();
 export function ImagesProvider({ children, client }) {
@@ -20,7 +21,6 @@ export class ImagesClient {
   }
 
   getQuery = (options) => {
-
     const hash = options.src;
     let query = this.queries.find((d) => d.hash === hash);
     if (!query) {
@@ -34,35 +34,47 @@ export class ImagesClient {
 export const useImage = (options) => {
   const client = useContext(ImagesContext);
 
-
   const [_, renderer] = useReducer((i) => i + 1, 0);
 
   const observerRef = useRef();
-  const unsubscribe=useRef()
+  const unsubscribe = useRef();
 
-  const prevOptions=usePrevious(options)
+  const ref = useRef({
+    value: options,
+    prev: { src: null, preview: null },
+  });
 
+  const current = ref.current.value;
 
-const keyChanged=prevOptions?.src===options.src
-
-  if (!observerRef.current || keyChanged) {
-    if(unsubscribe.current){
-       unsubscribe.current()
-    }
-    observerRef.current = createQueryObserver(client, options);
-    unsubscribe.current = observerRef.current.subscribe(renderer);
+  const prevOptions = ref.current.prev;
+  let keyChanged =false;
+  if (!isEqual(options, current)) {
+    ref.current = {
+      value: options,
+      prev: current,
+    };
+    keyChanged = true;
   }
- 
+
   useEffect(() => {
     return unsubscribe.current;
   }, []);
 
+  if (!observerRef.current || keyChanged) {
+    if (unsubscribe.current) {
+      unsubscribe.current();
+    }
+
+    if (!options?.src)
+      return { data: undefined, status: "idle", isLoading: false };
+    observerRef.current = createQueryObserver(client, options);
+    unsubscribe.current = observerRef.current.subscribe(renderer);
+  }
 
   return observerRef.current.getResult();
 };
 function createQuery(client, { src, preview }) {
 
-    console.log(src,preview)
   let query = {
     promise: null,
     hash: src,
@@ -73,6 +85,7 @@ function createQuery(client, { src, preview }) {
     },
     subscribers: [],
     setState: (updater) => {
+       
       query.state = updater(query.state);
       query.subscribers.forEach((subscriber) => {
         subscriber.notify();
@@ -82,7 +95,7 @@ function createQuery(client, { src, preview }) {
       query.subscribers.push(subscriber);
 
       return () => {
-       query.subscribers=  query.subscribers.filter((d) => d !== subscriber);
+        query.subscribers = query.subscribers.filter((d) => d !== subscriber);
       };
     },
     fetch: async () => {
@@ -126,10 +139,10 @@ function createQuery(client, { src, preview }) {
     },
   };
 
-  return query
+  return query;
 }
 
-function createQueryObserver(client,options) {
+function createQueryObserver(client, options) {
   const query = client.getQuery(options);
 
   const observer = {
@@ -137,13 +150,13 @@ function createQueryObserver(client,options) {
     getResult: () => query.state,
     subscribe: (callback) => {
       observer.notify = callback;
-  
+
       const unsubscribe = query.subscribe(observer);
-      
+
       query.fetch();
       return unsubscribe;
     },
   };
 
-  return observer
+  return observer;
 }

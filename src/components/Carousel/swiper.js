@@ -1,13 +1,21 @@
 import React, { forwardRef, useCallback, useRef, useState } from "react";
 
 import "swiper/css";
+import "swiper/css/effect-fade";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/virtual";
 import { Swiper as ReactSwiper } from "swiper/react";
-import {  Nav } from "./views";
+import { Nav } from "./views";
 
-import { FreeMode, Keyboard, Mousewheel } from "swiper";
+import {
+  EffectFade,
+  FreeMode,
+  Keyboard,
+  Mousewheel,
+  Navigation,
+  Pagination,
+} from "swiper";
 
 function Index(
   {
@@ -19,6 +27,7 @@ function Index(
     mobile,
     desktop,
     SlidesPerView,
+    effectFade,
     ...props
   },
   ref
@@ -36,19 +45,15 @@ function Index(
     if (instance.isLocked) {
       setPrev(false);
       setNext(false);
-      return
+      return;
     }
-     setPrev(swiper.activeIndex > 0);
+    setPrev(instance.activeIndex > 0);
   }, []);
 
-  const params = {
-    mousewheel: { forceToAxis: true },
-  };
 
   const onSlideChange = (swiper) => {
-    setPrev(swiper.activeIndex > 0);
-
-    setNext(swiper.activeIndex < swiper.slides.length - SlidesPerView);
+    setPrev(swiper.activeIndex!==0);
+    setNext(swiper.activeIndex <=swiper.slides.length - SlidesPerView);
   };
 
   return (
@@ -58,11 +63,24 @@ function Index(
         direction={"horizontal"}
         spaceBetween={10}
         enabled={enabled}
-        modules={[Mousewheel, FreeMode, Keyboard]}
+        modules={[
+          Mousewheel,
+          EffectFade,
+          Navigation,
+          Pagination,
+          FreeMode,
+          Keyboard,
+        ]}
         onSwiper={onSwiperReady}
         onSlideChange={onSlideChange}
         cssMode={true}
         passiveListeners={true}
+        mousewheel={{ forceToAxis: true }}
+        navigation={{
+          enabled: true,
+          nextEl: nextEl.current,
+          prevEl: prevEl.current,
+        }}
         freeMode={{
           enabled: true,
           sticky: true,
@@ -73,9 +91,26 @@ function Index(
           onlyInViewport: false,
         }}
         {...(transitionEvents && transitionEvents)}
-        {...params}
-        {...props}
+        {...(effectFade && {
+          effect: "fade",
+          cssMode: false,
+
+          pagination: {
+            type: "bullets",
+            dynamicBullets: true,
+            dynamicMainBullets: 6,
+            clickable: true,
+          },
+
+          fadeEffect: {
+            crossFade: true,
+          },
+        })}
+        longSwipesRatio={0.3}
+        slidesPerGroupAuto="auto"
         slidesPerView="auto"
+        longSwipesMs={200}
+        {...props}
       >
         {children}
       </ReactSwiper>
@@ -93,6 +128,7 @@ function Index(
         next
         ref={prevEl}
         onClick={() => {
+          console.log(swiper.current.activeIndex);
           swiper.current.slideNext();
         }}
         enable={nextEnabled}

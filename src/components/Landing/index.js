@@ -1,10 +1,13 @@
 import React, {
+  forwardRef,
   lazy,
-  Suspense, useCallback,
+  Suspense,
+  useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
-  useState
+  useState,
 } from "react";
 import { useInView } from "react-intersection-observer";
 import { useQueryClient } from "react-query";
@@ -17,183 +20,224 @@ import {
 } from "../../requests/requests";
 import AudioControls from "../AudioControls";
 import Video from "../CroppedVideo";
-
+import { ReactComponent as UnMute } from "../../assets/unMute.svg";
+import { ReactComponent as Mute } from "../../assets/mute.svg";
 
 import { useModalState } from "../../contexts/modalContext";
 
 import Description from "../Epic/description";
-import { Details } from "../Epic/views";
-import ProgressiveImage from "../ProgressiveImage";
-import { Container, Down, Gradient, Picture, Scroll } from "./styles";
+import { Details } from "./Details";
 
+import ProgressiveImage from "../cachedImage";
+import {
+  Container,
+  Down,
+  Gradient,
+  MoreDetails,
+  HeaderButton,
+  VideoControls,
+  Picture,
+  Title,
+  Overview,
+  Scroll,
+  LinerGradient,
+  HeroGradient,
+} from "./styles";
+import { useSpring } from "react-spring";
+import { useHover } from "@use-gesture/react";
+import { MdApi } from "react-icons/md";
+import useMeasure from "react-use-measure";
+import Carousel from "../Carousel";
+import { useSwiper, useSwiperSlide } from "swiper/react";
 
 const types = ["CLIP", "TRAILER", "TEASER", "BLOOPERS", "BTS", "FEATURETTE"];
 
-const Youtube=lazy(()=>{ return import("../Youtube")})
+const Youtube = lazy(() => {
+  return import("../Youtube");
+});
 
-const Landing = ({ queryEnabled}) => {
-  const movieData = useLatestMovie({ queryOptions: { enabled:!!queryEnabled } });
+export const LandingCard = forwardRef(
+  ({ queryEnabled, data: movie, index }, ref) => {
+    const backdropPath = movie?.backdropPath;
+    const posterPath = movie?.posterPath;
 
-  const movie = movieData?.data?.latestMovie;
-  const backdropPath = movie?.images?.filePath;
-  const posterPath = movie?.posterPath;
+    const slide = useSwiperSlide();
 
-  const device = useMedia();
+    const swiper = useSwiper();
+    const device = useMedia();
 
-  const desktop = device === "desktop";
+    const desktop = device === "desktop";
 
-  const src = desktop ? backdropPath : posterPath;
+    const src = desktop ? backdropPath : posterPath;
+    
+    const originalPoster = src ? `https://image.tmdb.org/t/p/w780${src}` : null;
+    const previewPoster = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
 
-  const original = src ? `https://image.tmdb.org/t/p/original${src}` : null;
-  const preview = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
-
-  const videoData = useVideosById({
-    id: movie?.id,
-    types,
-    queryOptions: {
-      enabled: !!movie?.id,
-    },
-  });
-
-  const videos = videoData?.data?.videosById;
-
-  const scrollRef = useRef();
-
-  const id = useMemo(() => {
-    if (!videos) return null;
-
-    const clip = videos.clip[0];
-    const trailer = videos.trailer[0];
-    const teaser = videos.teaser[0];
-    return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
-  }, [videos]);
-
-  const { ref, inView, entry } = useInView({
-    threshold: 0.95,
-  });
-
-  const refcb = useCallback(
-    (node) => {
-      scrollRef.current = node;
-      if (typeof ref === "function") {
-        ref(node);
-        return;
-      }
-      if (ref && ref.current) {
-        ref.current = node;
-      }
-    },
-    [ref]
-  );
-
-  const handleScroll = useCallback((e) => {
-    e.stopPropagation();
-    const { bottom } = scrollRef.current.getBoundingClientRect();
-    const len = Math.abs(window.scrollX - bottom);
-    window.scrollBy({
-      top: len,
-      left: 0,
-      behavior: "smooth",
-    });
-  }, []);
-
-  const [{ activated, expand }, dispatch] = useModalState();
-
-  const play = activated || expand;
-
-  let [searchParams, setSearchParams] = useSearchParams();
-  const queryClient = useQueryClient();
-
-
-  useEffect(() => {
-    const id = movie?.id;
-    if (!id) return;
-    (async () => {
-      await queryClient.prefetchQuery(["movie", id], async () =>
-        getMovieDetails({ id: id })
-      );
-    })();
-  }, [movie?.id, queryClient]);
-
-  const handleClick = useCallback(() => {
-    dispatch({
-      type: "set modal",
-      ...(!activated && { scroll: window.scrollY }),
+    const videoData = useVideosById({
+      id: movie?.id,
+      types,
+      queryOptions: {
+        enabled: !!movie?.id,
+      },
     });
 
-    setSearchParams({ mv: movie.id });
-  }, [activated, dispatch, movie?.id, setSearchParams]);
+    const videos = videoData?.data?.videosById;
 
-  const [audio, setAudio] = useState(false);
-  const [show, setShow] = useState();
+    const scrollRef = useRef();
 
-  const showCb = useCallback(({ show }) => {
-    setShow(show);
-  }, []);
+    const id = useMemo(() => {
+      if (!videos) return null;
 
-  const handleAudio = useCallback(() => {
-    setAudio((x) => !x);
-  }, []);
+      const clip = videos.clip[0];
+      const trailer = videos.trailer[0];
+      const teaser = videos.teaser[0];
+      return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
+    }, [videos]);
 
-  return (
-    <Container onClick={handleClick} ref={refcb}>
-      <ProgressiveImage
-        className="absolute"
-        original={original}
-        preview={preview}
-        alt=""
-      />
+    const refcb = useCallback(
+      (node) => {
+        scrollRef.current = node;
 
-      <div
-        style={{
-          zIndex: 5,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-end",
-        }}
-        className="absolute"
+        if (typeof ref === "function") {
+          ref(node);
+          return;
+        }
+        if (ref && ref.current) {
+          ref.current = node;
+        }
+      },
+      [ref]
+    );
+
+    const handleScroll = useCallback((e) => {
+      e.stopPropagation();
+      const { bottom } = scrollRef.current.getBoundingClientRect();
+      const len = Math.abs(window.scrollX - bottom);
+      window.scrollBy({
+        top: len,
+        left: 0,
+        behavior: "smooth",
+      });
+    }, []);
+
+    const [{ activated, expand }, dispatch] = useModalState();
+
+    const play = activated || expand;
+
+    let [searchParams, setSearchParams] = useSearchParams();
+
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+      const id = movie?.id;
+      if (!id) return;
+      (async () => {
+        await queryClient.prefetchQuery(["movie", id], async () =>
+          getMovieDetails({ id: id })
+        );
+      })();
+    }, [movie?.id, queryClient]);
+
+    const handleClick = useCallback(() => {
+      dispatch({
+        type: "set modal",
+        ...(!activated && { scroll: window.scrollY }),
+      });
+
+      setSearchParams({ mv: movie.id });
+    }, [activated, dispatch, movie?.id, setSearchParams]);
+
+    const [audio, setAudio] = useState(false);
+    const [show, setShow] = useState();
+
+    const landscapePosterPath = movie?.landscapePosterPath;
+    const original = landscapePosterPath
+      ? `https://image.tmdb.org/t/p/w780${landscapePosterPath}`
+      : null;
+    const preview = landscapePosterPath
+      ? `https://image.tmdb.org/t/p/w300${landscapePosterPath}`
+      : null;
+
+    useLayoutEffect(() => {
+      console.log(swiper.isActive, movie?.title);
+    }, [movie?.title, swiper.isActive]);
+
+    const onVideoEnded = useCallback(() => {
+      console.log("ended");
+      swiper.slideNext();
+    }, [swiper]);
+    return (
+      <Container
+        ref={refcb}
+        style={{ pointerEvents: slide.isActive ? "auto" : "none" }}
       >
-        <Gradient style={{ zIndex: 1 }} />
+        <ProgressiveImage
+          className="absolute"
+          original={originalPoster}
+          preview={previewPoster}
+          alt=""
+        />
 
-        {(show || desktop) && (
-          <Details style={{ zIndex: 2, height: "18vw", paddingBottom: "10vh" }}>
-            <Description movie={movie} />
-            {show && <AudioControls cb={handleAudio} audio={audio} />}
-          </Details>
-        )}
-      </div>
-      {id && (
         <div
           style={{
-            height: "150%",
-            aspectRatio: "16/9 ",
-            zIndex: 2,
-            position: "absolute",
-            backgroundColor: "transparent",
-            top: "50%",
-            left: "50%",
-            overflow: "hidden",
-            transform: "translate(-50%,-50%) ",
+            zIndex: 5,
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "flex-end",
           }}
+          className="absolute"
         >
+          <Gradient style={{ zIndex: 1 }} />
+
+          {(show || desktop) && (
+            <>
+              <Details
+                title={movie?.title}
+                overview={movie?.overview}
+                landscapePosterPath={movie?.landscapePosterPath}
+                active={slide.isActive}
+              />
+            </>
+          )}
+        </div>
+
+        {id && (
           <Suspense fallback={<div></div>}>
             <Youtube
               id={id}
-              play={!play}
+              play={slide.isActive}
               light={false}
               audio={audio}
-              cb={showCb}
-              visible={inView}
+              title={movie?.title}
+              onVideoEnded={onVideoEnded}
             />
           </Suspense>
-        </div>
-      )}
+        )}
+        <HeroGradient />
+      </Container>
+    );
+  }
+);
 
-      <Scroll onClick={handleScroll}>
-        <Down />
-      </Scroll>
-    </Container>
+const Landing = ({ queryEnabled }) => {
+  
+  const movieData = useLatestMovie({
+    queryOptions: { enabled: !!queryEnabled },
+  });
+
+  const data = movieData?.data?.latestMovie;
+
+  return (
+    <Carousel
+      longSwipesRatio={0.05}
+      longSwipesMs={10}
+      long
+      data={data}
+      card={"landing"}
+      dark
+      noPadding
+      effectFade
+    ></Carousel>
   );
 };
-
 export default Landing;

@@ -1,35 +1,44 @@
 import { useCallback, useRef, useState } from "react";
-import usePrevious from "./usePrevious"
-const useHover = () => {
+import useLatest from "./useLatest";
+import usePrevious from "./usePrevious";
+const useHover = ({ onHover }={}) => {
   const [isHovering, setIsHovering] = useState();
-  
- const prevHoveringState= usePrevious(isHovering)
+
+  const prevHoveringState = usePrevious(isHovering);
+
+ const onHoverCallBack=useLatest(onHover)
   const handleMouseOver = useCallback(
     (e) => {
-     if(!prevHoveringState){
-setIsHovering(true);
-     }
-      
+      if (onHoverCallBack.current) {
+        onHoverCallBack.current(true)
+        return
+      }
+        if (!prevHoveringState) {
+          setIsHovering(true);
+        }
     },
-    [setIsHovering,prevHoveringState]
+    [onHoverCallBack, prevHoveringState]
   );
 
   const handleMouseOut = useCallback(
     (e) => {
-       if(prevHoveringState){
-setIsHovering(false);
-     }
+       if (onHoverCallBack.current) {
+         onHoverCallBack.current(true);
+         return
+       }
+      if (prevHoveringState) {
+        setIsHovering(false);
+      }
     },
-    [setIsHovering,prevHoveringState]
+    [onHoverCallBack, prevHoveringState]
   );
 
   const nodeRef = useRef();
 
   const callbackRef = useCallback(
     (node) => {
-      
       if (!node) return;
-      
+
       if (nodeRef.current) {
         nodeRef.current.removeEventListener("mouseenter", handleMouseOver);
         nodeRef.current.removeEventListener("mouseleave", handleMouseOut);

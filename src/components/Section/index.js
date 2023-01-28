@@ -70,6 +70,7 @@ export const SectionWrapper = ({
   variables,
   queryEnabled,
   whileInView,
+  titleCard,
   card,
   ...props
 }) => {
@@ -103,9 +104,10 @@ export const SectionWrapper = ({
     isFetchingNextPage,
     status,
     isLoading,
+   
   } = useQuery({
     ...variables,
-    withImages: details,
+    withLandscapePosterPath: details || titleCard,
     queryOptions: { enabled: !!fetchQuery },
   });
 
@@ -147,6 +149,7 @@ export const Section = memo((props) => {
   return (
     <ErrorBoundary
       fallbackRender={({ resetErrorBoundary, error }) => {
+        console.warn(error)
         return (
           <div>
             There was an error!

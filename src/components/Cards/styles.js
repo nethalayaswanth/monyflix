@@ -1,47 +1,90 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+import { animated } from "react-spring";
 import Shimmer from "../shimmer";
- 
-export const CardContainer = styled.div`
+import { circleGradient } from "../Landing/styles";
+
+export const Flex = styled(animated.div)`
   box-sizing: border-box;
-  box-shadow: 0 4px 7px rgb(0 0 0 / 25%);
-  margin-bottom: 8px;
-  overflow: hidden;
-  border-radius: 12px;
-  padding-top: ${({ height }) => (height ? `${height}` : "149.82%")};
-  background-color: ${({ color }) =>
-    color ? `${color}` : "rgb(249, 250, 251)"};
   position: relative;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  ${({ center }) => {
+    return center
+      ? css`
+          align-items: center;
+          justify-content: center;
+        `
+      : "";
+  }}
 `;
 
-export const CardWrapper = styled.div`
-  box-sizing: border-box;
+export const Absolute = styled.div`
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  object-fit: cover;
+`;
 
+export const AspectBox = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: ${({ landscape }) => (landscape ? 16 / 9 : 2 / 3)};
+
+  &.absolute {
+    ${Absolute}
+  }
+`;
+
+export const textSmall = css`
+  font-size: 15px;
+  line-height: 1.33338;
+  font-weight: 400;
+  letter-spacing: 0;
+`;
+export const CardWrapper = styled(Flex)`
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+
+  @media only screen and (min-width: 740px) {
+    &.landscape::after,
+    &.landing::after {
+      ${circleGradient}
+    }
+  }
+  &.landscape {
+    ${AspectBox} {
+      aspect-ratio: 2/3;
+      @media only screen and (min-width: 740px) {
+        aspect-ratio: 8/3;
+      }
+    }
+  }
+
+  &.landing {
+    ${AspectBox} {
+      max-height: 700px;
+      aspect-ratio: 2/3;
+      overflow: hidden;
+      margin-bottom: 20px;
+      margin-top: 20px;
+
+      @media only screen and (min-width: 740px) {
+        aspect-ratio: 16/9;
+        max-height: 100vh;
+      }
+    }
+  }
+`;
+
+export const CardContainer = styled.div`
+  box-sizing: border-box;
   overflow: hidden;
   background-color: ${({ color }) =>
     color ? `${color}` : "rgb(249, 250, 251)"};
   position: relative;
   width: 100%;
   border-radius: 6px;
-`;
-
-export const Image = styled(Shimmer)`
-  object-fit: contain;
-  position: absolute;
-  top: 0;
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  left: 0;
-  object-fit: cover;
-  z-index: 5;
-`;
-
-export const AspectBox = styled.div`
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  object-fit: cover;
 `;

@@ -1,5 +1,6 @@
 
 import { useCallback, useRef } from "react";
+import isEqual from 'lodash/isEqual'
 
 export default function usePrevious(value) {
   
@@ -12,7 +13,7 @@ export default function usePrevious(value) {
 
 
 
-  if (value !== current) {
+  if (!isEqual(value,current)) {
     ref.current = {
       value: value,
       prev: current,

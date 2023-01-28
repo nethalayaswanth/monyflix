@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Shimmer from "./shimmer";
 
+
+
 export const Img = styled(Shimmer)`
   object-fit: contain;
   position: absolute;

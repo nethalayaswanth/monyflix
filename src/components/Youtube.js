@@ -1,190 +1,257 @@
 import React, {
-  memo, useCallback,
-  useLayoutEffect, useMemo, useRef, useState
+  forwardRef,
+  memo,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
-import { BsFillPlayFill } from "react-icons/bs";
 import ReactPlayer from "react-player/youtube";
 
-import styled from "styled-components";
-import useHover from "../hooks/useHover";
-import AspectBox from "./AspectBox";
+import styled,{css} from "styled-components";
 
-import useMedia from "../hooks/useMedia";
+import { useInView } from "react-intersection-observer";
+import { ReactComponent as Mute } from "../assets/mute.svg";
+import { ReactComponent as PauseRounded } from "../assets/pauseRounded.svg";
+import { ReactComponent as PlayRounded } from "../assets/playRounded.svg";
+import { ReactComponent as UnMute } from "../assets/unMute.svg";
+import { HeaderButton, VideoControls } from "./Landing/styles";
 
 const VideoContainer = styled.div`
-  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
+  width: 100%;
+  z-index: 2;
+
+  ${({ absolute }) =>
+    absolute &&
+    css`
+      position: absolute;
+    `}
+`;
+const Player = styled.div`
   position: relative;
   z-index: 1;
   display: flex;
-  justify-content:center;
-  align-items:center
+  justify-content: center;
+  align-items: center;
+  height: 150%;
+  aspect-ratio: 16/9;
+  z-index: 2;
+  position: absolute;
+  background-color: transparent;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
 `;
 
+export const VideoPlayer = forwardRef(({ id, full, ...props }, ref) => {
+  return (
+    <ReactPlayer
+      className="react-player"
+      ref={ref}
+      url={`https://www.youtube.com/watch?v=${id}`}
+      width={"100%"}
+      height={"100%"}
+      playsInline={true}
+      config={{
+        youtube: {
+          playerVars: {
+            autoplay: 1,
+            controls: full ? 1 : 0,
+            disablekb: 1,
+
+            fs: full ? 1 : 0,
+            loop: 1,
+            modestbranding: 1,
+            playlist: id,
+          },
+        },
+      }}
+      {...props}
+    />
+  );
+});
 export function Youtube({
   id,
   style,
-  light = true,
-  miniModal,
-  play = false,
+  play: _play = false,
   full = false,
-  interectionOptions,
   audio = true,
   cb,
-  visible = true,
+  absolute,
+  title,
+  onVideoEnded,
 }) {
-  const playerRef = useRef();
+  const player = useRef();
 
   const [ready, setReady] = useState(false);
 
-  const [Play, setPlay] = useState(play);
-  const [show, setShow] = useState(false);
-  const [iconShow, setIconShow] = useState(false);
+  const [play, setPlay] = useState(_play);
+  const [mute, setMute] = useState(!audio);
 
-  const device = useMedia();
-
-  const mobile = device === "mobile";
-  const desktop = device === "desktop";
+  const {
+    ref: inviewRef,
+    inView: visible,
+    entry,
+  } = useInView({
+    threshold: 0.9,
+  });
+  const refcb = useCallback(
+    (node) => {
+      inviewRef(node);
+    },
+    [inviewRef]
+  );
 
   const playerRefCb = useCallback((ref) => {
-    playerRef.current = ref;
+    player.current = ref;
   }, []);
-
-  const [hoverRef, isHovering] = useHover();
-
-  const wrapperRefCb = useCallback(
-    (ref) => {
-      if (light) {
-        hoverRef(ref);
-      }
-    },
-    [hoverRef, light]
-  );
 
   const onReady = useCallback((e) => {
     setReady(true);
-    const player = playerRef.current.getInternalPlayer();
-    player.setLoop(true);
+    player.current.getInternalPlayer().setLoop(true);
   }, []);
 
   useLayoutEffect(() => {
     if (!ready) return;
 
-    setPlay(visible && play);
-    setShow(visible && play);
-  }, [visible, ready, play]);
+    setPlay(visible && _play);
+  }, [visible, ready, _play]);
 
-  const onStart = useCallback((e) => {}, []);
+  const onPause = useCallback((e) => {
+    setPlay(false);
+  }, []);
 
   const onEnded = useCallback((e) => {
-    setShow(false);
+    // onEnded?.();
+    console.log("ended", e);
+    setPlay(false);
+    player.current.setLoop(true);
+    player.current.playVideo();
   }, []);
 
   const onBufferEnd = useCallback(
     (e) => {
-      setShow(visible);
+      setPlay(visible && _play);
     },
-    [visible]
+    [_play, visible]
   );
 
   const onBuffer = useCallback(
     (e) => {
       if (!full) {
-        setShow(false);
+        setPlay(false);
       }
     },
     [full]
   );
 
   const onError = useCallback((e) => {
-    setShow(false);
+    console.log("erroe");
+    setPlay(false);
   }, []);
-  const onSeek = useCallback(() => {}, []);
 
-  useLayoutEffect(() => {
-    cb && cb({ show, audio });
-  }, [cb, audio, show]);
+  const onProgress = useCallback(({ played }) => {
+    if (played > 0.9) {
+      // player.current.seekTo(0, "fraction");
+      onVideoEnded?.()
+    }
+  }, [onVideoEnded]);
 
-  useLayoutEffect(() => {
-    if (isHovering === undefined) return;
-    setIconShow(isHovering);
-  }, [isHovering]);
+  const onStateChanged = useCallback((e) => {
+    console.log(e.data);
+  }, []);
+
+  const show = visible && play;
 
   const styles = useMemo(() => {
     return {
-      // position: "absolute",
-      // top: 0,
-       left: 0,
+      left: 0,
       // ...(!full && { pointerEvents: "none" }),
-      // opacity: show || light ? 1 : 0,
-      // transition: "opacity 0.5s",
-      // overflow: "hidden",
-      
-      // aspectRatio: 16 / 9,
-      // ...style,
-
-      
+      opacity: show ? 1 : 0,
+      transition: "opacity 0.5s",
     };
-  }, [full, show, light, style]);
+  }, [show]);
+
+  console.log(play, title);
 
   return (
-    <VideoContainer ref={wrapperRefCb} >
-     
-      <ReactPlayer
-        className="react-player"
-        ref={playerRefCb}
-        url={`https://www.youtube.com/watch?v=${id}`}
-        playing={Play}
-        light={light}
-        controls={full}
-        volume={(show && audio) || (full && desktop) ? 1 : 0}
-        start={5}
-        onReady={onReady}
-        onStart={onStart}
-        onBufferEnd={onBufferEnd}
-        onBuffer={onBuffer}
-        onEnded={onEnded}
-        onSeek={onSeek}
-        onError={onError}
-        style={styles}
-        width={"100%"}
-        height={"100%"}
-        playIcon={
-          <BsFillPlayFill
-            fill={"white"}
-            style={{
-              width: "32px",
-              height: "32px",
-              visibility: isHovering ? "visible" : "hidden",
+    <>
+      <VideoControls>
+        <HeaderButton
+          disabled={!visible}
+          onClick={() => {
+            setPlay((x) => !x);
+          }}
+        >
+          {play ? <PlayRounded /> : <PauseRounded />}
+        </HeaderButton>
+        <HeaderButton
+          onClick={() => {
+            console.log(mute);
+            setMute((x) => !x);
+          }}
+        >
+          {mute ? <UnMute /> : <Mute />}
+        </HeaderButton>
+      </VideoControls>
+      <VideoContainer absolute={absolute} ref={refcb}>
+        <Player>
+         
+           <VideoPlayer
+            className="react-player"
+            ref={playerRefCb}
+            url={`https://www.youtube.com/watch?v=${id}`}
+            playing={play}
+            controls={full}
+            volume={(show && !mute) || full ? 1 : 0}
+            start={5}
+            onReady={onReady}
+            onPause={onPause}
+            onBufferEnd={onBufferEnd}
+            onBuffer={onBuffer}
+            onEnded={onEnded}
+            onProgress={onProgress}
+            onError={onError}
+            style={styles}
+            width={"100%"}
+            height={"100%"}
+            playsInline={true}
+            config={{
+              youtube: {
+                playerVars: {
+                  autoplay: _play ? 1 : 0,
+                  controls: full ? 1 : 0,
+                  disablekb: 1,
+                  iv_load_policy:3,
+                  fs: full ? 1 : 0,
+                  loop: 1,
+                  modestbranding: 1,
+                  playlist: id,
+                },
+                events: {
+                  onStateChange: onStateChanged,
+                },
+              },
             }}
-          />
-        }
-        config={{
-          youtube: {
-            playerVars: {
-              autoplay: 1,
-              controls: full ? 1 : 0,
-              disablekb: 1,
-              fs: full ? 1 : 0,
-              loop: 1,
-              modestbranding: 1,
-              playlist: id,
-
-              // host: `${window.location.protocol}//www.youtube.com`,
-            },
-          },
-        }}
-      />
-    </VideoContainer>
+          /> 
+        </Player>
+      </VideoContainer>
+    </>
   );
 }
 
-
-export  function Player(args) {
+export function PlayerBox(args) {
   return (
-    <AspectBox>
-      <Youtube {...args}/>
-    </AspectBox>
+    <Player>
+      <Youtube {...args} />
+    </Player>
   );
 }
 

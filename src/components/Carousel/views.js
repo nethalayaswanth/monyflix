@@ -114,30 +114,71 @@ export const SwiperWrapper = styled.div`
       scroll-padding-right: 0px;
     }
   }
+  .swiper-slide.hide{
+    visibility:hidden
+  }
 
   .swiper-slide {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    ${({ desktop, padding, margin, value }) => {
+      const width = `calc(
+          (100% - 2 * ${!desktop ? padding : 0}px - ${
+        value - 1
+      } * ${margin}px) /
+            ${value}
+        )`;
+      return css`
+        width: ${width};
+        --width: ${width};
+      `;
+    }}
+  }
+
+  .swiper-slide:first-child {
+    ${({ desktop, padding, margin, value }) => {
+      return css`
+        margin-left: ${padding}px;
+      `;
+    }}
+  }
+/* 
+  .swiper-slide:last-child {
+    ${({ desktop, padding, margin, value, endPadding }) => {
+      const marginRight = endPadding
+        ? `calc(var(--width) * ${value - 1} + ${
+            value - 1
+          } * ${margin}px + ${padding}px)`
+        : `${padding}px`;
+      return css`
+        margin-right: ${marginRight};
+      `;
+    }}
+  } */
+
+  .swiper-pagination-bullet {
+    --swiper-pagination-bullet-inactive-color: white;
+  }
+
+  .swiper-pagination-bullet-active {
+    --swiper-theme-color: white;
   }
 `;
 
-
-
 export const Nav = forwardRef(
-  ({ next,onClick, enable, visible, dark, style }, ref) => {
+  ({ next, onClick, enable, visible, dark, style }, ref) => {
     return (
-      <NavButton next={next} ref={ref} style={{ ...style }} onClick={onClick}>
+      <NavButton next={next} enable={enable} ref={ref} style={{ ...style }} onClick={onClick}>
         <Svg
           className="controller"
           style={{
             fill: dark ? "white" : "black",
-            visibility: enable ? "visible":"hidden" ,
+            visibility: enable ? "visible" : "hidden",
           }}
         />
       </NavButton>
     );
   }
 );
-

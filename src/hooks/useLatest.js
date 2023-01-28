@@ -5,7 +5,7 @@ const useLatest =(current) => {
   useEffect(() => {
     storedValue.current = current
   },[current])
-  return storedValue.current
+  return storedValue
 }
 
 export default useLatest

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import useHover from "../../hooks/useHover";
 import AspectBox from "../AspectBox";
 import { CardWrapper } from "../Cards/styles";
-import ProgressiveImage from "../ProgressiveImage";
+import ProgressiveImage from "../cachedImage";
 
 const Text = styled.div`
   white-space: nowrap;
@@ -36,7 +36,6 @@ const ThumbNailIcon = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-
   top: 0;
   left: 0;
   border-radius: 6px;

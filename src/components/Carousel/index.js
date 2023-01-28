@@ -16,14 +16,15 @@ import DetailsCard from "../Cards/detailsCard";
 import ExpandCard from "../Cards/expandCard";
 import LandscapeCard from "../Cards/landscapeCard";
 import ThumbnailCard from "../Cards/thumbNailCard";
+import { LandingCard } from "../Landing";
 import Swiper from "./swiper";
 import { SwiperWrapper } from "./views";
 
 const DEFAULT_BREAKPOINTS = [420, 480, 740, 1000, 1350, 1500];
 const DETAIL_DEFAULTVALUES = [1.5, 1.5, 3, 4, 6, 6];
 const DETAIL_DEFAULTVALUE = 1.5;
-const LANDSCAPE_DEFAULTVALUES=[1]
-const LANDSCAPE_DEFAULTVALUE=1
+const LANDSCAPE_DEFAULTVALUES = [1];
+const LANDSCAPE_DEFAULTVALUE = 1;
 
 const DEFAULT_VALUES = [3, 4, 5, 6, 7, 8];
 const DEFAULT_VALUE = 2;
@@ -38,6 +39,7 @@ const defaultbreakPointValues = {
   detail: DETAIL_DEFAULTVALUES,
   card: DEFAULT_VALUES,
   landscape: LANDSCAPE_DEFAULTVALUES,
+  landing: LANDSCAPE_DEFAULTVALUES,
 };
 
 const defaultBreakPointValue = {
@@ -46,43 +48,48 @@ const defaultBreakPointValue = {
   detail: DETAIL_DEFAULTVALUE,
   card: DEFAULT_VALUE,
   landscape: LANDSCAPE_DEFAULTVALUE,
+  landing: LANDSCAPE_DEFAULTVALUE,
 };
 export const Cards = {
-  expand:ExpandCard ,
-  thumbnail:ThumbnailCard ,
-  detail:DetailsCard,
-  card:Card ,
-  landscape:LandscapeCard ,
+  expand: ExpandCard,
+  thumbnail: ThumbnailCard,
+  detail: DetailsCard,
+  card: Card,
+  landscape: LandscapeCard,
+  landing: LandscapeCard,
 };
 
 export default function Carousel(options) {
   const {
-  data,
-  loading,
-  style,
-  dark,
-  epic,
-  fetchMore,
-  hasMore,
-  isFetching,
-  movies,
-  enabled,
-  children,
- 
-  margin = DEFAULTMARGIN,
-  padding = DEFAULTPARENTPADDING,
-  controllerWidth = DEFAULTCONTROLLERWIDTH,
-  endPadding,
-  card = "expand",
-  onClick, ...restOptions
-}=options;
+    data,
+    loading,
+    style,
+    dark,
+    epic,
+    fetchMore,
+    hasMore,
+    isFetching,
+    movies,
+    enabled,
+    children,
+    margin = DEFAULTMARGIN,
+    padding = DEFAULTPARENTPADDING,
+    controllerWidth = DEFAULTCONTROLLERWIDTH,
+    endPadding,
+    card = "expand",
+    noPadding,
+    effectFade,
+    onClick,
+    full,
+    ...restOptions
+  } = options;
 
-const {
-  breakPoints = DEFAULT_BREAKPOINTS,
-  breakPointValues = defaultbreakPointValues[card],
-  defaultValue = defaultBreakPointValue[card],
-  ...props
-} = restOptions;
+  const {
+    breakPoints = DEFAULT_BREAKPOINTS,
+    breakPointValues = defaultbreakPointValues[card],
+    defaultValue = defaultBreakPointValue[card],
+    ...props
+  } = restOptions;
   const swiper = useRef();
 
   const [visible, elRef] = useIntersectionObserver();
@@ -113,13 +120,15 @@ const {
     } * ${margin}px) / ${value})`;
 
     const marginRight = endPadding
-      ? `${width} * ${value - 1} + ${value - 1} * ${margin}px + ${padding}px)`
+      ? `calc(var(--width) * ${value - 1} + ${value - 1} * ${margin}px + ${padding}px)`
       : `${padding}px`;
 
     const marginLeft = `${padding}px`;
 
     return { width, marginRight, marginLeft };
   }, [desktop, endPadding, margin, padding, value]);
+
+  
 
   const placeHolder = Array(8).fill(0);
 
@@ -143,12 +152,13 @@ const {
     [dispatch]
   );
 
+
   return (
     <>
       <SwiperWrapper
-        // {...hoverRef()}
         style={{
           ...style,
+          ...(noPadding && { padding: 0 }),
         }}
         controllerWidth={desktop ? controllerWidth : 0}
         mobile={mobile}
@@ -156,6 +166,8 @@ const {
         dark={dark}
         endPadding={endPadding}
         padding={padding}
+        value={value}
+        margin={margin}
       >
         <Swiper
           ref={swiper}
@@ -165,6 +177,7 @@ const {
           dark={dark}
           SlidesPerView={value}
           transitionEvents={transitionEvents}
+          effectFade={effectFade}
           {...props}
         >
           {!loading && data !== undefined ? (
@@ -173,48 +186,33 @@ const {
                 const first = index === 0;
                 const last = index === data.length - 1;
                 return (
-                  <SwiperSlide
-                    style={{
-                      width,
-                      ...(first && { marginLeft }),
-                      ...(last && {
-                        marginRight,
-                      }),
-                    }}
-                    key={`${index}`}
-                  >
-                    <Component data={current} />
+                  <SwiperSlide key={`${index}`}>
+                    <Component data={current} card={card} index={index} />
                   </SwiperSlide>
                 );
               })}
               {hasMore && !loading && (
-                <SwiperSlide
-                  style={{
-                    width,
-                    marginRight,
-                  }}
-                  key={"loading"}
-                >
-                  <Component ref={elRef} />
+                <SwiperSlide key={"loading"}>
+                  <Component card={card} ref={elRef} />
                 </SwiperSlide>
               )}
+
+              {endPadding &&
+                [...Array(value - 1).fill(0)].map((current, index) => {
+                  return (
+                    <SwiperSlide
+                      key={`${index}`}
+                      className="hide"
+                    ></SwiperSlide>
+                  );
+                })}
             </>
           ) : (
             placeHolder.map((data, index) => {
               const first = index === 0;
               const last = index === placeHolder.length - 1;
               return (
-                <SwiperSlide
-                  style={{
-                    width,
-                    ...(first && { marginLeft }),
-                    ...(last && {
-                      marginRight,
-                    }),
-                  }}
-                  key={index}
-                  index={index}
-                >
+                <SwiperSlide card={card} key={index} index={index}>
                   <Component />
                 </SwiperSlide>
               );

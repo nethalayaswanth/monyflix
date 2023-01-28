@@ -16,7 +16,7 @@ export default function usePrefetch({
 
   const handlePrefetch = useCallback(async () => {
     if (fetched.current) return;
-  
+
     const types = ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"];
     queryClient.prefetchQuery(
       ["movie", id],
@@ -30,34 +30,33 @@ export default function usePrefetch({
     );
   }, [id, queryClient]);
 
-  const [hoverRef, isHovering] = useHover();
-
-  const {
-    ref: inViewRef,
-    inView,
-    entry,
-  } = useInView({
-    threshold: 0.5,
-    triggerOnce: true,
+  const [hoverRef] = useHover({
+    onHover: (hovering) => {
+      if (fetched.current) return;
+      if (whileHover && hovering) {
+        if (enabled) {
+          handlePrefetch();
+          fetched.current = true;
+          return;
+        }
+      }
+    },
   });
 
-  useLayoutEffect(() => {
-    if (fetched.current) return;
-    if (whileInView && inView) {
-      if (enabled) {
-        handlePrefetch();
-        fetched.current = true;
-        return;
-      }
-    }
-    if (whileHover && isHovering) {
-      if (enabled) {
-        handlePrefetch();
-        fetched.current = true;
-        return;
-      }
-    }
-  }, [enabled, handlePrefetch, inView, isHovering, whileHover, whileInView]);
+  const { ref: inViewRef } = useInView({
+    threshold: 0.5,
+    triggerOnce: true,
+    onChange: (inView, entry) => {
+       if (whileInView && inView) {
+         if (enabled) {
+           handlePrefetch();
+           fetched.current = true;
+           return;
+         }
+       }
+    },
+  });
+
 
   return { ref: mergeRefs(hoverRef, inViewRef), handlePrefetch };
 }

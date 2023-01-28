@@ -98,49 +98,49 @@ function App() {
               queryEnabled={queryEnabled}
               variables={{ genres: ["Drama"] }}
               title={"Drama"}
-              whileInView={true}
+              whileInView
             />
             <Section
               query="moviesByGenre"
               queryEnabled={queryEnabled}
               variables={{ genres: ["Comedy"] }}
               title={"Comedy"}
-              whileInView={true}
+              whileInView
             />
             <Section
               query="moviesByGenre"
               queryEnabled={queryEnabled}
               variables={{ genres: ["Family"] }}
               title={"Family"}
-              whileInView={true}
+              whileInView
               card={"detail"}
             />
           </>
         )}
         {loaderCount >= 2 && (
           <>
-            {" "}
             <Section
               query="moviesByGenre"
               queryEnabled={queryEnabled}
-              variables={{ genres: ["ScienceFiction", "Thriller"] }}
-              title={"Sci-Fi"}
+              variables={{ genres: ["Action",'Comedy'] }}
+              title={"sci-fi"}
               card="landscape"
-              whileInView={true}
+              whileInView
+              titleCard
             />
             <Section
               query="moviesByGenre"
               queryEnabled={queryEnabled}
               variables={{ genres: ["Action"] }}
               title={"Action"}
-              whileInView={true}
+              whileInView
             />
             <Section
               query="moviesByGenre"
               queryEnabled={queryEnabled}
               variables={{ genres: ["Adventure", "Action"] }}
               title={"Adventure"}
-              whileInView={true}
+              whileInView
               card={"detail"}
             />
           </>
@@ -154,15 +154,14 @@ function App() {
               queryEnabled={queryEnabled}
               variables={{ genres: ["Horror"] }}
               title={"Horror"}
-              whileInView={true}
+              whileInView
             />
             <Section
               query="moviesByGenre"
               queryEnabled={queryEnabled}
               variables={{ genres: ["Mystery", "Crime", "Thriller"] }}
               title={"Mystery"}
-              whileInView={true}
-            
+              whileInView
               card={"landscape"}
             />
           </>
@@ -175,16 +174,15 @@ function App() {
               queryEnabled={queryEnabled}
               variables={{ genres: ["History", "War"] }}
               title={"History"}
-              whileInView={true}
+              whileInView
             />
             <Section
               query="moviesByGenre"
               queryEnabled={queryEnabled}
               variables={{ genres: ["Documentary"] }}
               title={"Documentary"}
-              whileInView={true}
+              whileInView
               card={"detail"}
-             
             />
           </>
         )}
