@@ -7,7 +7,7 @@ export default function Genre() {
   const { genreId } = useParams();
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useMoviesByGenre({ genres: [genreId], size: 20 });
+    useMoviesByGenre({ genreIds: [genreId], size: 20 });
 
     console.log({ data, fetchNextPage, hasNextPage, isFetching})
   const movies = useMemo(() => {

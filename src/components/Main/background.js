@@ -1,16 +1,14 @@
-import { lazy, Suspense, useState } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 import Epic from "../Epic";
 
 import Landing from "../Landing";
-import Modal from "../Modal";
 import { Section } from "../Section";
-import { FullLoader, Loader } from "../spinner";
+import { Loader } from "../spinner";
 
 import { useInView } from "react-intersection-observer";
 import { useIsFetching } from "react-query";
-import { ParamProvider, useParamState } from "../../contexts/paramContext";
+import { useParamState } from "../../contexts/paramContext";
 import usePrevious from "../../hooks/usePrevious";
 import { getGenreIds } from "../../requests/requests";
 
@@ -39,8 +37,6 @@ export default function Background() {
     },
   });
 
-
-
   return (
     <>
       <Landing queryEnabled={queryEnabled} />
@@ -65,9 +61,8 @@ export default function Background() {
 
       {loaderCount >= 1 && (
         <>
-    
           <Epic
-            genres={getGenreIds(["Romance", "Drama"])}
+            genres={{ genres: ["Romance", "Drama"] }}
             title={"Love & Romance"}
           />
           <Section
@@ -80,15 +75,15 @@ export default function Background() {
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds(["Comedy"])}
-            title={"Comedy"}
+            variables={{ genres: ["Adventure"] }}
+            title={"Adventure"}
             whileInView
           />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds(["Family"])}
-            title={"Family"}
+            variables={{ genres: ["Action"] }}
+            title={"Action"}
             whileInView
             card={"detail"}
           />
@@ -99,7 +94,7 @@ export default function Background() {
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds(["Action", "Comedy"])}
+            variables={{ genres: ["ScienceFiction"] }}
             title={"sci-fi"}
             card="landscape"
             whileInView
@@ -108,15 +103,15 @@ export default function Background() {
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds(["Action"])}
-            title={"Action"}
+            variables={{ genres: ["Comedy"] }}
+            title={"Comedy"}
             whileInView
           />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds(["Adventure", "Comedy"])}
-            title={"Adventure"}
+            variables={{ genres: ["Family"] }}
+            title={"Family"}
             whileInView
             card={"detail"}
           />
@@ -124,19 +119,18 @@ export default function Background() {
       )}
       {loaderCount >= 3 && (
         <>
-    
           <Epic genres={getGenreIds(["Epic"])} title={"Thrillers"} />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds(["Horror"]) }
+            variables={{ genres: ["Horror"] }}
             title={"Horror"}
             whileInView
           />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds(["Mystery", "Crime", "Thriller"])}
+            variables={{ genres: ["Mystery", "Crime", "Thriller"] }}
             title={"Mystery"}
             whileInView
             card={"landscape"}
@@ -145,18 +139,18 @@ export default function Background() {
       )}
       {loaderCount >= 3 && (
         <>
-       
+          {" "}
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds( ["History", "War"] )}
+            variables={{ genres: ["History", "War"] }}
             title={"History"}
             whileInView
           />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
-            variables={getGenreIds( ["Documentary"] )}
+            variables={{ genres: ["Documentary"] }}
             title={"Documentary"}
             whileInView
             card={"detail"}

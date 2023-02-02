@@ -148,8 +148,8 @@ const Navbar = () => {
   const handleChange = (e) => {
     const parsedUrl = new URL(window.location.href);
 
+    parsedUrl.searchParams.set("q", e.target.value.trim());
     if (e.target.value.trim().length > 0) {
-      parsedUrl.searchParams.set("q", e.target.value.trim());
       window.scrollTo({
         top: 0,
         left: 0,
@@ -157,16 +157,12 @@ const Navbar = () => {
       });
       navigate(`/search${parsedUrl.search}`);
       return;
+    } else {
+      navigate(`/browse`);
     }
 
-    // navigate(`/browse`);
+    //
   };
-
-  useEffect(() => {
-    if (open) {
-      inputRef.current.focus();
-    }
-  }, [open]);
 
   return (
     <NavContainer {...bind()} style={{ backgroundColor }}>

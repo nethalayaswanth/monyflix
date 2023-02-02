@@ -159,14 +159,16 @@ export function useRecommendedMovies({ id, size, queryOptions }) {
 }
 export function useMoviesByGenre({
   genres,
+  genreIds,
   queryOptions,
   size,
   withLandscapePosterPath = false,
 }) {
+
+  const ids = genreIds ?? getGenreIds(genres)
   return useInfiniteQuery(
-    ["moviesByGenre", ...genres],
+    ["moviesByGenre", ...ids],
     async ({ pageParam = { cursor: 0, page: 1 } }) => {
-    
       const { MovieGenre: data } = await graphQLClient.request(MovieGenre, {
         genres,
         after: pageParam.cursor,
@@ -178,7 +180,7 @@ export function useMoviesByGenre({
     },
     {
       ...(queryOptions && queryOptions),
-      getNextPageParam
+      getNextPageParam,
     }
   );
 }
