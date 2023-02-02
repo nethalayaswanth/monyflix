@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Youtube } from "../Youtube";
 
 import { useParams } from "react-router-dom";
-import useMedia from "../../hooks/useMedia";
+import useMedia from "../../hooks/useBreakpoint";
 import Spinner from "../spinner";
 
 const Container = styled.div`

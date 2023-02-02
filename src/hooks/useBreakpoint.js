@@ -1,13 +1,13 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import useResizeObserver from "use-resize-observer";
 
-const breakpointsDefault = [300, 480, 740];
+const breakpointsDefault = [0, 480, 740];
 
 const defaultValues = ["mobile", "tablet", "desktop"];
 
 const defaultvalue = "desktop";
 
-function useMedia({
+function useBreakpoint({
   breakPoints = breakpointsDefault,
   breakPointValues = defaultValues,
   defaultValue = defaultvalue,
@@ -15,11 +15,12 @@ function useMedia({
 } = {}) {
   const getValue = useCallback(
     (width) => {
+
+      if(!breakPointValues) return defaultValue 
       const index = [...breakPoints].reverse().findIndex((bp) => bp <= width);
 
-      return index !== -1
-        ? [...breakPointValues].reverse()[index]
-        : defaultValue;
+      const value =  [...breakPointValues].reverse()[index] ?? defaultValue;
+      return value;
     },
     [breakPointValues, breakPoints, defaultValue]
   );
@@ -27,20 +28,21 @@ function useMedia({
   const [value, setValue] = useState(() => getValue(document.body.clientWidth));
   const valueRef = useRef();
 
-  const { width } = useResizeObserver({
-    ref,
-  });
-
-  useLayoutEffect(() => {
-    if (!width) return;
+  useResizeObserver({
+    ref,onResize:({width})=>{
     const value = getValue(width);
 
     if (valueRef.current !== value) {
       valueRef.current = value;
       setValue(value);
-    }
-  }, [breakPointValues, breakPoints, defaultValue, getValue, width]);
+    }}
+  });
+
+ 
+  // useLayoutEffect(() => {
+   
+  // }, [breakPointValues, breakPoints, defaultValue, getValue, width]);
   return value;
 }
 
-export default useMedia;
+export default useBreakpoint;

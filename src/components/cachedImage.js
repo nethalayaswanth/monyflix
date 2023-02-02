@@ -18,10 +18,12 @@ export const Img = styled(animated(Shimmer))`
 `;
 
 
-const ProgressiveImage = ({ original,landing, preview, style, onFetch, ...props }) => {
+const ProgressiveImage = ({ original,landing,modal, preview, style, onFetch, ...props }) => {
  
  
 const {data,isLoading}= useImage({src:original,preview})
+
+
 
   const [transitions, api] = useTransition(data, () => ({
     from: { opacity: 0 },

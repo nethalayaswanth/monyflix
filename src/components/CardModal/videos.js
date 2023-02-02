@@ -8,7 +8,7 @@ import {
 
 import Section from "../Section";
 
- const Videos = ({ movieId, opened, renderFullList }) => {
+ const Videos = ({ movieId, opened, initialData }) => {
   const {
     isLoading,
     error: videoError,
@@ -20,54 +20,55 @@ import Section from "../Section";
     queryOptions: {
       enabled: !!movieId,
       keepPreviousData: true,
+      refetchOnMount:false
     },
   });
 
 
   const videos = useMemo(() => {
-    const videos = videoData?.videosById;
+    const videos = videoData?.videosById ?? initialData;
     if (!videos) return;
     const clips = {
-      data: renderFullList ? videos.clip : videos.clip.slice(0, 1),
+      data:  videos.clip ,
       title: "Clips",
-      breakPointValues: [3, 3, 3, 3, 3, 1],
+      breakPointValues: [1, 1, 1.5,2, 2,2],
     };
     const trailers = {
-      data: renderFullList ? videos.trailer : videos.trailer.slice(0, 1),
+      data: videos.trailer,
       title: "Trailers",
-      breakPointValues: [4, 4, 3, 3, 3, 2],
+      breakPointValues: [2, 2, 3, 4, 4,3],
     };
     const teasers = {
-      data: renderFullList ? videos.teaser : videos.teaser.slice(0, 1),
+      data: videos.teaser ,
       title: "Teasers",
-      breakPointValues: [4, 4, 3, 3, 3, 2],
+      breakPointValues: [3, 3, 4, 4, 4, 4],
     };
     const bts = {
-      data: renderFullList ? videos.bts : videos.bts.slice(0, 1),
+      data: videos.bts ,
       title: "Behind The Scenes",
-      breakPointValues: [4, 4, 3, 3, 3, 2],
+      breakPointValues: [3, 3, 4, 4, 4, 4],
     };
     const featurette = {
-      data: renderFullList ? videos.featurette : videos.featurette.slice(0, 1),
+      data:  videos.featurette ,
       title: "Featurette",
-      breakPointValues: [4, 4, 3, 3, 3, 2],
+      breakPointValues: [2, 2, 3, 3, 3, 3],
     };
     const bloopers = {
-      data: renderFullList ? videos.bloopers : videos.bloopers.slice(0, 1),
+      data:  videos.bloopers ,
       title: "Bloopers",
-      breakPointValues: [4, 4, 3, 3, 3, 2],
+      breakPointValues: [3, 3, 4, 4, 4, 4],
     };
 
     return [clips, trailers, teasers, bts, featurette, bloopers];
-  }, [renderFullList, videoData]);
+  }, [initialData, videoData?.videosById]);
 
-
+  
   return (
     <>
-      {opened && videoData && videos && (
+      {opened  && videos && (
         <>
           {videos.map((type, i) => {
-            if (type.data.length === 0) return null;
+            if (!type.data || type.data.length === 0) return null;
 
             return (
               <Section
@@ -75,6 +76,8 @@ import Section from "../Section";
                 data={type.data}
                 title={type.title}
                 card="thumbnail"
+                cardExpand={false}
+                cardHover={false}
                 breakPointValues={type.breakPointValues}
               />
             );

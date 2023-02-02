@@ -4,8 +4,8 @@ import radient from "../../assets/radient.png";
 export const Container = styled.div`
   position: relative;
   display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+  flex-direction: column;
+  justify-content: flex-end;
   overflow: hidden;
   background-color: rgb(0, 0, 0);
   margin: auto;
@@ -37,8 +37,6 @@ export const Container = styled.div`
   }
 `;
 
-
-
 export const Image = styled.img`
   width: 100%;
   height: 100%;
@@ -46,14 +44,36 @@ export const Image = styled.img`
 `;
 
 export const Carousel = styled.div`
-  position: absolute;
+  justify-content: flex-end;
   width: 100%;
-  height: unset;
-  bottom: 10px;
-  @media only screen and (min-width: 1000px) {
-    bottom: 20px;
+  height: auto;
+  margin-bottom: 20px;
+`;
+
+export const MetaWrapper = styled.div`
+  flex-grow: 1;
+  flex-basis: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  z-index:5;
+
+  & .flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: end;
   }
-  top: unset;
+  & .metadata {
+    position: relative;
+  }
+
+  & .video-controls {
+    position: relative;
+  }
+  & .player-container {
+    position: absolute;
+  }
 `;
 export const Gradient = styled.div`
   position: absolute;
@@ -72,7 +92,7 @@ export const Gradient = styled.div`
   z-index: 1;
   background-image: url(${radient});
   background: rgba(4, 0, 0, 0.2);
-  z-index: 7;
+  z-index: 4;
 `;
 
 export const Wrapper = styled.div`

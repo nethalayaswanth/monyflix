@@ -159,10 +159,10 @@ export const Scroll = styled.button`
 `;
 
 export const VideoControls = styled.div`
-  bottom: 40px;
+  bottom: var(--metaData-padding);
   position: absolute;
   transition: unset;
-  padding: 0 40px;
+  padding: 0 var(--metaData-padding);
   right: 0;
   z-index: 5;
   display: flex;
@@ -196,7 +196,7 @@ export const HeaderButton = styled.button`
 
 export const Details = styled(animated.div)`
   display: flex;
-  /* align-items: flex-end; */
+
   justify-content: space-between;
   flex: 1;
   text-align: left;
@@ -207,7 +207,7 @@ export const Details = styled(animated.div)`
   display: flex;
   flex-direction: column;
   width: 100%;
-  bottom: 40px;
+  bottom: var(--metaData-padding);
   font-size: 15px;
   line-height: 1.33338;
   font-weight: 400;
@@ -216,25 +216,10 @@ export const Details = styled(animated.div)`
     cursor: pointer;
   }
 
-  opacity: 0;
-  -webkit-filter: blur(1px);
-  filter: blur(1px);
-  transform: translateY(-15px);
-
-  ${({ active }) =>
-    active
-      ? css`
-          opacity: 1;
-          -webkit-filter: blur(0px);
-          filter: blur(0px);
-          transform: translateY(0px);
-          transition: opacity 1s ease-out 0.2s, filter 666ms ease-out 0.3s,
-            transform 666ms ease-out, -webkit-filter 666ms ease-out 0.3s;
-        `
-      : ``};
+  padding: 0 var(--metaData-padding);
+  max-width: 200px;
 
   @media only screen and (min-width: 740px) {
-    padding: 0 40px;
     max-width: 300px;
     box-sizing: content-box;
     text-align: unset;
@@ -251,7 +236,47 @@ export const Title = styled.div`
   position: relative;
   max-width: 240px;
 `;
+const mask = css`
+  --line-height: 22;
+  --link-length: 4;
+  --one-ch: 8;
+  --fade-direction: 270deg;
+  word-break: break-word;
+  position: relative;
+  mask: linear-gradient(
+      0deg,
+      transparent 0,
+      transparent calc(var(--line-height) * 1px),
+      #000 calc(var(--line-height) * 1px)
+    ),
+    linear-gradient(
+      var(--fade-direction),
+      transparent 0,
+      transparent calc((var(--link-length) * var(--one-ch)) * 1px),
+      #000
+        calc(
+          ((var(--link-length) * var(--one-ch)) + (var(--line-height) * 2)) *
+            1px
+        )
+    );
+  z-index: 1;
+  mask-position: right bottom;
+  -webkit-mask-position: right bottom;
+`;
 
+export const More = styled.button`
+  background: 0px 0px;
+  border: 0px;
+  position: absolute;
+  text-decoration: none;
+  text-transform: uppercase;
+  bottom: 10px;
+  cursor: pointer;
+  z-index: 3;
+  right: 20px;
+  content: "...";
+  color: rgba(255,255,255,0.5);
+`;
 export const Overview = styled(animated.div)`
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
@@ -264,8 +289,9 @@ export const Overview = styled(animated.div)`
   overflow: hidden;
   margin-bottom: 10px;
 
+${mask}
   @media only screen and (min-width: 740px) {
-    -webkit-line-clamp: unset
+    -webkit-line-clamp: unset;
   }
 `;
 

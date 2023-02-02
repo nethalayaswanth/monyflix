@@ -1,41 +1,36 @@
-import React, {
-  useCallback, useMemo, useState
-} from "react";
+import React, { useCallback, useMemo } from "react";
 
-import { useInView } from "react-intersection-observer";
-import { useModalState } from "../../contexts/modalContext";
-import useMedia from "../../hooks/useMedia";
+import useMedia from "../../hooks/useBreakpoint";
 import { useMoviesByGenre } from "../../requests/requests";
-import AudioControls from "../AudioControls";
 
-import Carousel from "../Carousel";
 import ProgressiveImage from "../cachedImage";
+import Carousel from "../Carousel";
 import { Youtube } from "../Youtube";
 import { useEpicState } from "./context";
-import Description from "./description";
 import {
   Carousel as CarouselWrapper,
   Container,
-  Details,
-  Gradient
+  Gradient,
+  MetaWrapper,
 } from "./views";
-import Video from "../CroppedVideo";
+
+import { Details } from "../Landing/Details";
+import { useDevice } from "../../contexts/deviceContext.js";
 
 export default function EpicContainer({ genres, title: header }) {
   const [state, dispatch] = useEpicState();
 
-  
-
-  const onSlideChange = useCallback(({activeIndex}) => {
-
-   
-    dispatch({
-      type: "set state",
-      payload: {
-        id: activeIndex,
-      },
-    });
-  }, [dispatch]);
+  const onSlideChange = useCallback(
+    ({ activeIndex }) => {
+      dispatch({
+        type: "set state",
+        payload: {
+          id: activeIndex,
+        },
+      });
+    },
+    [dispatch]
+  );
 
   const {
     data,
@@ -46,12 +41,12 @@ export default function EpicContainer({ genres, title: header }) {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useMoviesByGenre({ genres, withLandscapePosterPath:true });
+  } = useMoviesByGenre({ genres, withLandscapePosterPath: true });
 
   const movies = useMemo(() => {
     if (data) {
       var list = [];
-      data.pages.forEach(({ MovieGenre: { data } }, i) => {
+      data.pages.forEach(({ data }, i) => {
         list = [...list, ...data];
       });
       return list;
@@ -59,19 +54,17 @@ export default function EpicContainer({ genres, title: header }) {
     return [];
   }, [data]);
 
-  const backdropPath = movies[state.id]?.backdropPath;
-  const posterPath = movies[state.id]?.posterPath;
-  const title = movies[state.id]?.title;
+  const movie = movies[state.id];
+  const backdropPath = movie?.backdropPath;
+  const posterPath = movie?.posterPath;
+  const title = movie?.title;
 
-  
-  
-   const original = backdropPath
-     ? `https://image.tmdb.org/t/p/w780/${backdropPath}`
-     : null;
-   const preview = backdropPath
-     ? `https://image.tmdb.org/t/p/w300/${backdropPath}`
-     : null;
-
+  const original = backdropPath
+    ? `https://image.tmdb.org/t/p/w780/${backdropPath}`
+    : null;
+  const preview = backdropPath
+    ? `https://image.tmdb.org/t/p/w300/${backdropPath}`
+    : null;
 
   const id = useMemo(() => {
     if (!movies[state.id]) return null;
@@ -84,30 +77,9 @@ export default function EpicContainer({ genres, title: header }) {
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [movies, state.id]);
 
-  const device = useMedia();
-
-  const mobile = device === "mobile";
-  const desktop = device === "desktop";
-
-  const [{ activated, expand }] = useModalState();
-
-  const play = activated || expand;
-
-  const [audio, setAudio] = useState(false);
-  const [show, setShow] = useState();
-
-  const showCb = useCallback(({ show }) => {
-    setShow(show);
-  }, []);
-
-  const handleAudio = useCallback(() => {
-    setAudio((x) => !x);
-  }, []);
-
-  
-
+ 
   return (
-    <Container >
+    <Container>
       <div
         style={{
           width: "100%",
@@ -122,17 +94,23 @@ export default function EpicContainer({ genres, title: header }) {
           />
         )}
       </div>
+      <MetaWrapper>
+        <div className="flex-row">
+          {movie && (
+            <Details
+              trigger={movie?.title}
+              title={movie?.title}
+              overview={movie?.overview}
+            />
+          )}
+          {id && <Youtube id={id} play={true} audio={true} />}
+        </div>
+      </MetaWrapper>
       <CarouselWrapper
         style={{
-          zIndex: 8,
+          zIndex: 10,
         }}
       >
-        {/* {movies[state.id] && (
-          <Details>
-            <Description movie={movies[state.id]} genre={header} />
-            {show && <AudioControls cb={handleAudio} audio={audio} />}
-          </Details>
-        )} */}
         <Carousel
           dark={true}
           data={movies}
@@ -141,30 +119,13 @@ export default function EpicContainer({ genres, title: header }) {
           isFetching={isFetchingNextPage}
           fetchMore={fetchNextPage}
           style={{ margin: 0 }}
-          card="landscape"
-          breakPointValues={[3,4,5,6,7,8,9]}
+          card="epic"
+          cardHover={false}
           onSlideChange={onSlideChange}
           endPadding={true}
         />
       </CarouselWrapper>
-
       <Gradient />
-
-      {id && (
-        <div className="absolute" style={{background:'rgba(0,0,0,0.8)'}}>
-         
-         
-              <Youtube
-                id={id}
-                play={!play}
-                
-                audio={audio}
-              
-              />
-          
-           
-        </div>
-      )}
     </Container>
   );
 }

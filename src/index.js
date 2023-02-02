@@ -15,6 +15,13 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 const queryClient = new QueryClient();
 const imagesClient=new ImagesClient()
 
+queryClient.setDefaultOptions({
+  queries: {
+    staleTime: 3600 * 1000,
+    cacheTime: 3600 * 1000,
+  },
+});
+
 root.render(
   <QueryClientProvider client={queryClient}>
     <ImagesProvider client={imagesClient}>

@@ -115,7 +115,7 @@ export const SectionWrapper = ({
     if (data) {
       var list = [];
       data.pages.forEach((page, i) => {
-        const { data } = page[Object.keys(page)[0]];
+        const { data } = page;
         list = [...list, ...data];
       });
       return list;
@@ -137,7 +137,6 @@ export const SectionWrapper = ({
       }}
       refCb={refCb}
       card={card}
-      {...(details && { slidesPerView: "auto" })}
       {...props}
     >
       {children && children}

@@ -1,19 +1,11 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useLayoutEffect,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useCallback, useRef } from "react";
 
 import AspectBox from "../AspectBox";
 
 import { useHover } from "@use-gesture/react";
 
-import { useSearchParams } from "react-router-dom";
-import { useModalState, useModalDispatch } from "../../contexts/modalContext";
-import useMedia from "../../hooks/useMedia";
+import { useModalDispatch } from "../../contexts/modalContext";
+import useMedia from "../../hooks/useBreakpoint";
 import { mergeRefs } from "../../utils";
 import ProgressiveImage from "../cachedImage";
 import { CardContainer as CardOuter } from "./styles";

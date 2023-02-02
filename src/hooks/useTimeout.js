@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
+import useLatest from "./useLatest";
 
 export default function useTimeout(callback, delay = null) {
-  const savedCallback = useRef(callback);
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
+ const savedCallback = useLatest(callback)
 
   useEffect(() => {
     if (delay===null) {
@@ -14,5 +11,5 @@ export default function useTimeout(callback, delay = null) {
     const id = setTimeout(() => savedCallback.current(), delay);
 
     return () => clearTimeout(id);
-  }, [delay]);
+  }, [delay, savedCallback]);
 }

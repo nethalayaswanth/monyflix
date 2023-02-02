@@ -71,13 +71,7 @@ const ThumbnailCard = forwardRef(({ height, style, data }, ref) => {
             <ProgressiveImage original={original} preview={preview} />
             <ThumbNailIcon>
               <BsFillPlayFill
-                fill={"white"}
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  color: "white",
-                  visibility: isHovering ? "visible" : "hidden",
-                }}
+               
               />
             </ThumbNailIcon>
           </ThumbNailContainer>

@@ -1,20 +1,17 @@
 import React, { cloneElement, useEffect, useRef, useState } from "react";
-import { SwiperSlide } from "swiper/react";
 
 import { useHover } from "@use-gesture/react";
+import styled from "styled-components";
 import { useModalState } from "../../contexts/modalContext";
+import useMedia from "../../hooks/useBreakpoint";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
-import useMedia from "../../hooks/useMedia";
 import Card from "../Cards";
 import DetailsCard from "../Cards/detailsCard";
 import ExpandCard from "../Cards/expandCard";
 import LandscapeCard from "../Cards/landscapeCard";
 import ThumbnailCard from "../Cards/thumbNailCard";
-import Swiperjs from "./swiper";
-import { SwiperWrapper } from "./views";
 import SwiperTrail from "./trail";
-import styled from "styled-components";
-
+import { SwiperWrapper } from "./views";
 
 const Slide = styled.div`
   display: -webkit-box;
@@ -32,8 +29,6 @@ const Slide = styled.div`
   position: relative;
   flex-shrink: 0;
 `;
-
-
 
 const DEFAULTBREAKPOINTS = [1500, 1350, 1000, 740, 480, 420];
 const DEFAULTVALUES = [8, 7, 6, 5, 3, 2];
@@ -165,7 +160,6 @@ export default function TrailCarousel({
                       width: `calc((100% - 2 *  ${
                         !desktop ? padding : 0
                       }px  - ${value - 1} * ${margin}px) / ${value})`,
-                      
                     }}
                     key={`${index}`}
                   >
@@ -200,7 +194,7 @@ export default function TrailCarousel({
                     ? children({ ref: elRef, onClick })
                     : cloneElement(component, { ref: elRef, onClick })}
                 </Slide>
-              ):null}
+              ) : null}
             </>
           ) : (
             placeHolder.map((data, index) => {

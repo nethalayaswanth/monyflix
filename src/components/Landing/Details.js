@@ -10,6 +10,7 @@ import {
   Scroll,
   LinerGradient,
   HeroGradient,
+  More,
 } from "./styles";
 import { useSpring } from "react-spring";
 import { useHover } from "@use-gesture/react";
@@ -19,7 +20,7 @@ import ProgressiveImage from "../cachedImage";
 
 
 
-export  function Details({landscapePosterPath,overview,active,style,title}){
+export  function Details({landscapePosterPath,overview,trigger,style,title}){
 
 
    
@@ -29,13 +30,20 @@ export  function Details({landscapePosterPath,overview,active,style,title}){
   const preview = landscapePosterPath
     ? `https://image.tmdb.org/t/p/w300${landscapePosterPath}`
     : null;
-const [{ height, scale }, api] = useSpring(() => ({
-    from: { height: 60, scale: 1 },
-  }));
+
+
+  const [{ opacity, y }, _] = useSpring(() => {
+   
+    return {
+      from: { opacity: trigger ? 0 : 1, y: trigger ? -15 : 0 },
+      to: { opacity: trigger ? 1 : 0, y: trigger ? 0 : -15 },
+      reset: true,
+    };
+  }, [trigger]);
 
   const [measureRef, { height: viewHeight }] = useMeasure();
   const bind = useHover((state) => {
-    console.log(state.hovering);
+   
     if (state.hovering) {
       api.start({ to: { height: viewHeight, scale: 1.2 } });
     }
@@ -44,12 +52,22 @@ const [{ height, scale }, api] = useSpring(() => ({
       api.start({ to: { height: 60, scale: 1 } });
     }
   });
+  const [{ height, scale }, api] = useSpring(() => ({
+    from: { height: 60, scale: 1 },
+  }));
+
 
     return (
       <Container
         {...bind()}
-        style={{ transformOrigin: "left bottom", ...style }}
-        active={active}
+        style={{
+          transformOrigin: "left bottom",
+          opacity,
+          y,
+          filter: opacity.to([0, 1], [1, 0]).to((x) => `blur(${x}px)`),
+          ...style,
+        }}
+        className='metadata'
       >
         <Title>
           {landscapePosterPath ? (
@@ -67,10 +85,13 @@ const [{ height, scale }, api] = useSpring(() => ({
             <>{title}</>
           )}
         </Title>
-        <Overview style={{ height }}>
-          <div ref={measureRef}>{overview}</div>
-        </Overview>
-        
+        <div style={{position:'relative'}}>
+          <Overview style={{ height }}>
+            <div ref={measureRef}>{overview}</div>
+          </Overview>
+        {/* { truncate && <More>...</More>} */}
+        </div>
+
         <MoreDetails>More Details</MoreDetails>
       </Container>
     );

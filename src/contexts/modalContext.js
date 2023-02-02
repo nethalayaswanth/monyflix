@@ -1,24 +1,35 @@
-import React, { createContext, useContext, useMemo, useReducer } from "react";
+import React, { createContext, useContext, useReducer } from "react";
 
 const ModalStateContext = createContext();
 const ModalDispatchContext = createContext();
 
 const initialState = {
-  
-  expand: false, 
+  expand: false,
   parent: null,
-  details:false,
+  details: false,
   movie: null,
   param: null,
-  mini:false
+  mini: false,
 };
 
 function Reducer(state, action) {
+  
   switch (action.type) {
     case "set modal": {
+    const updates= action.callback?.(state);
+
+    console.log(updates)
       return {
         ...state,
-       ...action.payload
+        ...action.payload,
+        ...updates
+      };
+    }
+    case "modal callback": {
+    const updates =  action.callback?.(state);
+      return {
+        ...state,
+        ...updates,
       };
     }
     case "set movie": {
@@ -93,7 +104,8 @@ function Reducer(state, action) {
         activated: false,
         param: null,
         expand: false,
-        expanded: false,
+        collapseMini:false
+
       };
     }
 
@@ -104,17 +116,10 @@ function Reducer(state, action) {
         miniExpand: false,
         expand: false,
         parent: null,
-        isHovering: false,
-        miniExpanded: false,
-        expanded: false,
-        activate: false,
-        activated: false,
-        details:false,
-        hovered:false,
-        clicked:false,
         movie: null,
         param: null,
-        mini:false
+        mini: false,
+        showMini: false,
       };
     }
 
@@ -143,10 +148,10 @@ function Reducer(state, action) {
 function ModalProvider({ children }) {
   const [state, dispatch] = useReducer(Reducer, initialState);
 
-
+  
   const value = [state, dispatch];
-  value.state=state
-  value.dispatch=dispatch
+  value.state = state;
+  value.dispatch = dispatch;
 
   return (
     <ModalStateContext.Provider value={value}>
@@ -171,10 +176,8 @@ function useModalDispatch() {
   if (context === undefined) {
     throw new Error("useModalDispatch must be used within a ModalProvider");
   }
-  
+
   return context;
 }
 
-
-export { useModalState,useModalDispatch, ModalProvider };
-
+export { useModalState, useModalDispatch, ModalProvider };

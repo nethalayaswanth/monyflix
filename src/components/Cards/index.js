@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import useMedia from "../../hooks/useMedia";
+import useMedia from "../../hooks/useBreakpoint";
 import { mergeRefs } from "../../utils";
 import AspectBox from "../AspectBox";
 import { CardWrapper } from "../Cards/styles";

@@ -40,17 +40,19 @@ export const MovieGenre = gql`
   query MovieGenre(
     $genres: [String]!
     $after: Int
+    $size: Int
+    $page: Int
     $withVideo: Boolean = true
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
     $withLandscapePosterPath: Boolean = false
   ) {
-    MovieGenre(genres: $genres, after: $after) {
+    MovieGenre(genres: $genres, after: $after, size: $size, page: $page) {
       data {
         ...CoreMovieFields
-        
       }
       cursor
       hasMore
+      nextPage
     }
   }
 `;
@@ -60,14 +62,15 @@ export const Movies = gql`
   query Movies(
     $type: MoviesType!
     $after: Int
+    $size: Int
+    $page: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
     $withLandscapePosterPath: Boolean = false
   ) {
-    movies(type: $type, after: $after) {
+    movies(type: $type, after: $after, size: $size, page: $page) {
       data {
-        ...CoreMovieFields 
-         
+        ...CoreMovieFields
       }
       cursor
       hasMore
@@ -75,6 +78,27 @@ export const Movies = gql`
   }
 `;
 
+export const Search = gql`
+  ${CORE_MOVIE_FIELDS}
+  query Search(
+    $key: String!
+    $after: Int
+    $size: Int
+    $page: Int
+    $withVideo: Boolean = false
+    $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
+    $withLandscapePosterPath: Boolean = false
+  ) {
+    search(key: $key, after: $after, size: $size, page: $page) {
+      data {
+        ...CoreMovieFields
+      }
+      cursor
+      hasMore
+      nextPage
+    }
+  }
+`;
 export const Movie = gql`
   ${CORE_MOVIE_FIELDS}
   query Query(
@@ -86,7 +110,9 @@ export const Movie = gql`
     movie(id: $id) {
       ...CoreMovieFields
       runtime
-      genres
+      genres{
+id,name
+      }
       tagline
     }
   }
@@ -98,11 +124,12 @@ export const similarMovies = gql`
     $id: ID!
     $size: Int
     $after: Int
+    $page: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
     $withLandscapePosterPath: Boolean = false
   ) {
-    similarMovies(id: $id, after: $after, size: $size) {
+    similarMovies(id: $id, after: $after, size: $size, page: $page) {
       data {
         ...CoreMovieFields
       }
@@ -117,11 +144,12 @@ export const recommendedMovies = gql`
     $id: ID!
     $size: Int
     $after: Int
+    $page: Int
     $withVideo: Boolean = false
     $videoTypes: [VideoType] = [CLIP]
     $withLandscapePosterPath: Boolean = false
   ) {
-    recommendedMovies(id: $id, after: $after, size: $size) {
+    recommendedMovies(id: $id, after: $after, size: $size, page: $page) {
       data {
         ...CoreMovieFields
       }
@@ -149,11 +177,13 @@ export const trendingMovies = gql`
   ${CORE_MOVIE_FIELDS}
   query trendingMovies(
     $after: Int
+    $size: Int
+    $page: Int
     $withVideo: Boolean = false
     $withLandscapePosterPath: Boolean = false
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
   ) {
-    trendingMovies(after: $after) {
+    trendingMovies(after: $after, size: $size, page: $page) {
       data {
         ...CoreMovieFields
       }
@@ -221,6 +251,7 @@ const queries = {
   similarMovies,
   recommendedMovies,
   Movie,
+  Search,
 };
 
 export default queries;

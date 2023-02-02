@@ -13,7 +13,7 @@ export default function useEventListener({
     const isSupported = element && element.addEventListener;
     if (!isSupported) return;
 
-    const eventListener = (event) => savedHandler(event);
+    const eventListener = (event) => savedHandler.current(event);
 
     element.addEventListener(event, eventListener, options);
 

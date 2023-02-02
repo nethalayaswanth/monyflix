@@ -2,15 +2,15 @@ import React, {
   forwardRef,
   memo,
   useCallback,
-  useLayoutEffect,
-  useMemo,
+  useEffect,
   useRef,
   useState,
 } from "react";
 import ReactPlayer from "react-player/youtube";
 
-import styled,{css} from "styled-components";
+import styled, { css } from "styled-components";
 
+import { ErrorBoundary } from "react-error-boundary";
 import { useInView } from "react-intersection-observer";
 import { ReactComponent as Mute } from "../assets/mute.svg";
 import { ReactComponent as PauseRounded } from "../assets/pauseRounded.svg";
@@ -39,7 +39,7 @@ const Player = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 150%;
+  height: 180%;
   aspect-ratio: 16/9;
   z-index: 2;
   position: absolute;
@@ -77,6 +77,11 @@ export const VideoPlayer = forwardRef(({ id, full, ...props }, ref) => {
     />
   );
 });
+
+const callIffunction = (fn, ...args) => {
+  console.log(this);
+  if (typeof fn === "function") fn.call(...args);
+};
 export function Youtube({
   id,
   style,
@@ -113,84 +118,99 @@ export function Youtube({
     player.current = ref;
   }, []);
 
-  const onReady = useCallback((e) => {
+  const onReady = (e) => {
     setReady(true);
-    player.current.getInternalPlayer().setLoop(true);
+    player.current?.getInternalPlayer()?.setLoop(true);
+  };
+
+  const playVideo = useCallback((e) => {
+    setPlay(true);
+    if (typeof player.current?.getInternalPlayer().playVideo !== "function")
+      return;
+    player.current?.getInternalPlayer()?.playVideo();
+
+    console.log("playvideo");
   }, []);
 
-  useLayoutEffect(() => {
-    if (!ready) return;
+  const pauseVideo = useCallback((e) => {
+    setPlay(false);
+    if (typeof player.current?.getInternalPlayer()?.pauseVideo !== "function")
+      return;
+    player.current?.getInternalPlayer()?.pauseVideo();
+  }, []);
 
-    setPlay(visible && _play);
-  }, [visible, ready, _play]);
+  const togglePlay = () => {
+    if (play) {
+      pauseVideo();
+      return;
+    }
+    playVideo();
+  };
 
   const onPause = useCallback((e) => {
-    setPlay(false);
+    // setPlay(false);
   }, []);
 
-  const onEnded = useCallback((e) => {
-    // onEnded?.();
-    console.log("ended", e);
+  const onEnded = (e) => {
     setPlay(false);
-    player.current.setLoop(true);
-    player.current.playVideo();
-  }, []);
+    player.current?.getInternalPlayer()?.setLoop(true);
+    playVideo();
+  };
 
-  const onBufferEnd = useCallback(
-    (e) => {
-      setPlay(visible && _play);
-    },
-    [_play, visible]
-  );
+  const onBufferEnd = (e) => {
+    playVideo();
+  };
 
-  const onBuffer = useCallback(
-    (e) => {
-      if (!full) {
-        setPlay(false);
-      }
-    },
-    [full]
-  );
+  const onBuffer = (e) => {
+    // pauseVideo();
+  };
 
-  const onError = useCallback((e) => {
-    console.log("erroe");
-    setPlay(false);
-  }, []);
+  const onError = (e) => {
+    console.log("error");
+    pauseVideo();
+  };
 
-  const onProgress = useCallback(({ played }) => {
-    if (played > 0.9) {
-      // player.current.seekTo(0, "fraction");
-      onVideoEnded?.()
+  const timeOutRef = useRef();
+
+  const onProgress = ({ played }) => {
+    if (played > 0.8) {
+      player.current?.getInternalPlayer()?.seekTo(0, "fraction");
+
+      onVideoEnded?.();
+      pauseVideo();
+      timeOutRef.current = setTimeout(() => playVideo(), 3000);
     }
-  }, [onVideoEnded]);
+  };
 
-  const onStateChanged = useCallback((e) => {
-    console.log(e.data);
-  }, []);
+  useEffect(() => {
+    if (_play && ready && visible) {
+      playVideo();
+    } else {
+      pauseVideo();
+    }
 
-  const show = visible && play;
+    return () => clearTimeout(timeOutRef.current);
+  }, [_play, pauseVideo, playVideo, ready, visible]);
 
-  const styles = useMemo(() => {
-    return {
-      left: 0,
-      // ...(!full && { pointerEvents: "none" }),
-      opacity: show ? 1 : 0,
-      transition: "opacity 0.5s",
-    };
-  }, [show]);
+  const show = play;
 
-  console.log(play, title);
+  const styles = {
+    left: 0,
+    ...(!full && { pointerEvents: "none" }),
+    // opacity: show ? 1 : 0,
+    transition: "opacity 0.5s",
+  };
 
+  console.log(play);
   return (
     <>
-      <VideoControls>
+      <VideoControls className="video-controls">
         <HeaderButton
+          key={play ? "pause" : "play"}
           disabled={!visible}
-          onClick={() => {
-            setPlay((x) => !x);
-          }}
+          onClick={togglePlay}
         >
-          {play ? <PlayRounded /> : <PauseRounded />}
+          {play ? <PlayRounded key="play" /> : <PauseRounded key="pause" />}
         </HeaderButton>
         <HeaderButton
           onClick={() => {
@@ -201,16 +221,20 @@ export function Youtube({
           {mute ? <UnMute /> : <Mute />}
         </HeaderButton>
       </VideoControls>
-      <VideoContainer absolute={absolute} ref={refcb}>
+      <VideoContainer
+        className="player-container"
+        absolute={absolute}
+        ref={refcb}
+      >
         <Player>
-         
-           <VideoPlayer
+          <VideoPlayer
             className="react-player"
             ref={playerRefCb}
             url={`https://www.youtube.com/watch?v=${id}`}
-            playing={play}
+            playing={false}
             controls={full}
-            volume={(show && !mute) || full ? 1 : 0}
+            // volume={(show && !mute) || full ? 1 : 0}
+            volume={0}
             start={5}
             onReady={onReady}
             onPause={onPause}
@@ -226,21 +250,18 @@ export function Youtube({
             config={{
               youtube: {
                 playerVars: {
-                  autoplay: _play ? 1 : 0,
+                  // autoplay: _play ? 1 : 0,
                   controls: full ? 1 : 0,
                   disablekb: 1,
-                  iv_load_policy:3,
+                  iv_load_policy: 3,
                   fs: full ? 1 : 0,
                   loop: 1,
                   modestbranding: 1,
                   playlist: id,
                 },
-                events: {
-                  onStateChange: onStateChanged,
-                },
               },
             }}
-          /> 
+          />
         </Player>
       </VideoContainer>
     </>
@@ -249,10 +270,26 @@ export function Youtube({
 
 export function PlayerBox(args) {
   return (
-    <Player>
+    <ErrorBoundary
+      fallbackRender={({ error, resetErrorBoundary }) => {
+        <div role="alert">
+          <div>Oh no</div>
+          <pre>{error.message}</pre>
+          <button
+            onClick={() => {
+              // though you could accomplish this with a combination
+              // of the FallbackCallback and onReset props as well.
+              resetErrorBoundary();
+            }}
+          >
+            Try again
+          </button>
+        </div>;
+      }}
+    >
       <Youtube {...args} />
-    </Player>
+    </ErrorBoundary>
   );
 }
 
-export default memo(Youtube);
+export default memo(PlayerBox);

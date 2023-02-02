@@ -20,13 +20,13 @@ export default function usePrefetch({
     const types = ["CLIP", "TRAILER", "BLOOPERS", "BTS", "FEATURETTE"];
     queryClient.prefetchQuery(
       ["movie", id],
-      async () => getMovieDetails({ id: id }),
-      { staleTime: "Infinity" }
+      async () => getMovieDetails({ id: parseInt(id) }),
+      { staleTime: 3600 * 1000, cacheTime: 3600 * 1000 }
     );
     queryClient.prefetchQuery(
       ["videos", id, types],
-      async () => getVideosById({ id: id, types }),
-      { staleTime: "Infinity" }
+      async () => getVideosById({ id: parseInt(id), types }),
+      { staleTime: 3600 * 1000 }
     );
   }, [id, queryClient]);
 

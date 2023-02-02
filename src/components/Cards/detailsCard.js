@@ -1,8 +1,13 @@
-import { forwardRef, useCallback, useRef, useState } from "react";
+import { forwardRef, useCallback, useRef } from "react";
 
 import { useSearchParams } from "react-router-dom";
 
+import { useHover } from "@use-gesture/react";
+import { useModalDispatch } from "../../contexts/modalContext";
+import useMedia from "../../hooks/useBreakpoint";
+import { mergeRefs } from "../../utils";
 import AspectBox from "../AspectBox";
+import ProgressiveImage from "../cachedImage";
 import {
   Adult,
   Description,
@@ -13,19 +18,13 @@ import {
   Title,
 } from "../CardModal/styles";
 import timeConversion from "../CardModal/utils";
-import ProgressiveImage from "../cachedImage";
-import { useModalDispatch } from "../../contexts/modalContext";
-import { useHover } from "@use-gesture/react";
 import usePrefetch from "./usePrefetch";
-import useMedia from "../../hooks/useMedia";
-import { mergeRefs } from "../../utils";
 
 const DetailsCard = ({ data: current, onClick }, ref) => {
   const dispatch = useModalDispatch();
 
   const miniRef = useRef();
 
- 
   let [searchParams, setSearchParams] = useSearchParams();
 
   const src = current?.landscapePosterPath;
@@ -36,71 +35,69 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
   const year = current?.releaseDate?.split("-")[0];
   const runTime = current?.runtime;
 
-   const device = useMedia();
+  const device = useMedia();
 
-   const mobile = device === "mobile";
-   const desktop = device === "desktop";
+  const mobile = device === "mobile";
+  const desktop = device === "desktop";
 
-     const timeOutRef = useRef();
+  const timeOutRef = useRef();
 
-     const clearTimer = useCallback(() => {
-       if (timeOutRef.current) {
-         clearTimeout(timeOutRef.current);
-       }
-     }, []);
+  const clearTimer = useCallback(() => {
+    if (timeOutRef.current) {
+      clearTimeout(timeOutRef.current);
+    }
+  }, []);
 
-     const setTimer = useCallback(
-       (cb) => {
-         clearTimer();
-         timeOutRef.current = setTimeout(() => {
-           cb();
-         }, 100);
-       },
-       [clearTimer]
-     );
+  const setTimer = useCallback(
+    (cb) => {
+      clearTimer();
+      timeOutRef.current = setTimeout(() => {
+        cb();
+      }, 100);
+    },
+    [clearTimer]
+  );
 
-     const handleHovering = useCallback(
-       (hovering) => {
-         if (!hovering) {
-           clearTimer();
-           return;
-         }
-         const showMini = () => {
-           dispatch({
-             type: "set modal",
-             payload: {
-               movie: current,
-               parent: miniRef.current,
-               mini: true,
-               overlay:original,
-               aspectRatio:16/9
-             },
-           });
-         };
+  const handleHovering = useCallback(
+    (hovering) => {
+      if (!hovering) {
+        clearTimer();
+        return;
+      }
+      const showMini = () => {
+        dispatch({
+          type: "set modal",
+          payload: {
+            movie: current,
+            parent: miniRef.current,
+            mini: true,
+            overlay: original,
+            aspectRatio: 16 / 9,
+          },
+        });
+      };
 
-        //  if (mini) {
-        //    showMini();
-        //    return;
-        //  }
+      //  if (mini) {
+      //    showMini();
+      //    return;
+      //  }
 
-         setTimer(showMini);
-       },
-       [ setTimer, clearTimer, dispatch, current, preview]
-     );
+      setTimer(showMini);
+    },
+    [setTimer, clearTimer, dispatch, current, preview]
+  );
 
-      const bind = useHover((state) => {
-        if (current && desktop) {
-          handleHovering(state.hovering);
-        }
-      });
+  const bind = useHover((state) => {
+    if (current && desktop) {
+      handleHovering(state.hovering);
+    }
+  });
 
-   const { ref: prefetchRef, handlePrefetch } = usePrefetch({
-     id: current?.id,
-     whileInView: !desktop,
-     enabled: current && !desktop,
-   });
-
-   
+  const { ref: prefetchRef, handlePrefetch } = usePrefetch({
+    id: current?.id,
+    whileInView: !desktop,
+    enabled: current && !desktop,
+  });
 
   const handleClick = useCallback(() => {
     handlePrefetch();
@@ -110,17 +107,7 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
     });
     setSearchParams({ mv: current?.id });
     onClick?.();
-  }, [
-  
-    current?.id,
-    dispatch,
-    handlePrefetch,
-    onClick,
-    setSearchParams,
-  ]);
-
-
-   
+  }, [current?.id, dispatch, handlePrefetch, onClick, setSearchParams]);
 
   return (
     <div
@@ -157,7 +144,6 @@ const DetailsCard = ({ data: current, onClick }, ref) => {
           {current?.overview}
         </Overview>
       </Description>
-     
     </div>
   );
 };

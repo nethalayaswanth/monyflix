@@ -3,7 +3,6 @@ import React, {
   lazy,
   Suspense,
   useCallback,
-  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -17,36 +16,38 @@ import { Modal } from "./styles";
 
 import { animated } from "react-spring";
 
-import useMedia from "../../hooks/useMedia";
-
-import { useInView } from "react-intersection-observer";
-import ProgressiveImage from "../cachedImage";
+import { useDevice } from "../../contexts/deviceContext.js";
+import usePrevious from "../../hooks/usePrevious";
+import ProgressiveImage, { Img } from "../cachedImage";
+import { Description } from "../Cards/styles";
 import RecommendedMovies from "./recommendedMovies";
 import SimilarMovies from "./similarMovies";
-import timeConversion from "./utils";
+import timeConversion, { dateFormat } from "./utils";
 import Videos from "./videos";
-import AspectBox from "../AspectBox";
 
 const Youtube = lazy(() => {
   return import("../Youtube");
 });
 const TrailModal = forwardRef(
-  ({ style, width, footerHeight,miniHeight, fade, progress, minifade }, ref) => {
+  (
+    { style, width, footerHeight, miniHeight, fade, progress, minifade },
+    ref
+  ) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const param = searchParams.get("mv");
+    const param = parseInt(searchParams.get("mv"));
 
-    const [currentMovieId, setCurrentMovieId] = useState(param);
+    const prevParam = usePrevious(param);
 
-    const [{ movie,expand, aspectRatio, overlay, details }, dispatch] =
-      useModalState();
+    const [currentMovieId, setCurrentMovieId] = useState(parseInt(param));
 
-    const movieId = currentMovieId || movie?.id;
+    const [{ movie, expand, card, overlay, mini }, dispatch] = useModalState();
+
+    const movieId = (param ?? prevParam) || movie?.id;
 
     const {
       data: movieDetails,
       isLoading: movieDetailsLoading,
-      refetch: movieDetailsRefetch,
       status: movieDetailStatus,
       isFetching,
       error,
@@ -71,21 +72,6 @@ const TrailModal = forwardRef(
       return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
     }, [movieDetails]);
 
-    useLayoutEffect(() => {
-      if (param) {
-        setCurrentMovieId(param);
-      }
-    }, [param]);
-
-    // useEffect(() => {
-    //   if (
-    //     (similarMoviesQuery?.data && expanded) ||
-    //     (recommendedMoviesQuery?.data && expanded)
-    //   ) {
-    //     setListRenderSize(true);
-    //   }
-    // }, [expanded, recommendedMoviesQuery?.data, similarMoviesQuery?.data]);
-
     let location = useLocation();
     let navigate = useNavigate();
 
@@ -93,14 +79,38 @@ const TrailModal = forwardRef(
       (e) => {
         e.stopPropagation();
 
+        const searchKey = searchParams.get("q");
         setSearchParams(
-          { mv: movie?.id },
+          { ...(searchKey && { q: searchKey }), mv: movie?.id },
           {
             state: { backgroundLocation: location, miniModal: true },
           }
         );
       },
-      [location, movie, setSearchParams]
+      [location, movie?.id, searchParams, setSearchParams]
+    );
+
+    const handleGenres = useCallback(
+      (id) => {
+        searchParams.set("q", "fast");
+
+        const path = new URL(window.location.href);
+
+        console.log(path, id, searchParams.toString());
+        console.log("clicked", `/genre/${id}`);
+        navigate(`search${searchParams.toString()}`);
+
+        // window.scrollTo({
+        //   top: 0,
+        //   left: 0,
+        // });
+
+        if (param) {
+          searchParams.delete("mv");
+          setSearchParams(searchParams);
+        }
+      },
+      [navigate, param, searchParams, setSearchParams]
     );
 
     const handleClose = useCallback(
@@ -117,11 +127,9 @@ const TrailModal = forwardRef(
     );
 
     const current = movieDetails?.movie;
-    const year = current?.releaseDate.split("-")[0];
+    const year = current?.releaseDate;
     const genres = movieDetails?.movie.genres;
     const runTime = movieDetails?.movie.runtime;
-
-
 
     const backDropPath = current?.backdropPath
       ? `https://image.tmdb.org/t/p/w780${current?.backdropPath}`
@@ -138,85 +146,61 @@ const TrailModal = forwardRef(
       });
     }, []);
 
-    const device = useMedia();
+    const { mobile, desktop } = useDevice();
 
-    const {
-      ref: elRef,
-      inView,
-      entry,
-    } = useInView({
-      threshold: 0.95,
-      rootMargin: "100px 0px 100px 0px",
-    });
-
-    const mobile = device === "mobile";
-    const desktop = device === "desktop";
-
-    const [audio, setAudio] = useState(false);
-    const [show, setShow] = useState();
-
-    const showCb = useCallback(({ show }) => {
-      setShow(show);
-    }, []);
-
-    const handleAudio = useCallback(() => {
-      setAudio((x) => !x);
-    }, []);
-
-    const opened = param ;
-    const collapsing=!param && expand
+    const potraitFooter = (card === "potrait" && mini) || param;
+    const detailFooter = card === "detail" && mini && !param;
+    const opened = !!param;
+    const collapsing = !param && expand;
 
     return (
       <Suspense>
-        <div
-          style={{
-            position: "relative",
-            height: "100%",
-            width: "100%",
-          }}
-        >
+        <>
           <Modal.LoadingOverlay
             visible={isFetching && param}
           ></Modal.LoadingOverlay>
-          <animated.div
-            style={{
-              height: miniHeight,
-              // aspectRatio: opened ? "auto" : aspectRatio,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Modal.Wrapper>
-              <animated.div
-                style={{
-                  opacity: minifade.to({
-                    range: [0, 0.5, 0.7],
-                    output: [1, 0, 1],
-                  }),
-                  width: "100%",
-                  height: "100%",
-                  zIndex: 6,
-                  pointerEvents: "none",
-                  position: "absolute",
-                }}
-              >
-                <div
-                  style={{ aspectRatio, width: "100%", position: "relative" }}
-                >
-                  <ProgressiveImage
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      background: "none",
-                    }}
-                    original={overlay}
-                    alt={``}
-                  />
-                </div>
-              </animated.div>
 
+          <Modal.Wrapper>
+            <animated.div
+              style={{
+                opacity: minifade.to({
+                  range: [0, 0.5, 0.7],
+                  output: [1, 0, 1],
+                }),
+                width: "100%",
+                height: "100%",
+                zIndex: 6,
+                pointerEvents: "none",
+                position: "absolute",
+              }}
+            >
+              <div style={{ width: "100%", position: "relative" }}>
+                <Img
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    background: "none",
+                  }}
+                  src={overlay}
+                  alt={``}
+                />
+              </div>
+            </animated.div>
+            <animated.div
+              ref={ref}
+              style={{
+                opacity: minifade.to({
+                  range: [0, 0.5, 0.8],
+                  output: [0, 1, 0],
+                }),
+                alignItems: "center",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                flexBasis: "auto",
+                flex: 1,
+              }}
+            >
               <div
                 style={{
                   position: "relative",
@@ -231,149 +215,144 @@ const TrailModal = forwardRef(
                   flexBasis: "auto",
                   flexShrink: 0,
                 }}
-                ref={elRef}
               >
                 <ProgressiveImage
                   style={{
                     width: "100%",
                     height: "100%",
-                    position: "relative",
                   }}
+                  modal
                   original={backDropPath}
                   preview={backDropPathPreview}
                   alt={``}
                 />
 
-                <animated.div
-                  style={{
-                    width: "100%",
-                    height: "300%",
-                    position: "absolute",
-                    left: 0,
-                    zIndex: 2,
-                    backgroundColor: "transparent",
-                  }}
-                >
-                  {/* {videoId && !collapsing && (
-                    <Suspense fallback={<div></div>}>
-                      <Youtube
-                        id={videoId}
-                        light={false}
-                        play={true}
-                        audio={audio}
-                        cb={showCb}
-                        visible={inView}
-                      />
-                    </Suspense>
-                  )} */}
-                  {/* {
+                {videoId && !collapsing && (
+                  <Suspense fallback={<div></div>}>
+                    <Youtube id={videoId} light={false} play={true} />
+                  </Suspense>
+                )}
+                {/* {
                   <>
                     {(expand || expanded) && (
                       <Button onClick={handleClose}>
                         <Close style={{ fill: "white" }} />
                       </Button>
                     )}
-                    {show && (
-                      <Button
-                        onClick={handleAudio}
-                        style={{ bottom: 0, top: "auto" }}
-                      >
-                        <AudioControls audio={audio} />
-                      </Button>
-                    )}
+                   
                   </>
                 } */}
-                </animated.div>
               </div>
 
-              <Modal.Content expand={param} style={{}}>
-                <Modal.Description expand={param}>
-                  <Modal.Header>
-                    <Modal.Title expand={param}>{current?.title}</Modal.Title>
-                  </Modal.Header>
-                  <Modal.InlineFlex>
-                    <Modal.Item>{year}</Modal.Item>
-                    {runTime && (
-                      <Modal.Item>{timeConversion(runTime)}</Modal.Item>
-                    )}
-                    <Modal.Adult>
-                      {current?.adult ? "U/A 13+" : "U/A 18+"}
-                    </Modal.Adult>
-                  </Modal.InlineFlex>
-                  {aspectRatio < 1 && (
-                    <Modal.Overview className={param && "expand"}>
-                      {current?.overview}
-                    </Modal.Overview>
-                  )}
-                  {param && <Modal.Tagline>{current?.tagline}</Modal.Tagline>}
-                </Modal.Description>
-                {genres && param && (
-                  <Modal.Genres>
-                    <span
-                      key={"genres"}
-                      style={{ ...(!desktop && { fontWeight: 600 }) }}
-                    >
-                      Genres:
-                    </span>
-                    {genres.map((genre, i) => {
-                      const last = i === genres.length - 1;
-                      return (
-                        <span key={i}>
-                          {`${genre}`}
-                          {!last && ","}
-                        </span>
-                      );
-                    })}
-                  </Modal.Genres>
-                )}
-              </Modal.Content>
+              {
+                <Description.Content
+                  className="modal-content"
+                  desktop={desktop}
+                  opened={opened}
+                  style={{ height: param ? "auto" : 0 }}
+                >
+                  <Description.Wrapper
+                    className="modal-description"
+                    opened={param}
+                  >
+                    <Description.Title>{current?.title}</Description.Title>
 
+                    <Description.Overview>
+                      {current?.overview}
+                    </Description.Overview>
+                    <Description.MetaData>
+                      {runTime ? <span>{timeConversion(runTime)}</span> : null}
+                      {year ? <span>{dateFormat(year)}</span> : null}
+                      {current?.adult ? (
+                        <span>
+                          <Description.Badge>
+                            {current?.adult ? "U/A 13+" : "U/A 18+"}
+                          </Description.Badge>
+                        </span>
+                      ) : null}
+                    </Description.MetaData>
+                    {opened && current?.tagline && (
+                      <Description.Tagline>
+                        {`"${current?.tagline}"`}
+                      </Description.Tagline>
+                    )}
+                  </Description.Wrapper>
+
+                  {genres && opened && (
+                    <Description.Genres>
+                      <span
+                        key={"genres"}
+                        style={{ ...(!desktop && { fontWeight: 600 }) }}
+                      >
+                        Genres:
+                      </span>
+                      {genres.map((genre, i) => {
+                        const last = i === genres.length - 1;
+                        return (
+                          <span
+                            key={i}
+                            className="link"
+                            onClick={() => {
+                              console.log(genre.id);
+                              handleGenres(genre.id);
+                            }}
+                          >
+                            {`${genre.name}`}
+
+                            {!last && ","}
+                          </span>
+                        );
+                      })}
+                    </Description.Genres>
+                  )}
+                </Description.Content>
+              }
               <Videos
                 movieId={movieId}
                 opened={opened}
-                // renderFullList={true}
-              />
-              <RecommendedMovies
-                movieId={movieId}
-                opened={opened}
-                // renderFullList={true}
-              />
-              <SimilarMovies
-                movieId={movieId}
-                opened={opened}
-                // renderFullList={true}
+                initialData={movieDetails?.movie?.videos}
               />
 
-              {!param && (
-                <>
-                  <Modal.Footer style={{ height: footerHeight }}>
-                    <div style={{ flex: 1 }}>
-                      {aspectRatio > 1 && (
-                        <div>
-                          <Modal.Header>
-                            <Modal.Title expand={param}>
+              <SimilarMovies movieId={movieId} opened={opened} />
+              <RecommendedMovies movieId={movieId} opened={opened} />
+
+              {!opened && (
+                <Modal.Footer style={{ height: footerHeight }}>
+                  <div style={{ flex: 1 }}>
+                    <div>
+                      {detailFooter && (
+                        <>
+                          <Description.Wrapper
+                            className="modal-description"
+                            opened={opened}
+                          >
+                            <Description.Title>
                               {current?.title}
-                            </Modal.Title>
-                          </Modal.Header>
-                          <Modal.InlineFlex>
-                            <Modal.Item>{year}</Modal.Item>
-                            {runTime && (
-                              <Modal.Item>{timeConversion(runTime)}</Modal.Item>
-                            )}
-                            <Modal.Adult>
-                              {current?.adult ? "U/A 13+" : "U/A 18+"}
-                            </Modal.Adult>
-                          </Modal.InlineFlex>
-                        </div>
+                            </Description.Title>
+                            <Description.MetaData>
+                              {year && <span>{dateFormat(year)}</span>}
+                              {runTime && (
+                                <span>{timeConversion(runTime)}</span>
+                              )}
+                              {current?.adult && (
+                                <span>
+                                  <Description.Badge>
+                                    {current?.adult ? "U/A 13+" : "U/A 18+"}
+                                  </Description.Badge>
+                                </span>
+                              )}
+                            </Description.MetaData>
+                          </Description.Wrapper>
+                        </>
                       )}
                     </div>
-                    <Modal.Up onClick={handleExpand} />
-                  </Modal.Footer>
-                </>
+                  </div>
+                  <Modal.Up onClick={handleExpand} />
+                </Modal.Footer>
               )}
-            </Modal.Wrapper>
-          </animated.div>
-        </div>
+            </animated.div>
+          </Modal.Wrapper>
+        </>
       </Suspense>
     );
   }

@@ -1,7 +1,6 @@
-import useMedia from "../hooks/useMedia";
-import { Overlay } from "./Landing/styles";
 import styled from "styled-components";
-
+import useMedia from "../hooks/useBreakpoint";
+import { Overlay } from "./Landing/styles";
 
 export const Wrapper = styled.div`
   -o-object-fit: cover;
@@ -11,17 +10,16 @@ export const Wrapper = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;`
+  overflow: hidden;
+`;
 
-
-const Video = ({style, show, children, crop = true }) => {
+const Video = ({ style, show, children, crop = true }) => {
   const device = useMedia();
 
- 
   const desktop = device === "desktop";
 
   return (
-    <Wrapper style={{...style}}>
+    <Wrapper style={{ ...style }}>
       <div
         style={{
           display: "flex",

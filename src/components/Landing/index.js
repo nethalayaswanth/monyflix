@@ -9,46 +9,24 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useInView } from "react-intersection-observer";
 import { useQueryClient } from "react-query";
 import { useSearchParams } from "react-router-dom";
-import useMedia from "../../hooks/useMedia";
+import useMedia from "../../hooks/useBreakpoint";
 import {
   getMovieDetails,
-  useVideosById,
   useLatestMovie,
+  useVideosById,
 } from "../../requests/requests";
-import AudioControls from "../AudioControls";
-import Video from "../CroppedVideo";
-import { ReactComponent as UnMute } from "../../assets/unMute.svg";
-import { ReactComponent as Mute } from "../../assets/mute.svg";
 
 import { useModalState } from "../../contexts/modalContext";
 
-import Description from "../Epic/description";
 import { Details } from "./Details";
 
-import ProgressiveImage from "../cachedImage";
-import {
-  Container,
-  Down,
-  Gradient,
-  MoreDetails,
-  HeaderButton,
-  VideoControls,
-  Picture,
-  Title,
-  Overview,
-  Scroll,
-  LinerGradient,
-  HeroGradient,
-} from "./styles";
-import { useSpring } from "react-spring";
-import { useHover } from "@use-gesture/react";
-import { MdApi } from "react-icons/md";
-import useMeasure from "react-use-measure";
-import Carousel from "../Carousel";
 import { useSwiper, useSwiperSlide } from "swiper/react";
+import ProgressiveImage from "../cachedImage";
+import Carousel from "../Carousel";
+import { Container, Gradient, HeroGradient } from "./styles";
+import { useDevice } from "../../contexts/deviceContext.js";
 
 const types = ["CLIP", "TRAILER", "TEASER", "BLOOPERS", "BTS", "FEATURETTE"];
 
@@ -64,12 +42,10 @@ export const LandingCard = forwardRef(
     const slide = useSwiperSlide();
 
     const swiper = useSwiper();
-    const device = useMedia();
-
-    const desktop = device === "desktop";
+      const { mobile, desktop } = useDevice();
 
     const src = desktop ? backdropPath : posterPath;
-    
+
     const originalPoster = src ? `https://image.tmdb.org/t/p/w780${src}` : null;
     const previewPoster = src ? `https://image.tmdb.org/t/p/w300${src}` : null;
 
@@ -220,12 +196,11 @@ export const LandingCard = forwardRef(
 );
 
 const Landing = ({ queryEnabled }) => {
-  
   const movieData = useLatestMovie({
     queryOptions: { enabled: !!queryEnabled },
   });
 
-  const data = movieData?.data?.latestMovie;
+  const data = movieData?.data;
 
   return (
     <Carousel
@@ -234,6 +209,7 @@ const Landing = ({ queryEnabled }) => {
       long
       data={data}
       card={"landing"}
+      cardHover={false}
       dark
       noPadding
       effectFade

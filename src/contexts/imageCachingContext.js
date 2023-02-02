@@ -67,6 +67,8 @@ export const useImage = (options) => {
 
     if (!options?.src)
       return { data: undefined, status: "idle", isLoading: false };
+
+   
     observerRef.current = createQueryObserver(client, options);
     unsubscribe.current = observerRef.current.subscribe(renderer);
   }
@@ -81,7 +83,7 @@ function createQuery(client, { src, preview }) {
     state: {
       isLoading: true,
       status: "loading",
-      data: preview,
+      data: preview, 
     },
     subscribers: [],
     setState: (updater) => {

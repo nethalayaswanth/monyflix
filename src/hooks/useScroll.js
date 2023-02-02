@@ -21,7 +21,7 @@ export const useScroll = (options = {}) => {
         if (onScrollStart) {
           onScrollStart(e);
         } else {
-          console.log(`%cstart`, "color:red");
+         
           setScrolling(true);
         }
         scrolling.current = true;
@@ -32,7 +32,6 @@ export const useScroll = (options = {}) => {
           if (onScrollEnd) {
             onScrollEnd(e);
           } else {
-           console.log(`%cend`, "color:green");
             setScrolling(false);
           }
           scrolling.current = false;
@@ -41,12 +40,7 @@ export const useScroll = (options = {}) => {
     },
     [onScrollEnd, onScrollStart]
   );
-
-  // const handleScroll = useMemo(
-  //   () =>
-  //     wait !== 0 ? throttle(() => scrollFunc(), wait) : () => scrollFunc(),
-  //   [wait, scrollFunc]
-  // );
+ 
 
   useEventListener({
     event: "scroll",

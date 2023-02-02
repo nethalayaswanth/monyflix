@@ -21,27 +21,31 @@ import Section from "../Section";
      const data = recommendedMoviesQuery?.data;
      if (data) {
        var list = [];
-       data.pages.forEach(({ recommendedMovies: { data } }, i) => {
+       data.pages.forEach(( { data  }, i) => {
          list = [...list, ...data];
        });
-       if (renderFullList) return list;
-       return list.slice(0, 2);
+        return list;
+     
      }
      return [];
-   }, [recommendedMoviesQuery?.data, renderFullList]);
+   }, [recommendedMoviesQuery?.data]);
+
+  
 
    return (
      <>
-       {opened && recommendedMovies && (
+       {opened && recommendedMovies && recommendedMovies.length !== 0 && (
          <Section
-           title="More Like This"
+           title="Recommended Movies"
            data={recommendedMovies}
            loading={recommendedMoviesQuery.status === "loading"}
            hasMore={recommendedMoviesQuery.hasNextPage && renderFullList}
            isFetching={recommendedMoviesQuery.isFetchingNextPage}
            fetchMore={recommendedMoviesQuery.fetchNextPage}
-           card="card"
-           breakPointValues={[5, 5, 4, 4, 3, 2]}
+           card="potrait"
+           cardExpand={false}
+           cardHover={false}
+           breakPointValues={[2, 2, 3, 4, 4, 5]}
          ></Section>
        )}
      </>

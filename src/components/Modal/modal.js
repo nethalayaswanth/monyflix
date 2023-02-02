@@ -24,8 +24,8 @@ import useResizeObserver from "use-resize-observer";
 import { useModalState } from "../../contexts/modalContext";
 import ModalCard from "../CardModal";
 
-
-import {PADDING_Y} from './utils'
+import { PADDING_Y } from "./utils";
+import usePrevious from "../../hooks/usePrevious";
 export const MAX_WIDTH = 850;
 export const MOBILE_BREAKPOINT = 630;
 export const GAP = 10;
@@ -46,16 +46,16 @@ const Wrapper = styled.div`
   will-change: scroll-position;
 `;
 
-const Modal = ({}) => {
+const ModalWrapper = ({}) => {
   const portalEl = document.getElementById("root");
 
   const [searchParams, setSearchParams] = useSearchParams();
 
   const param = searchParams.get("mv");
 
-  const [{ parent, mini, expand, aspectRatio }, dispatch] = useModalState();
+  const [{ parent, mini, showMini, expand }, dispatch] = useModalState();
 
-  const screen = useWindowSize();
+  const prevMini = usePrevious();
 
   const [isHovering, setHovering] = useState();
 
@@ -63,35 +63,14 @@ const Modal = ({}) => {
     // setHovering(state.hovering);
   });
 
-  const hoverAway = useHover((state) => {
-    if (state.hovering && !param) {
-      const { from } = hoverStyles();
-      api.start({
-        to: async (animate) => {
-          await animate({
-            to: {
-              ...from,
-              minifade: 1,
-              fade: 0,
-            },
-            config: { tension: 100, mass: 1, clamp: true },
-          }).then(() => {
-            dispatch({ type: "set reset" });
-          });
-        },
-      });
-    }
-  });
-
   const modal = useRef();
+  const modalInner = useRef();
 
   const bodyStyle = useRef();
 
   const scroll = useRef();
 
   const miniRect = useRef();
-  const miniTranslateY = useRef();
-  const miniTranslateX = useRef();
 
   const handleClose = useCallback(
     (e) => {
@@ -112,8 +91,8 @@ const Modal = ({}) => {
   const hoverStyles = useCallback(() => {
     const parentRect = parent?.getBoundingClientRect();
 
-    return getHoverStyles({ parentRect, aspectRatio });
-  }, [parent, aspectRatio]);
+    return getHoverStyles({ parentRect });
+  }, [parent]);
 
   const [
     {
@@ -149,6 +128,15 @@ const Modal = ({}) => {
           height: 0,
           top: 0,
           left: 0,
+          transformOrigin: "center top",
+        },
+        config: {
+          tension: 200,
+          friction: 20,
+          mass: 0.2,
+          velocity: 0.5,
+          // precision: 0.01,
+          clamp: true,
         },
       };
     }
@@ -167,7 +155,14 @@ const Modal = ({}) => {
         opacity: 0,
         transformOrigin: "center center",
       },
-      config: { tension: 100, friction: 15, clamp: true },
+      config: {
+        tension: 200,
+        friction: 20,
+        mass: 0.2,
+        velocity: 0.5,
+        // precision: 0.01,
+        clamp: true,
+      },
     };
   });
 
@@ -196,6 +191,30 @@ const Modal = ({}) => {
     });
   }, []);
 
+  const closeMini = useCallback(() => {
+    const { from } = hoverStyles();
+   
+    api.start({
+      to: async (animate) => {
+        await animate({
+          to: {
+            ...from,
+            minifade: 1,
+            fade: 0,
+          },
+        }).then(() => {
+          dispatch({ type: "set reset" });
+        });
+      },
+    });
+  }, [api, dispatch, hoverStyles]);
+  
+  const hoverAway = useHover((state) => {
+    if (state.hovering && !param && !expand) {
+       console.log("hover away");
+      closeMini();
+    }
+  });
   useLayoutEffect(() => {
     if (!mini) return;
     const { to, from } = hoverStyles();
@@ -210,12 +229,18 @@ const Modal = ({}) => {
     });
   }, [api, hoverStyles, mini]);
 
+  useLayoutEffect(() => {
+    if (!showMini && !param && !expand) {
+      closeMini();
+    }
+  }, [closeMini, expand, param, showMini]);
+
   useResizeObserver({
     ref: document.body,
     onResize: ({ width: screenWidth, height }) => {
       if (expand) {
-        const { width, y:translateY } = updatedStyles({ width: screenWidth });
-   const miniTop = modal?.current?.getBoundingClientRect();
+        const { width, y: translateY } = updatedStyles({ width: screenWidth });
+        const miniTop = modal?.current?.getBoundingClientRect();
 
         api.start({
           to: async (animate) => {
@@ -223,10 +248,9 @@ const Modal = ({}) => {
               to: [
                 {
                   width,
-                  
                 },
               ],
-              config: { tension: 180, mass: 3, clamp: true, friction: 40 },
+              // config: { tension: 180, mass: 3, clamp: true, friction: 40 },
             });
           },
         });
@@ -236,34 +260,39 @@ const Modal = ({}) => {
 
   useLayoutEffect(() => {
     if (param && !expand) {
+      let scrollHeight;
       if (mini) {
         miniRect.current = modal?.current?.getBoundingClientRect();
-      }
-
-      if (!mini && parent) {
+        scrollHeight = modalInner.current?.scrollHeight;
+      } else if (!mini && parent) {
         miniRect.current = parent.getBoundingClientRect();
+        scrollHeight = modalInner.current?.scrollHeight;
       }
-
-      const main = document.getElementById("app");
 
       lockBody();
 
       const { from, to } = getExpandStyles({
         miniRect: miniRect.current,
         parentRect: parent?.getBoundingClientRect(),
+        scrollHeight,
       });
 
       api.start({
         to: async (animate) => {
           await animate({
-            to: {
-              ...to,
-              opacity: 1,
-              fade: 1,
-              progress: 1,
-              minifade: 0.5,
-            },
-            config: { tension: 100, clamp: true },
+            to: [
+              {
+                ...to,
+                opacity: 1,
+                fade: 1,
+                progress: 1,
+                minifade: 0.5,
+              },
+              {
+                height: "auto",
+              },
+            ],
+            // config: { tension: 100, clamp: true },
           }).then((r) => {
             dispatch({ type: "set modal", payload: { expand: true } });
           });
@@ -280,36 +309,32 @@ const Modal = ({}) => {
     if (!param && expand) {
       const modalRect = modal?.current.getBoundingClientRect();
       const parentRect = parent?.getBoundingClientRect();
- 
-     
-      const { to, from } = collapseStyles({
-        parentRect,
-        modalRect,
-        aspectRatio,
-        currentY: y.get(),
-      });
 
-      document.body.style.overflowY = "scroll";
+      api.start((_, { springs: { y } }) => {
+        const { to, from } = collapseStyles({
+          parentRect,
+          modalRect,
+          currentY: y.get(),
+        });
 
-    
+        document.body.style.overflowY = "scroll";
 
-      api.start(() => {
-   
+        console.log({ to, from });
         return {
           to: async (animate) => {
             await animate({
-              to: [
-                {
-                  ...to,
-                  progress: 0,
-                  opacity: 0,
-                  fade: 0,
-                  minifade: 1,
-                },
-              ],
-              from,
-              config: { tension: 35, mass: 3, clamp: true, friction: 1 },
+              to: {
+                ...to,
+                progress: 0,
+                opacity: 0,
+                fade: 0,
+                minifade: 1,
+              },
+
+              from: { ...from },
+              // config: { tension: 170,mass:20, clamp: true },
             }).then((r) => {
+              console.log("resolved");
               dispatch({
                 type: "set reset",
               });
@@ -321,18 +346,7 @@ const Modal = ({}) => {
         };
       });
     }
-  }, [
-    expand,
-    dispatch,
-    param,
-    mini,
-    y,
-    api,
-    parent,
-    lockBody,
-    unlockBody,
-    aspectRatio,
-  ]);
+  }, [expand, dispatch, param, mini, api, parent, lockBody, unlockBody]);
 
   useLayoutEffect(() => {
     return () => {
@@ -366,10 +380,11 @@ const Modal = ({}) => {
               y,
               scaleY,
               scaleX,
+              height,
               left,
               display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
             <ModalCard
@@ -379,6 +394,7 @@ const Modal = ({}) => {
               minifade={minifade}
               miniHeight={height}
               footerHeight={footerHeight}
+              ref={modalInner}
             />
           </animated.div>
           <animated.div
@@ -386,6 +402,7 @@ const Modal = ({}) => {
             {...hoverAway()}
             style={{
               position: "fixed",
+              zIndex: 1,
               top: 0,
               left: 0,
               width: "100%",
@@ -401,4 +418,4 @@ const Modal = ({}) => {
     : null;
 };
 
-export default memo(Modal);
+export default memo(ModalWrapper);

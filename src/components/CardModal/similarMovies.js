@@ -22,18 +22,18 @@ import Section from "../Section";
     const data = similarMoviesQuery?.data;
     if (data) {
       var list = [];
-      data.pages.forEach(({ similarMovies: { data } }, i) => {
+      data.pages.forEach(({ data }, i) => {
         list = [...list, ...data];
       });
-      if (renderFullList) return list;
-      return list.slice(0, 2);
+       return list;
+      
     }
     return [];
-  }, [renderFullList, similarMoviesQuery?.data]);
+  }, [similarMoviesQuery?.data]);
 
   return (
     <>
-      {opened && similarMovies && (
+      {opened && similarMovies && similarMovies.length !== 0 && (
         <Section
           title="More Like This"
           data={similarMovies}
@@ -41,8 +41,11 @@ import Section from "../Section";
           hasMore={similarMoviesQuery.hasNextPage && renderFullList}
           isFetching={similarMoviesQuery.isFetchingNextPage}
           fetchMore={similarMoviesQuery.fetchNextPage}
-          card="card"
-          breakPointValues={[5, 5, 4, 4, 3, 2]}
+          card="detail"
+          cardExpand={false}
+          cardHover={false}
+         
+          breakPointValues={[1.5, 1.75, 3, 3, 3, 3]}
         ></Section>
       )}
     </>

@@ -50,19 +50,19 @@ export const Flex = styled(animated.div)`
 
 export const Content = styled(Flex)`
   padding: 0 10px;
-  flex: 1;
+  flex: auto;
+  flex-shrink: 0;
   min-height: 0;
-  flex-direction: ${({ desktop }) => desktop?'row':'column'};
-  overflow:hidden;
-    ${({ expand }) =>
-      expand
-        ? css`
-            padding: 0 25px;
-            @media only screen and (min-width: 740px) {
-              padding: 0 40px;
-            }
-          `
-        : ``};
+  height: 0;
+
+  flex-direction: ${({ desktop }) => (desktop ? "row" : "column")};
+  overflow: hidden;
+  ${({ expand }) =>
+    expand
+      ? css`
+          padding: 0 var(--metaData-padding);
+        `
+      : ``};
 `;
 
 export const Header = styled.div`
@@ -77,7 +77,6 @@ export const InlineFlex = styled(Flex)`
 `;
 
 export const Block = styled(animated.div)`
-     
   display: flex;
   position: relative;
   width: 100%;
@@ -97,7 +96,7 @@ export const Wrapper = styled(Block)`
   flex-direction: column;
   background-color: white;
   display: flex;
-   overflow: hidden; 
+  overflow: hidden;
 `;
 
 export const ModalWrapper = styled(Block)`
@@ -132,7 +131,6 @@ export const AspectBox = styled.div`
   object-fit: cover;
 `;
 export const Text = styled.p`
-     
   overflow: hidden;
   text-overflow: ellipsis;
   word-wrap: break-word;
@@ -173,8 +171,8 @@ export const Title = styled(Text)`
 `;
 
 export const Tagline = styled(Title)`
-  font-size: "1.5rem";
-  font-weight: "600";
+  font-size: 1.5rem;
+  font-weight: 600;
   font-style: italic;
 `;
 export const Overview = styled(Text)`
@@ -214,8 +212,7 @@ export const Button = styled.div`
 
 export const Divider = styled.div`
   display: block;
-     
-     
+
   border: 0.5px solid rgba(0, 0, 0, 0.15);
 `;
 export const Close = styled(MdOutlineClose)`
@@ -247,16 +244,15 @@ export const Footer = styled(InlineFlex)`
 
 export const Up = styled(IoChevronForwardCircleOutline)`
   cursor: pointer;
-  height:  36px;
+  height: 36px;
   width: 36px;
   transform: rotate(-90deg);
   opacity: 0.7;
-  
 `;
 
 export const Description = styled(Flex)`
   height: unset;
-  
+
   padding-right: ${({ expand }) => expand && "2rem"};
 `;
 
@@ -266,8 +262,19 @@ export const Genres = styled.div`
   word-break: break-word;
   margin-top: 0.8em;
   margin-bottom: 0.25em;
-  span {
-    &:first-of-type {
+  & > span {
+    :not(:first-of-type) {
+      cursor: pointer;
+    }
+
+    :not(:first-of-type):hover {
+      text-decoration: underline;
+    }
+    & .link{
+
+    }
+
+    :first-of-type {
       opacity: 1;
       font-weight: 500;
     }
@@ -275,19 +282,17 @@ export const Genres = styled.div`
   }
 `;
 
-
 export const LoadingOverlay = styled.div`
   position: absolute;
-              top: 0;
-              left: 0;
-              background: rgba(255,255,255,0.5);
-              opacity:${({ visible }) =>
-                visible ? 1 : 0};
-              transition: "opacity 0.3s";
-              height: 100%;
-              width: 100%;
-              pointerEvents: none;
-              zIndex: 100;
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: ${({ visible }) => (visible ? 1 : 0)};
+  transition: "opacity 0.3s";
+  height: 100%;
+  width: 100%;
+  pointerevents: none;
+  zindex: 100;
 `;
 
 export const Modal = {
@@ -311,4 +316,3 @@ export const Modal = {
   Up,
   ModalWrapper,
 };
-

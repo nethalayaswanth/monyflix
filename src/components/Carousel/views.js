@@ -6,7 +6,7 @@ const NavButton = styled.button`
   top: 0;
   position: absolute;
   height: 100%;
-  z-index: 10;
+  z-index: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -16,7 +16,7 @@ const NavButton = styled.button`
   text-align: center;
   opacity: 0;
 
-  width: var(--controllerWidth);
+  width: var(--controller-width);
 
   ${(props) =>
     !props.next
@@ -61,11 +61,9 @@ export const Next = styled(NavButton)`
 `;
 
 export const SwiperWrapper = styled.div`
-  --controllerWidth: ${({ controllerWidth }) => `${controllerWidth}px`};
-
   overflow: visible;
   position: relative;
-  padding: 0 var(--controllerWidth);
+  padding: 0 var(--controller-width);
 
   &:hover {
     ${NavButton} {
@@ -78,7 +76,7 @@ export const SwiperWrapper = styled.div`
     position: relative;
     list-style: none;
     padding: 0;
-    z-index: 2;
+    z-index: ${({ cardHover }) => (cardHover ? 2 : 1)};
     height: 100%;
     display: flex;
     max-height: max-content;
@@ -114,8 +112,8 @@ export const SwiperWrapper = styled.div`
       scroll-padding-right: 0px;
     }
   }
-  .swiper-slide.hide{
-    visibility:hidden
+  .swiper-slide.hide {
+    visibility: hidden;
   }
 
   .swiper-slide {
@@ -123,11 +121,9 @@ export const SwiperWrapper = styled.div`
     align-items: center;
     justify-content: center;
     position: relative;
-    ${({ desktop, padding, margin, value }) => {
+    ${({ margin, value }) => {
       const width = `calc(
-          (100% - 2 * ${!desktop ? padding : 0}px - ${
-        value - 1
-      } * ${margin}px) /
+          (100% - 2 * var(--swiper-padding) - ${value - 1} * ${margin}px) /
             ${value}
         )`;
       return css`
@@ -138,25 +134,20 @@ export const SwiperWrapper = styled.div`
   }
 
   .swiper-slide:first-child {
-    ${({ desktop, padding, margin, value }) => {
+    ${({}) => {
       return css`
-        margin-left: ${padding}px;
+        margin-left: var(--swiper-padding);
       `;
     }}
   }
-/* 
+
   .swiper-slide:last-child {
     ${({ desktop, padding, margin, value, endPadding }) => {
-      const marginRight = endPadding
-        ? `calc(var(--width) * ${value - 1} + ${
-            value - 1
-          } * ${margin}px + ${padding}px)`
-        : `${padding}px`;
       return css`
-        margin-right: ${marginRight};
+        margin-right: var(--swiper-padding);
       `;
     }}
-  } */
+  }
 
   .swiper-pagination-bullet {
     --swiper-pagination-bullet-inactive-color: white;

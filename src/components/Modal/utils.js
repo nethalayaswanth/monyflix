@@ -19,11 +19,12 @@ export const getScale = ({ width, height, finalWidth, finalHeight }) => {
 
 const clamp = (i, min, max) => Math.max(min, Math.min(i, max));
 
-export const getHoverStyles = ({ parentRect, aspectRatio }) => {
+export const getHoverStyles = ({ parentRect }) => {
   const left = window.scrollX + parentRect.left;
   const top = window.scrollY + parentRect.top;
 
   const width = parentRect.width * 2 - parentRect.width / 2;
+  const aspectRatio = parentRect.width / parentRect.height;
 
   const footerHeight = aspectRatio > 1 ? 100 : 46;
   const titleHeight = aspectRatio > 1 ? 100 : 0;
@@ -56,27 +57,32 @@ export const getHoverStyles = ({ parentRect, aspectRatio }) => {
     to,
   };
 };
-export const collapseStyles = ({
-  parentRect,
-  modalRect,
-  aspectRatio,
-  currentY,
-}) => {
+export const collapseStyles = ({ parentRect, modalRect, currentY }) => {
+  const w = document.body.clientWidth;
+
+  const { y: topPadding } = updatedStyles({ width: w });
   const x = parentRect
     ? parentRect.left + parentRect.width / 2 - document.body.clientWidth / 2
     : 0;
   const scale = parentRect ? parentRect.width / modalRect.width : FADE_SCALE;
-  const y = parentRect ? currentY + parentRect.top - PADDING_Y : FADE_TRANSLATE;
-  const height=parentRect?parentRect.height / scale:'auto'
+  const y = parentRect
+    ? currentY + parentRect.top - topPadding
+    : FADE_TRANSLATE;
+  const height = parentRect ? parentRect.height / scale : "auto";
+  const aspectRatio = parentRect
+    ? parentRect?.width / parentRect?.height
+    : null;
+  const fromHeight = aspectRatio ? modalRect.width / aspectRatio : null;
+
   return {
     to: {
       x,
       y,
       scaleX: scale,
       scaleY: scale,
-      height
+      height,
     },
-    from: { height: modalRect.width / aspectRatio },
+    from: { height: fromHeight },
   };
 };
 
@@ -91,7 +97,7 @@ export const updatedStyles = ({ width }) => {
 
   return { width: clampedWidth, y: topPadding };
 };
-export const getExpandStyles = ({ miniRect, parentRect }) => {
+export const getExpandStyles = ({ miniRect, parentRect, scrollHeight }) => {
   const w = document.body.clientWidth;
 
   const { width: clampedWidth, y: topPadding } = updatedStyles({ width: w });
@@ -121,12 +127,13 @@ export const getExpandStyles = ({ miniRect, parentRect }) => {
     };
   }
 
-  const { width, left, top } = miniRect;
+  const { width, left, top, height: miniHeight } = miniRect;
 
   const scale = width / clampedWidth;
   const translateX = left - w / 2 + width / 2;
   const translateY = topPadding - parentRect.top;
-
+  const scaledHeight = scrollHeight * (1 - scale) + scrollHeight;
+  const toHeight = Math.max(scaledHeight,2000);
   const from = {
     width: clampedWidth,
     scaleY: scale,
@@ -134,6 +141,7 @@ export const getExpandStyles = ({ miniRect, parentRect }) => {
     top: parentRect.top,
     x: translateX,
     y: top - parentRect.top,
+    height: miniHeight / scale,
   };
 
   const to = {
@@ -142,7 +150,7 @@ export const getExpandStyles = ({ miniRect, parentRect }) => {
     scaleX: 1,
     x: 0,
     y: translateY,
-    height: "auto",
+    height: toHeight,
   };
   return {
     from,
