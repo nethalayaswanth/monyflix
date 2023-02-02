@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import useLatest from "./useLatest";
 
+
 export default function useEventListener({
   event,
   listener,

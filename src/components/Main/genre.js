@@ -5,6 +5,7 @@ import Grid from "./grid";
 
 export default function Genre() {
   const { genreId } = useParams();
+  
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useMoviesByGenre({ genreIds: [genreId], size: 20 });

@@ -48,11 +48,15 @@ const getNextPageParam=(data, pages) => {
         }
         return undefined;
       }
-const endpoint =
-  process.env.NODE_ENV !== "production"
-    ? `${process.env.REACT_APP_BASE_ENDPOINT_LOCAL}`
-    : `${process.env.REACT_APP_BASE_ENDPOINT}`;
+   
+const endpoint ='https://movies-server-eta.vercel.app'
 
+  // process.env.NODE_ENV !== "production"
+  //   ? `${process.env.REACT_APP_BASE_ENDPOINT_LOCAL}`
+  //   : `${process.env.REACT_APP_BASE_ENDPOINT}`;
+
+      //  console.log(process.env.NODE_ENV,endpoint);
+      
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
     "Content-Type": "application/json",

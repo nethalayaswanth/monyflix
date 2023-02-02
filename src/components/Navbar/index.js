@@ -1,6 +1,5 @@
 import { useHover } from "@use-gesture/react";
-import { useEffect, useRef } from "react";
-import { useState } from "react";
+import { useRef, useTransition, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { animated, useSpring } from "react-spring";
 import useMeasure from "react-use-measure";
@@ -106,13 +105,24 @@ const Navbar = () => {
   const { desktop } = useDevice();
   const [ref, { width: containerWidth }] = useMeasure();
 
+  const [isPending, startTransition] = useTransition();
   const width = open ? (!desktop ? containerWidth : 274) : 36;
-  const props = useSpring({
-    width,
-    scale: open ? 1 : 0,
-    borderOpacity: open ? 0.85 : 0,
-    borderRadius: open ? 3 : 0,
-  });
+  const [props] = useSpring(
+    () => ({
+      to: {
+        width,
+        scale: open ? 1 : 0,
+        borderOpacity: open ? 0.85 : 0,
+        borderRadius: open ? 3 : 0,
+      },
+      onRest: () => {
+        if (open) {
+          inputRef.current.focus();
+        }
+      },
+    }),
+    [open]
+  );
 
   useEventListener({
     event: "scroll",
@@ -145,23 +155,38 @@ const Navbar = () => {
     inputRef.current.value = "";
     toggle(false);
   };
+  
+
   const handleChange = (e) => {
     const parsedUrl = new URL(window.location.href);
+    const value = e.target.value.trim();
+    parsedUrl.searchParams.set("q", value);
+    console.log(parsedUrl.pathname !== "/search", parsedUrl.search);
 
-    parsedUrl.searchParams.set("q", e.target.value.trim());
-    if (e.target.value.trim().length > 0) {
+    if (value.length > 0) {
+      if (parsedUrl.pathname !== "/search") {
+        navigate(`/search${parsedUrl.search}`);
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth",
+        });
+
+        return
+      }
+      else{
+        setSearchParams({q:value})
+      }
       window.scrollTo({
         top: 0,
         left: 0,
         behavior: "smooth",
       });
-      navigate(`/search${parsedUrl.search}`);
+      
       return;
     } else {
       navigate(`/browse`);
     }
-
-    //
   };
 
   return (
@@ -185,7 +210,7 @@ const Navbar = () => {
                 ref={inputRef}
                 disabled={!open}
                 onChange={handleChange}
-                value={searchKey ?? ""}
+                // value={searchKey ?? ""}
               />
             </InputWrapper>
 
