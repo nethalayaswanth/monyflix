@@ -19,6 +19,7 @@ import {
   ThumbNailHover,
 } from "./styles";
 import usePrefetch from "./usePrefetch";
+import { useNavigate } from "react-router-dom";
 
 const LandscapeCard = (
   { data: current, cardExpand = true, cardHover = true, card },
@@ -150,6 +151,7 @@ const LandscapeCard = (
 
   const dispatch = useModalDispatch();
 
+  let navigate = useNavigate();
   const handleHovering = useCallback(
     (hovering) => {
       if (!hovering) {
@@ -162,10 +164,11 @@ const LandscapeCard = (
           payload: {
             movie: current,
             parent: miniRef.current,
-            mini: true,
+            // mini: true,
             card: detail ? "detail" : "potrait",
             overlay: src?.original,
-            showMini:true
+            // showMini:true,
+            cardState:'mini'
           },
         });
       };
@@ -225,7 +228,7 @@ const LandscapeCard = (
     for (const [key, value] of parsedUrl.searchParams) {
       searchParams[key] = value;
     }
-    console.log(searchParams, movieId);
+    
 
     setSearchParams({ ...searchParams, mv: movieId });
   }, [cardExpand, current, dispatch, movieId, setSearchParams, src?.original]);

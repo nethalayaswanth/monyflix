@@ -9,7 +9,7 @@ export const keyFrameExampleOne = keyframes`
     }
 `;
 
-const styles = css`
+export const Shimmerstyles = css`
   animation-duration: 1.25s;
   animation-fill-mode: forwards;
   animation-iteration-count: infinite;
@@ -27,7 +27,7 @@ const styles = css`
 `;
 
 export const Shimmer = styled.img`
-  ${styles}
+  ${Shimmerstyles}
 `;
 
 export default Shimmer;

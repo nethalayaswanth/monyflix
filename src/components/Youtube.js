@@ -197,7 +197,7 @@ export function Youtube({
   const styles = {
     left: 0,
     ...(!full && { pointerEvents: "none" }),
-    // opacity: show ? 1 : 0,
+     opacity: show ? 1 : 0,
     transition: "opacity 0.5s",
   };
 

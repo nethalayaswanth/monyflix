@@ -41,7 +41,7 @@ const TrailModal = forwardRef(
 
     const [currentMovieId, setCurrentMovieId] = useState(parseInt(param));
 
-    const [{ movie, expand, card, overlay, mini }, dispatch] = useModalState();
+    const [{ movie, expanded:expand, card, overlay, small:mini }, dispatch] = useModalState();
 
     const movieId = (param ?? prevParam) || movie?.id;
 
@@ -59,7 +59,7 @@ const TrailModal = forwardRef(
       },
     });
 
-    const [renderFullList, setListRenderSize] = useState(false);
+   
 
     const videoId = useMemo(() => {
       if (!movieDetails) return null;
@@ -92,18 +92,17 @@ const TrailModal = forwardRef(
 
     const handleGenres = useCallback(
       (id) => {
-        searchParams.set("q", "fast");
-
+       
         const path = new URL(window.location.href);
 
         console.log(path, id, searchParams.toString());
         console.log("clicked", `/genre/${id}`);
-        navigate(`search${searchParams.toString()}`);
+        navigate(`${path.origin}/browse/genre/${id}`);
 
-        // window.scrollTo({
-        //   top: 0,
-        //   left: 0,
-        // });
+        window.scrollTo({
+          top: 0,
+          left: 0,
+        });
 
         if (param) {
           searchParams.delete("mv");
@@ -249,7 +248,7 @@ const TrailModal = forwardRef(
                   className="modal-content"
                   desktop={desktop}
                   opened={opened}
-                  style={{ height: param ? "auto" : 0 }}
+                   style={{ height: param ? "auto" : 0 }}
                 >
                   <Description.Wrapper
                     className="modal-description"

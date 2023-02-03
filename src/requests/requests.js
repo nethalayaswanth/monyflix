@@ -33,8 +33,7 @@ export const GenreIds = {
   Documentary: 99,
 };
 
-export const getGenreIds = (genres) =>
-  genres.map((genre) => `${GenreIds[genre]}`).filter((x) => !x);
+export const getGenreIds = (genres) =>genres.map((genre) => GenreIds[genre]?`${GenreIds[genre]}`:null).filter((x) => !!x);
 
 const getNextPageParam=(data, pages) => {
         if (data) {
@@ -51,12 +50,12 @@ const getNextPageParam=(data, pages) => {
    
 const endpoint ='https://movies-server-eta.vercel.app'
 
-  // process.env.NODE_ENV !== "production"
-  //   ? `${process.env.REACT_APP_BASE_ENDPOINT_LOCAL}`
-  //   : `${process.env.REACT_APP_BASE_ENDPOINT}`;
+//  const endpoint= process.env.NODE_ENV !== "production"
+//     ? `${process.env.REACT_APP_BASE_ENDPOINT_LOCAL}`
+//     : `${process.env.REACT_APP_BASE_ENDPOINT}`;
 
-      //  console.log(process.env.NODE_ENV,endpoint);
-      
+       console.log(process.env.NODE_ENV,endpoint);
+
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
     "Content-Type": "application/json",
@@ -170,16 +169,19 @@ export function useMoviesByGenre({
 }) {
 
   const ids = genreIds ?? getGenreIds(genres)
+  
+
   return useInfiniteQuery(
     ["moviesByGenre", ...ids],
     async ({ pageParam = { cursor: 0, page: 1 } }) => {
       const { MovieGenre: data } = await graphQLClient.request(MovieGenre, {
-        genres,
+        genres:ids,
         after: pageParam.cursor,
         withLandscapePosterPath,
         size,
         page: pageParam.page,
       });
+      console.log(data, genres);
       return data;
     },
     {

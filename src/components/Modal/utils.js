@@ -110,6 +110,7 @@ export const getExpandStyles = ({ miniRect, parentRect, scrollHeight }) => {
       x: 0,
       y: 0,
       top: 0,
+      from:1200
     };
 
     const to = {

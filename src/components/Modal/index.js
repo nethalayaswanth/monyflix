@@ -9,13 +9,11 @@ const Modal= () => {
 
   const param = searchParams.get("mv");
 
-  let location = useLocation();
 
-  const [{ activate, parent, activated, expand }, dispatch] = useModalState();
+  const [{ activate, parent, collapsed,expanded,small,activated, expand }, dispatch] = useModalState();
 
-  const mount = parent || param || expand;
+  const mount =  parent || collapsed ||small || param || expanded 
 
-  console.log(location);
   return mount ? (
     <ErrorBoundary
       fallbackRender={({ resetErrorBoundary, error }) => {

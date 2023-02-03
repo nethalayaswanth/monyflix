@@ -222,7 +222,7 @@ Description.Overview = styled.div`
   -webkit-line-clamp:3;
   overflow: hidden;
   color: var(--secondary-color);
-  flex: 1;
+  /* flex: 1; */
   .modal-description & {
     margin-top: 10px;
     -webkit-line-clamp: 4;

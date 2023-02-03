@@ -9,7 +9,9 @@ const initialState = {
   details: false,
   movie: null,
   param: null,
+  cardState: null,
   mini: false,
+  collapsed: null,
 };
 
 function Reducer(state, action) {
@@ -18,11 +20,13 @@ function Reducer(state, action) {
     case "set modal": {
     const updates= action.callback?.(state);
 
-    console.log(updates)
+    const temp = { ...state, ...action.payload, ...updates };
+
+    const collapsed=temp.cardState==='collapsed'
+    const small = temp.cardState === "mini";
+    const expanded = temp.cardState === "expanded";
       return {
-        ...state,
-        ...action.payload,
-        ...updates
+        ...temp,collapsed,small,expanded
       };
     }
     case "modal callback": {
@@ -110,7 +114,8 @@ function Reducer(state, action) {
     }
 
     case "set reset": {
-      return {
+
+      const temp = {
         ...state,
 
         miniExpand: false,
@@ -120,6 +125,14 @@ function Reducer(state, action) {
         param: null,
         mini: false,
         showMini: false,
+        cardState:null
+      };
+
+       const collapsed = temp.cardState === "collapsed";
+       const small = temp.cardState === "mini";
+       const expanded = temp.cardState === "expanded";
+      return {
+       ...temp,collapsed,small,expanded
       };
     }
 

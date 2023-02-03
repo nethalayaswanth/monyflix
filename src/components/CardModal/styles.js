@@ -291,8 +291,8 @@ export const LoadingOverlay = styled.div`
   transition: "opacity 0.3s";
   height: 100%;
   width: 100%;
-  pointerevents: none;
-  zindex: 100;
+  pointer-events: none;
+  z-index: 100;
 `;
 
 export const Modal = {

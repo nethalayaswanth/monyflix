@@ -37,27 +37,29 @@ export default function  App () {
             </Routes> */}
 
             <Routes>
-              <Route path="/" element={<Navigate to="/browse" />}></Route>
-              <Route element={<Main />}>
-                <Route path="/search" element={<Search />} />
-                <Route path="/browse">
-                  <Route index element={<Background />} />
-                  <Route path="genre/:genreId" element={<Genre />} />
+              <Route path="/" >
+                <Route index element={<Navigate to="browse" />} replace></Route>
+                <Route element={<Main />}>
+                  <Route path="search" element={<Search />} />
+                  <Route path="browse">
+                    <Route index element={<Background />} />
+                    <Route path="genre/:genreId" element={<Genre />} />
+                  </Route>
                 </Route>
-              </Route>
 
-              <Route path="/watch">
-                <Route path=":id" element={<Watch />} />
-              </Route>
+                <Route path="/watch">
+                  <Route path=":id" element={<Watch />} />
+                </Route>
 
-              <Route
-                path="*"
-                element={
-                  <main style={{ padding: "1rem" }}>
-                    <p>There's nothing here!</p>
-                  </main>
-                }
-              />
+                <Route
+                  path="*"
+                  element={
+                    <main style={{ padding: "1rem" }}>
+                      <p>There's nothing here!</p>
+                    </main>
+                  }
+                />
+              </Route>
             </Routes>
           </Suspense>
         </ModalProvider>

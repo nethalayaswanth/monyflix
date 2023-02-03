@@ -10,7 +10,6 @@ import { useInView } from "react-intersection-observer";
 import { useIsFetching } from "react-query";
 import { useParamState } from "../../contexts/paramContext";
 import usePrevious from "../../hooks/usePrevious";
-import { getGenreIds } from "../../requests/requests";
 
 export default function Background() {
   const [searchParams, setSearchParams] = useParamState();
@@ -61,10 +60,7 @@ export default function Background() {
 
       {loaderCount >= 1 && (
         <>
-          <Epic
-            genres={{ genres: ["Romance", "Drama"] }}
-            title={"Love & Romance"}
-          />
+          <Epic genres={["Romance"]} title={"Love & Romance"} />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
@@ -96,6 +92,7 @@ export default function Background() {
             queryEnabled={queryEnabled}
             variables={{ genres: ["ScienceFiction"] }}
             title={"sci-fi"}
+            key={"sci-fi"}
             card="landscape"
             whileInView
             titleCard
@@ -106,12 +103,14 @@ export default function Background() {
             variables={{ genres: ["Comedy"] }}
             title={"Comedy"}
             whileInView
+            key={"comedy"}
           />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
             variables={{ genres: ["Family"] }}
             title={"Family"}
+            key={"family"}
             whileInView
             card={"detail"}
           />
@@ -119,12 +118,13 @@ export default function Background() {
       )}
       {loaderCount >= 3 && (
         <>
-          <Epic genres={getGenreIds(["Epic"])} title={"Thrillers"} />
+          <Epic key={"thrillers"} genres={["Epic"]} title={"Thrillers"} />
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
             variables={{ genres: ["Horror"] }}
             title={"Horror"}
+            key={"horror"}
             whileInView
           />
           <Section
@@ -134,18 +134,19 @@ export default function Background() {
             title={"Mystery"}
             whileInView
             card={"landscape"}
+            key={"mystery"}
           />
         </>
       )}
-      {loaderCount >= 3 && (
+      {loaderCount >= 4 && (
         <>
-          {" "}
           <Section
             query="moviesByGenre"
             queryEnabled={queryEnabled}
             variables={{ genres: ["History", "War"] }}
             title={"History"}
             whileInView
+            key={"history"}
           />
           <Section
             query="moviesByGenre"
@@ -154,10 +155,11 @@ export default function Background() {
             title={"Documentary"}
             whileInView
             card={"detail"}
+            key={"documentary"}
           />
         </>
       )}
-      {loaderCount < 3 && <Loader ref={inViewRef} />}
+      {loaderCount < 5 && <Loader ref={inViewRef} />}
     </>
   );
 }

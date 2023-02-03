@@ -1,13 +1,11 @@
 
-import { useEffect, useLayoutEffect,useRef, useState } from "react";
+import { animated, useTransition } from "react-spring";
 import styled from "styled-components";
 import { useImage } from "../contexts/imageCachingContext";
-import Shimmer from "./shimmer";
-import { animated, useTransition } from "react-spring";
+import { Shimmerstyles } from "./shimmer";
 
-
-export const Img = styled(animated(Shimmer))`
-
+export const Img = styled(animated.img)`
+  ${Shimmerstyles}
   position: absolute;
   top: 0;
   width: 100%;
@@ -17,34 +15,33 @@ export const Img = styled(animated(Shimmer))`
   object-fit: cover;
 `;
 
+const ProgressiveImage = ({
+  original,
+  landing,
+  modal,
+  preview,
+  style,
+  onFetch,
+  ...props
+}) => {
+  const { data, isLoading } = useImage({ src: original, preview });
 
-const ProgressiveImage = ({ original,landing,modal, preview, style, onFetch, ...props }) => {
- 
- 
-const {data,isLoading}= useImage({src:original,preview})
-
-
-
-  const [transitions, api] = useTransition(data, () => ({
+  const [transitions, api] = useTransition(data ?? ["holder"], () => ({
     from: { opacity: 0 },
     enter: { opacity: 1 },
     leave: { opacity: 0 },
   }));
 
-
-  return  transitions(
-    (transitionStyles, item) =>{ 
+  return transitions((transitionStyles, item) => {
     return (
-          <Img
-            key={item}
-            src={item}
-            style={{ ...style, ...transitionStyles }}
-            alt={props.alt || " "}
-            {...props}
-          />
-        );}
-  )
-
-    
+      <Img
+        key={item}
+        {...(item === "holder" ? { as: "div" } : { src: item })}
+        style={{ ...style, ...transitionStyles }}
+        alt={props.alt || " "}
+        {...props}
+      />
+    );
+  });
 };
 export default ProgressiveImage;

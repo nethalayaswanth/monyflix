@@ -1,13 +1,6 @@
-import React, {
-  memo,
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { memo, useCallback, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
-import useWindowSize from "../../hooks/useWindowSize";
 import {
   collapseStyles,
   getExpandStyles,
@@ -24,8 +17,7 @@ import useResizeObserver from "use-resize-observer";
 import { useModalState } from "../../contexts/modalContext";
 import ModalCard from "../CardModal";
 
-import { PADDING_Y } from "./utils";
-import usePrevious from "../../hooks/usePrevious";
+import usePrevRender from "../../hooks/usePrevRender";
 export const MAX_WIDTH = 850;
 export const MOBILE_BREAKPOINT = 630;
 export const GAP = 10;
@@ -53,11 +45,14 @@ const ModalWrapper = ({}) => {
 
   const param = searchParams.get("mv");
 
-  const [{ parent, mini, showMini, expand }, dispatch] = useModalState();
+  const [
+    { parent, mini, collapsed, expanded, small, showMini, expand },
+    dispatch,
+  ] = useModalState();
 
-  const prevMini = usePrevious();
-
-  const [isHovering, setHovering] = useState();
+  const prevSmall = usePrevRender(small);
+  // const prevCollapsed = usePrevRender(collapsed);
+  const prevExpanded = usePrevRender(expanded);
 
   const bind = useHover((state) => {
     // setHovering(state.hovering);
@@ -113,48 +108,48 @@ const ModalWrapper = ({}) => {
     },
     api,
   ] = useSpring(() => {
-    if (!mini || !parent) {
-      return {
-        from: {
-          x: 0,
-          y: 0,
-          scaleY: 1,
-          scaleX: 1,
-          progress: 0,
-          opacity: 0,
-          fade: 0,
-          minifade: 1,
-          width: 0,
-          height: 0,
-          top: 0,
-          left: 0,
-          transformOrigin: "center top",
-        },
-        config: {
-          tension: 200,
-          friction: 20,
-          mass: 0.2,
-          velocity: 0.5,
-          // precision: 0.01,
-          clamp: true,
-        },
-      };
-    }
-    const { from, to } = hoverStyles();
-
     return {
-      to: {
-        ...to,
-        minifade: 0.5,
-        fade: 1,
-      },
       from: {
-        ...from,
-        minifade: 0,
-        fade: 0,
+        x: 0,
+        y: 0,
+        scaleY: 1,
+        scaleX: 1,
+        progress: 0,
         opacity: 0,
-        transformOrigin: "center center",
+        fade: 0,
+        minifade: 1,
+        width: 0,
+        height: 0,
+        top: 0,
+        left: 0,
+        transformOrigin: "center top",
       },
+      onPause: (results, spring) => {
+        console.log("pause", results, spring);
+      },
+      onRest: (results, spring) => {
+        const {
+          value: { progress },
+        } = results;
+        console.log("rest", results, spring);
+        if (progress === 0) {
+          dispatch({
+            type: "set reset",
+          });
+          requestAnimationFrame(() => {
+            unlockBody();
+          });
+        }
+        if (progress === 1) {
+          dispatch({
+            type: "set modal",
+            payload: {
+              cardState: "expanded",
+            },
+          });
+        }
+      },
+
       config: {
         tension: 200,
         friction: 20,
@@ -184,74 +179,77 @@ const ModalWrapper = ({}) => {
     const main = document.getElementById("app");
     main.style.top = "unset";
     main.style.position = "static";
-    document.body.style = bodyStyle.current;
-    window.scroll({
-      top: scroll.current,
-      left: 0,
-    });
+    if (bodyStyle.current) document.body.style = bodyStyle.current;
+    if (scroll.current) {
+      window.scroll({
+        top: scroll.current,
+        left: 0,
+      });
+    }
   }, []);
 
   const closeMini = useCallback(() => {
     const { from } = hoverStyles();
-   
+
     api.start({
       to: async (animate) => {
         await animate({
-          to: {
-            ...from,
-            minifade: 1,
-            fade: 0,
-          },
-        }).then(() => {
-          dispatch({ type: "set reset" });
+          ...from,
+          minifade: 1,
+          fade: 0,
+          progress: 0,
         });
       },
     });
-  }, [api, dispatch, hoverStyles]);
-  
+  }, [api, hoverStyles]);
+
   const hoverAway = useHover((state) => {
-    if (state.hovering && !param && !expand) {
-       console.log("hover away");
+    if (state.hovering && !param && !expanded) {
+      console.log("hover away");
       closeMini();
     }
   });
-  useLayoutEffect(() => {
-    if (!mini) return;
-    const { to, from } = hoverStyles();
 
-    api.stop();
+  useLayoutEffect(() => {
+    if (!small) return;
+
+    const { from, to } = hoverStyles();
+
+    if (prevSmall) api.stop(true);
     api.start({
       to: {
         ...to,
         minifade: 0.5,
         fade: 1,
+        progress: 0.5,
       },
+      ...(!prevSmall && {
+        from: {
+          ...from,
+          minifade: 0,
+          fade: 0,
+          opacity: 0,
+          transformOrigin: "center center",
+        },
+      }),
     });
-  }, [api, hoverStyles, mini]);
-
+  }, [api, hoverStyles, prevSmall, small]);
   useLayoutEffect(() => {
-    if (!showMini && !param && !expand) {
+    if (!small && !param && !expanded) {
       closeMini();
     }
-  }, [closeMini, expand, param, showMini]);
+  }, [closeMini, expanded, param, showMini, small]);
 
   useResizeObserver({
     ref: document.body,
     onResize: ({ width: screenWidth, height }) => {
-      if (expand) {
+      if (expanded) {
         const { width, y: translateY } = updatedStyles({ width: screenWidth });
         const miniTop = modal?.current?.getBoundingClientRect();
 
         api.start({
           to: async (animate) => {
-            await animate({
-              to: [
-                {
-                  width,
-                },
-              ],
-              // config: { tension: 180, mass: 3, clamp: true, friction: 40 },
-            });
+            await animate({ width });
           },
         });
       }
@@ -259,12 +257,13 @@ const ModalWrapper = ({}) => {
   });
 
   useLayoutEffect(() => {
-    if (param && !expand) {
+    if (param && !expanded) {
+      console.log("expanding");
       let scrollHeight;
-      if (mini) {
+      if (prevSmall) {
         miniRect.current = modal?.current?.getBoundingClientRect();
         scrollHeight = modalInner.current?.scrollHeight;
-      } else if (!mini && parent) {
+      } else if (!prevSmall && parent) {
         miniRect.current = parent.getBoundingClientRect();
         scrollHeight = modalInner.current?.scrollHeight;
       }
@@ -280,22 +279,13 @@ const ModalWrapper = ({}) => {
       api.start({
         to: async (animate) => {
           await animate({
-            to: [
-              {
-                ...to,
-                opacity: 1,
-                fade: 1,
-                progress: 1,
-                minifade: 0.5,
-              },
-              {
-                height: "auto",
-              },
-            ],
-            // config: { tension: 100, clamp: true },
-          }).then((r) => {
-            dispatch({ type: "set modal", payload: { expand: true } });
+            ...to,
+            opacity: 1,
+            fade: 1,
+            progress: 1,
+            minifade: 0.5,
           });
+          await animate({ height: "auto" });
         },
         from: {
           ...from,
@@ -306,7 +296,7 @@ const ModalWrapper = ({}) => {
         },
       });
     }
-    if (!param && expand) {
+    if (!param && expanded) {
       const modalRect = modal?.current.getBoundingClientRect();
       const parentRect = parent?.getBoundingClientRect();
 
@@ -318,35 +308,30 @@ const ModalWrapper = ({}) => {
         });
 
         document.body.style.overflowY = "scroll";
-
-        console.log({ to, from });
         return {
-          to: async (animate) => {
-            await animate({
-              to: {
-                ...to,
-                progress: 0,
-                opacity: 0,
-                fade: 0,
-                minifade: 1,
-              },
-
-              from: { ...from },
-              // config: { tension: 170,mass:20, clamp: true },
-            }).then((r) => {
-              console.log("resolved");
-              dispatch({
-                type: "set reset",
-              });
-              requestAnimationFrame(() => {
-                unlockBody();
-              });
-            });
+          to: {
+            ...to,
+            progress: 0,
+            opacity: 0,
+            fade: 0,
+            minifade: 1,
           },
+
+          from: { ...from },
         };
       });
     }
-  }, [expand, dispatch, param, mini, api, parent, lockBody, unlockBody]);
+  }, [
+    dispatch,
+    param,
+    api,
+    parent,
+    lockBody,
+    unlockBody,
+    expanded,
+    prevExpanded,
+    prevSmall,
+  ]);
 
   useLayoutEffect(() => {
     return () => {
@@ -359,63 +344,61 @@ const ModalWrapper = ({}) => {
     };
   }, [dispatch, unlockBody]);
 
-  const full = param || expand;
+  const full = param || expanded;
 
   const mount = mini || full;
 
-  return mount
-    ? createPortal(
-        <Wrapper style={{ ...(full && { height: "100%", width: "100%" }) }}>
-          <animated.div
-            ref={refCb}
-            {...bind()}
-            style={{
-              transformOrigin,
-              position: "absolute",
-              zIndex: 99999,
-              willChange: "transform position top width scaleX scaleY left",
-              top,
-              width,
-              x,
-              y,
-              scaleY,
-              scaleX,
-              height,
-              left,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <ModalCard
-              width={width}
-              progress={progress}
-              fade={fade}
-              minifade={minifade}
-              miniHeight={height}
-              footerHeight={footerHeight}
-              ref={modalInner}
-            />
-          </animated.div>
-          <animated.div
-            onClick={handleClose}
-            {...hoverAway()}
-            style={{
-              position: "fixed",
-              zIndex: 1,
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backdropFilter: "blur(2px)",
-              backgroundColor: "rgba(255, 255, 255, 0.5)",
-              opacity: opacity,
-            }}
-          />
-        </Wrapper>,
-        portalEl
-      )
-    : null;
+  return createPortal(
+    <Wrapper style={{ ...(full && { height: "100%", width: "100%" }) }}>
+      <animated.div
+        ref={refCb}
+        {...bind()}
+        style={{
+          transformOrigin,
+          position: "absolute",
+          zIndex: 99999,
+          willChange: "transform position top width scaleX scaleY left",
+          top,
+          width,
+          x,
+          y,
+          scaleY,
+          scaleX,
+          height,
+          left,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <ModalCard
+          width={width}
+          progress={progress}
+          fade={fade}
+          minifade={minifade}
+          miniHeight={height}
+          footerHeight={footerHeight}
+          ref={modalInner}
+        />
+      </animated.div>
+      <animated.div
+        onClick={handleClose}
+        {...hoverAway()}
+        style={{
+          position: "fixed",
+          zIndex: 1,
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backdropFilter: "blur(2px)",
+          backgroundColor: "rgba(255, 255, 255, 0.5)",
+          opacity: opacity,
+        }}
+      />
+    </Wrapper>,
+    portalEl
+  );
 };
 
 export default memo(ModalWrapper);
