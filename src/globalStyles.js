@@ -10,6 +10,7 @@ export const GlobalStyles = createGlobalStyle`
      font-family:  -apple-system, BlinkMacSystemFont, -webkit-system-font, "Malgun Gothic", "Segoe UI", "Helvetica Neue", Helvetica, sans-serif
     ;
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: kern;
     -moz-osx-font-smoothing: grayscale;
     color: #333333;
     font-size:  62.5%;
@@ -32,6 +33,7 @@ a {
     text-decoration: none;
     background:transparent;
 }
+
 button{
   margin: 0;
     padding: 0;
@@ -49,13 +51,13 @@ button{
  --controller-width:0px;
   --swiper-padding:25px;
   --metaData-padding:25px;
-  --nav-height:42px;
+  --nav-height:48px;
 
  @media only screen and (min-width: 740px) {
   --controller-width:40px;
   --swiper-padding:0px;
   --metaData-padding:40px;
-   --nav-height:56px;
+   --nav-height:68px;
   }
 }
 

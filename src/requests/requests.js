@@ -7,12 +7,12 @@ import {
   MovieGenre,
   Movies,
   recommendedMovies,
+  Search,
   similarMovies,
   trendingMovies,
   videosById,
-  Search,
 } from "./queries";
-export const GenreIds = {
+export const genreIds = {
   Romance: 10749,
   Drama: 18,
   Music: 10402,
@@ -33,28 +33,40 @@ export const GenreIds = {
   Documentary: 99,
 };
 
-export const getGenreIds = (genres) =>genres.map((genre) => GenreIds[genre]?`${GenreIds[genre]}`:null).filter((x) => !!x);
+export const movieTypes = {
+  Popular: "POPULAR",
+  Upcoming: "UPCOMING",
+  "Now Playing": "NOW_PLAYING",
+  "Top Rated": "TOP_RATED",
+};
+export const sortingTypes = {
+  Popularity: "POPULARITY",
+  "Release Date": "RELEASE_DATE",
+  Rating: "RATING",
+};
 
-const getNextPageParam=(data, pages) => {
-        if (data) {
-          const { cursor, hasMore, nextPage } = data;
+export const getGenreIds = (genres) =>
+  genres?.map((genre) => genreIds[genre] ?? null).filter((x) => !!x);
 
-          return hasMore
-            ? { cursor, page: nextPage - 1 }
-            : !!nextPage
-            ? { cursor: 0, page: nextPage }
-            : undefined;
-        }
-        return undefined;
-      }
-   
-const endpoint ='https://movies-server-eta.vercel.app'
+const getNextPageParam = (data, pages) => {
+  if (data) {
+    const { cursor, hasMore, nextPage, page } = data;
 
-//  const endpoint= process.env.NODE_ENV !== "production"
-//     ? `${process.env.REACT_APP_BASE_ENDPOINT_LOCAL}`
-//     : `${process.env.REACT_APP_BASE_ENDPOINT}`;
+    return hasMore
+      ? { cursor, page: page }
+      : !!nextPage
+      ? { cursor: 0, page: nextPage }
+      : undefined;
+  }
+  return undefined;
+};
 
-       console.log(process.env.NODE_ENV,endpoint);
+//  const endpoint ='https://movies-server-eta.vercel.app'
+
+const endpoint =
+  process.env.NODE_ENV !== "production"
+    ? `${process.env.REACT_APP_BASE_ENDPOINT_LOCAL}`
+    : `${process.env.REACT_APP_BASE_ENDPOINT}`;
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
@@ -62,29 +74,47 @@ const graphQLClient = new GraphQLClient(endpoint, {
   },
 });
 
+const arrayFilter = (arr) => arr?.filter((x) => !!x);
 export function useMovies({
   type,
   size,
-  withLandscapePosterPath,
+  titlePoster,
   queryOptions,
+  genres: genreKeys,
+  genreIds,
+  video,
+  adult,
+  sortBy = "Popularity",
 }) {
+  const _genreKeys = arrayFilter(genreKeys);
+  const _genreIds = arrayFilter(genreIds);
+  const _ids =
+    _genreIds && _genreIds.length !== 0 ? _genreIds : getGenreIds(_genreKeys);
+  const ids = _ids && _ids.length !== 0 ? _ids : null;
+  const moviestype = movieTypes[type];
+  const sortingType = sortingTypes[sortBy];
+
   return useInfiniteQuery(
-    ["movies", type],
-    async ({ pageParam = 0 }) => {
+    ["movies", { type: moviestype, genres: ids, sortBy: sortingType }],
+    async ({ pageParam = { cursor: 0, page: 1 } }) => {
       const { movies: data } = await graphQLClient.request(Movies, {
-        type,
-        after: pageParam,
-        withLandscapePosterPath,
+        type: moviestype,
+        after: pageParam.cursor,
+        page: pageParam.page,
+        withLandscapePosterPath:titlePoster,
         size,
+        genres: ids,
+        sortBy: sortingType,
+        withVideo:!!video,
+        adult
       });
 
       return data;
     },
     {
+      keepPreviousData: true,
       ...(queryOptions && queryOptions),
-      getNextPageParam: ({ cursor, hasMore }, pages) => {
-        return hasMore ? cursor : undefined;
-      },
+      getNextPageParam,
     }
   );
 }
@@ -105,13 +135,11 @@ export function useSearch({
         size,
         page: pageParam.page,
       });
-
-      console.log(search)
       return search;
     },
     {
       ...(queryOptions && queryOptions),
-      getNextPageParam
+      getNextPageParam,
     }
   );
 }
@@ -119,12 +147,13 @@ export function useSearch({
 export function useSimilarMovies({ id, size, queryOptions }) {
   return useInfiniteQuery(
     ["similarMovies", id],
-    async ({ pageParam = 0 }) => {
+    async ({ pageParam = { cursor: 0, page: 1 } }) => {
       const { similarMovies: data } = await graphQLClient.request(
         similarMovies,
         {
           id,
-          after: pageParam,
+          after: pageParam.cursor,
+          page: pageParam.page,
           size,
         }
       );
@@ -132,21 +161,20 @@ export function useSimilarMovies({ id, size, queryOptions }) {
     },
     {
       ...(queryOptions && queryOptions),
-      getNextPageParam: ({ cursor, hasMore }, pages) => {
-        return hasMore ? cursor : undefined;
-      },
+      getNextPageParam,
     }
   );
 }
 export function useRecommendedMovies({ id, size, queryOptions }) {
   return useInfiniteQuery(
     ["recommendedMovies", id],
-    async ({ pageParam = 0 }) => {
+    async ({ pageParam = { cursor: 0, page: 1 } }) => {
       const { recommendedMovies: data } = await graphQLClient.request(
         recommendedMovies,
         {
           id,
-          after: pageParam,
+          after: pageParam.cursor,
+          page: pageParam.page,
           size,
         }
       );
@@ -154,9 +182,7 @@ export function useRecommendedMovies({ id, size, queryOptions }) {
     },
     {
       ...(queryOptions && queryOptions),
-      getNextPageParam: ({ cursor, hasMore }, pages) => {
-        return hasMore ? cursor : undefined;
-      },
+      getNextPageParam,
     }
   );
 }
@@ -167,21 +193,19 @@ export function useMoviesByGenre({
   size,
   withLandscapePosterPath = false,
 }) {
-
-  const ids = genreIds ?? getGenreIds(genres)
-  
+  const ids = genreIds ?? getGenreIds(genres);
 
   return useInfiniteQuery(
     ["moviesByGenre", ...ids],
     async ({ pageParam = { cursor: 0, page: 1 } }) => {
       const { MovieGenre: data } = await graphQLClient.request(MovieGenre, {
-        genres:ids,
+        genres: ids,
         after: pageParam.cursor,
         withLandscapePosterPath,
         size,
         page: pageParam.page,
       });
-      console.log(data, genres);
+
       return data;
     },
     {
@@ -209,12 +233,13 @@ export function useTrendingMovies({
 }) {
   return useInfiniteQuery(
     ["trendingMovies"],
-    async ({ pageParam = 0 }) => {
-      const { trendingMovies:data } = await graphQLClient.request(
+    async ({ pageParam = { cursor: 0, page: 1 } }) => {
+      const { trendingMovies: data } = await graphQLClient.request(
         trendingMovies,
         {
           type,
-          after: pageParam,
+          after: pageParam.cursor,
+          page: pageParam.page,
           withLandscapePosterPath,
           size,
         }
@@ -223,9 +248,7 @@ export function useTrendingMovies({
     },
     {
       ...(queryOptions && queryOptions),
-      getNextPageParam: ({ cursor, hasMore}, pages) => {
-        return hasMore ? cursor : undefined;
-      },
+      getNextPageParam,
     }
   );
 }

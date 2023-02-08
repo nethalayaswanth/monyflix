@@ -8,53 +8,85 @@ const defaultOptions = {
 };
 
 function useIntersectionObserver({ options } = {}) {
-  const [isIntersecting, setIsIntersecting] = useState(undefined);
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   const elementRef = useRef();
+  const optionsRef=useRef()
 
-  const cbElRef = useCallback((node) => {
+  const cbRef = useCallback((node) => {
     elementRef.current = node;
+     if (!elementRef.current) return;
+  const { triggerOnce,onChange, ...intersectionOptions } = optionsRef.current;
+
+     const ob = new IntersectionObserver(
+       (entries) => {
+    
+         if (triggerOnce) {
+           const hasIntersected = entries.some((x) => x.isIntersecting);
+           if (hasIntersected) {
+            const entry=entries[0]
+             ob.disconnect();
+             if (onChange){onChange({entry,inView:entry.isIntersecting});return}
+              setIsIntersecting(hasIntersected);
+           }
+
+           return;
+         }
+         const isIntersecting = entries.some((x) => x.isIntersecting);
+   if (onChange) {
+    //  onChange({ entry, inView: entry.isIntersecting });
+     return;
+   }
+         setIsIntersecting(isIntersecting);
+       },
+       {
+         ...intersectionOptions,
+       }
+     );
+
   }, []);
 
   const overrideOptions = useMemo(() => {
     return { ...defaultOptions, ...(options && options) };
   }, [options]);
 
-  useEffect(() => {
-    if (!elementRef.current) return;
+optionsRef.current = overrideOptions;
 
-    const { triggerOnce, ...intersectionOptions } = overrideOptions;
+  // useEffect(() => {
+  //   if (!elementRef.current) return;
 
-    let isUnmounted = false;
-    const ob = new IntersectionObserver(
-      (entries) => {
-        if (isUnmounted) return;
-        if (triggerOnce) {
-          const hasIntersected = entries.some((x) => x.isIntersecting);
-          if (hasIntersected) {
-            ob.disconnect();
-            setIsIntersecting(hasIntersected);
-          }
+  //   const { triggerOnce, ...intersectionOptions } = optionsRef.current;
 
-          return;
-        }
-        const isIntersecting = entries.some((x) => x.isIntersecting);
+  //   let isUnmounted = false;
+  //   const ob = new IntersectionObserver(
+  //     (entries) => {
+  //       if (isUnmounted) return;
+  //       if (triggerOnce) {
+  //         const hasIntersected = entries.some((x) => x.isIntersecting);
+  //         if (hasIntersected) {
+  //           ob.disconnect();
+  //           setIsIntersecting(hasIntersected);
+  //         }
 
-        setIsIntersecting(isIntersecting);
-      },
-      {
-        ...intersectionOptions,
-      }
-    );
-    if (elementRef.current) ob.observe(elementRef.current);
+  //         return;
+  //       }
+  //       const isIntersecting = entries.some((x) => x.isIntersecting);
 
-    return () => {
-      ob.disconnect();
-      isUnmounted = true;
-    };
-  }, [overrideOptions, elementRef.current]);
+  //       setIsIntersecting(isIntersecting);
+  //     },
+  //     {
+  //       ...intersectionOptions,
+  //     }
+  //   );
+  //   if (elementRef.current) ob.observe(elementRef.current);
 
-  return [isIntersecting, cbElRef];
+  //   return () => {
+  //     ob.disconnect();
+  //     isUnmounted = true;
+  //   };
+  // }, [overrideOptions]);
+
+  return { ref: cbRef, inView: isIntersecting };
 }
 
 export default useIntersectionObserver;

@@ -1,6 +1,6 @@
 import { useHover } from "@use-gesture/react";
-import { useRef, useTransition, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { animated, useSpring } from "react-spring";
 import useMeasure from "react-use-measure";
 import styled, { css } from "styled-components";
@@ -8,17 +8,13 @@ import { ReactComponent as CloseIcon } from "../../assets/closeFill.svg";
 import { ReactComponent as SearchIcon } from "../../assets/search.svg";
 import { useDevice } from "../../contexts/deviceContext.js";
 import { useModalDispatch } from "../../contexts/modalContext";
-import { useParamDispatch, useParamState } from "../../contexts/paramContext";
-import useEventListener from "../../hooks/useEventListener";
+import { useParamState } from "../../contexts/paramContext";
+import useOutsideClick from "../../hooks/useClickAway";
+import Filters from "./filter";
+import PinnedHeader from "./pinnedHeader";
 
-export const NavContainer = styled.div`
+export const NavContainer = styled(animated.div)`
   height: var(--nav-height);
-
-  position: fixed;
-  width: 100%;
-  top: 0;
-  left: 0;
-  z-index: 3;
 
   backdrop-filter: blur(1px);
   background-image: linear-gradient(
@@ -26,13 +22,12 @@ export const NavContainer = styled.div`
     rgba(0, 0, 0, 0.7) 10%,
     transparent
   );
-
-  transition: background 300ms;
-
+  transition: height 0.56s cubic-bezier(0.52, 0.16, 0.24, 1);
+  /* background 0.44s 0.2s cubic-bezier(0.52, 0.16, 0.24, 1), */
   padding: 0 var(--metaData-padding);
+
   @media only screen and (min-width: 740px) {
     margin: auto;
-    height: 52px;
   }
 `;
 
@@ -44,10 +39,11 @@ const Flex = css`
   height: 100%;
   position: relative;
 `;
+
 export const NavWrapper = styled.div`
   ${Flex}
   padding: 5px 0;
-  justify-content: flex-end;
+  justify-content: flex-start;
 `;
 
 export const SearchWrapper = styled(animated.div)`
@@ -93,27 +89,55 @@ export const Input = styled.input`
   line-height: 34px;
   margin-right: 36px;
 `;
+
+export const Logo = styled(animated.h1)`
+  color: White;
+
+  font-size: 16px;
+  line-height: 36px;
+
+  height: 36px;
+`;
+
+const text = css`
+  font-size: 15px;
+  line-height: 1.41667;
+`;
+
+export const Spacer = styled.div`
+  ${Flex};
+  flex: 1;
+`;
+export const Discover = styled.div`
+  ${text}
+  padding: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: 6px;
+  cursor: pointer;
+`;
 const Navbar = () => {
   const [searchParams, setSearchParams] = useParamState();
 
   const searchKey = searchParams.get("q");
 
+  const location = useLocation();
+
   const [open, toggle] = useState(!!searchKey);
   const inputRef = useRef();
 
-  const [backgroundColor, setBg] = useState("transparent");
   const { desktop } = useDevice();
   const [ref, { width: containerWidth }] = useMeasure();
 
-  const [isPending, startTransition] = useTransition();
   const width = open ? (!desktop ? containerWidth : 274) : 36;
-  const [props] = useSpring(
+  const [{ backgroundOpacity, titleScale, ...props }] = useSpring(
     () => ({
       to: {
         width,
         scale: open ? 1 : 0,
         borderOpacity: open ? 0.85 : 0,
+        titleScale: open ? (desktop ? 1 : 0) : 1,
         borderRadius: open ? 3 : 0,
+        backgroundOpacity: open ? (desktop ? 0 : 1) : 0,
       },
       onRest: () => {
         if (open) {
@@ -124,29 +148,18 @@ const Navbar = () => {
     [open]
   );
 
-  useEventListener({
-    event: "scroll",
-    listener: () => {
-      setBg(window.scrollY > 0 ? "black" : "transparent");
-    },
-    element: window,
-    options: { passive: true },
-  });
-
   const navigate = useNavigate();
 
-  const dispatch = useModalDispatch();
+  const [stateRef, dispatch] = useModalDispatch();
   const bind = useHover((state) => {
     if (state.hovering) {
-      dispatch({
-        type: "set modal",
-        callback: (state) => {
-          //  console.log(state);
-          if (state.mini && !state.expand) {
-            return { ...state, showMini: false };
-          }
-        },
-      });
+      if (stateRef.current.small && !stateRef.current.expanded)
+        dispatch({
+          type: "set modal",
+          payload: {
+            cardState: "collapsed",
+          },
+        });
     }
   });
 
@@ -155,13 +168,17 @@ const Navbar = () => {
     inputRef.current.value = "";
     toggle(false);
   };
-  
+
+  const navigateHome = () => {
+    navigate(`/`);
+    inputRef.current.value = "";
+    toggle(false);
+  };
 
   const handleChange = (e) => {
     const parsedUrl = new URL(window.location.href);
     const value = e.target.value.trim();
     parsedUrl.searchParams.set("q", value);
-    console.log(parsedUrl.pathname !== "/search", parsedUrl.search);
 
     if (value.length > 0) {
       if (parsedUrl.pathname !== "/search") {
@@ -172,62 +189,91 @@ const Navbar = () => {
           behavior: "smooth",
         });
 
-        return
-      }
-      else{
-        setSearchParams({q:value})
+        return;
+      } else {
+        setSearchParams({ q: value });
       }
       window.scrollTo({
         top: 0,
         left: 0,
         behavior: "smooth",
       });
-      
+
       return;
     } else {
       navigate(`/browse`);
     }
   };
 
-  return (
-    <NavContainer {...bind()} style={{ backgroundColor }}>
-      <NavWrapper ref={ref}>
-        <SearchWrapper
-          style={{
-            width: props.width,
-            border: props.borderOpacity.to(
-              (opacity) => `2px solid hsla(0,0%,100%,${opacity})`
-            ),
-            borderRadius: props.borderRadius,
-          }}
-        >
-          <SearchBox>
-            <InputWrapper style={{ width }}>
-              <SearchButton onClick={() => toggle(!open)}>
-                <Search />
-              </SearchButton>
-              <Input
-                ref={inputRef}
-                disabled={!open}
-                onChange={handleChange}
-                // value={searchKey ?? ""}
-              />
-            </InputWrapper>
+  const clickAwayProps = useOutsideClick({
+    onOutsideClick: () => {
+      if (open && (!searchKey || searchKey.length === 0)) handleClose();
+    },
+  });
 
-            <SearchButton
-              style={{
-                transform: props.scale.to((scale) => `scale(${scale})`),
-                position: "absolute",
-                right: 0,
-              }}
-              onClick={handleClose}
-            >
-              <Close />
-            </SearchButton>
-          </SearchBox>
-        </SearchWrapper>
-      </NavWrapper>
-    </NavContainer>
+  const showFilters = location.pathname === "/discover";
+  return (
+    <PinnedHeader>
+      <NavContainer
+        style={{
+          backgroundColor: backgroundOpacity.to((o) => `rgba(0,0,0,${o})`),
+        }}
+        {...bind()}
+      >
+        <NavWrapper ref={ref}>
+          <Logo
+            onClick={navigateHome}
+            style={{
+              scale: titleScale,
+              opacity: backgroundOpacity.to({
+                range: [0, 1],
+                output: [1, 0],
+              }),
+            }}
+          >
+            MONYFLIX
+          </Logo>
+          <Spacer/>
+          {/* <Discover>Discover</Discover> */}
+          <SearchWrapper
+            {...clickAwayProps}
+            style={{
+              width: props.width,
+              border: props.borderOpacity.to(
+                (opacity) => `2px solid hsla(0,0%,100%,${opacity})`
+              ),
+              borderRadius: props.borderRadius,
+            }}
+          >
+            <SearchBox>
+              <InputWrapper style={{ width }}>
+                <SearchButton onClick={() => toggle(!open)}>
+                  <Search />
+                </SearchButton>
+                <Input
+                  ref={inputRef}
+                  disabled={!open}
+                  onChange={handleChange}
+                  defaultValue={searchKey}
+                />
+              </InputWrapper>
+
+              <SearchButton
+                style={{
+                  transform: props.scale.to((scale) => `scale(${scale})`),
+                  position: "absolute",
+                  right: 0,
+                }}
+                onClick={handleClose}
+              >
+                <Close />
+              </SearchButton>
+            </SearchBox>
+          </SearchWrapper>
+        </NavWrapper>
+      </NavContainer>
+      {showFilters ? <Filters /> : null}
+    </PinnedHeader>
   );
 };
 

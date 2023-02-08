@@ -57,8 +57,8 @@ export const Content = styled(Flex)`
 
   flex-direction: ${({ desktop }) => (desktop ? "row" : "column")};
   overflow: hidden;
-  ${({ expand }) =>
-    expand
+  ${({ opened }) =>
+    opened
       ? css`
           padding: 0 var(--metaData-padding);
         `
@@ -91,12 +91,23 @@ export const Wrapper = styled(Block)`
     0 6.7px 5.3px rgba(0, 0, 0, 0.048), 0 12.5px 10px rgba(0, 0, 0, 0.06),
     0 22.3px 17.9px rgba(0, 0, 0, 0.072), 0 41.8px 33.4px rgba(0, 0, 0, 0.086),
     0 100px 80px rgba(0, 0, 0, 0.12);
+  /* border-radius:  ${({ collapsing }) => (collapsing ? `30px` : `6px`)}; */
   border-radius: 6px;
   margin: 0;
   flex-direction: column;
   background-color: white;
   display: flex;
   overflow: hidden;
+  ${({ mini }) =>
+    mini
+      ? css`
+          && .video-controls {
+            padding: 0 10px;
+            bottom: 10px;
+           
+          }
+        `
+      : ``}
 `;
 
 export const ModalWrapper = styled(Block)`
@@ -111,6 +122,8 @@ export const ModalWrapper = styled(Block)`
   background-color: white;
   display: flex;
   overflow: hidden;
+
+ 
 `;
 export const ImageWrapper = styled.div`
   position: relative;
@@ -154,7 +167,7 @@ export const Spacer = styled.div`
   display: flex;
   -webkit-box-align: center;
   align-items: center;
-  flex: auto;
+  flex: 2;
 `;
 
 export const Title = styled(Text)`
@@ -295,6 +308,44 @@ export const LoadingOverlay = styled.div`
   z-index: 100;
 `;
 
+export const BgOverlay = styled(animated.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 2;
+`;
+
+export const Animated = styled(animated.div)`
+  position: absolute;
+  z-index: 4;
+  will-change: transform, position, top, width, scaleX, scaleY, left;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const BackDrop = styled(animated.div)`
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(800px, 100vh);
+  align-items: center;
+  display: flex;
+  overflow: hidden;
+  flex-basis: auto;
+  flex-shrink: 0;
+`;
+
 export const Modal = {
   LoadingOverlay,
   Adult,
@@ -315,4 +366,9 @@ export const Modal = {
   Title,
   Up,
   ModalWrapper,
+  BackDrop,
+  Animated,
+  BgOverlay,
+  
 };
+

@@ -1,120 +1,52 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useReducer,
+  useRef,
+} from "react";
 
 const ModalStateContext = createContext();
 const ModalDispatchContext = createContext();
 
 const initialState = {
-  expand: false,
   parent: null,
   details: false,
   movie: null,
   param: null,
   cardState: null,
-  mini: false,
-  collapsed: null,
+  small: false,
+  collapsed: false,
+  expanded: false,
 };
 
 function Reducer(state, action) {
-  
   switch (action.type) {
     case "set modal": {
-    const updates= action.callback?.(state);
+      const updates = action.callback?.(state);
 
-    const temp = { ...state, ...action.payload, ...updates };
+      const temp = { ...state, ...action.payload, ...updates };
 
-    const collapsed=temp.cardState==='collapsed'
-    const small = temp.cardState === "mini";
-    const expanded = temp.cardState === "expanded";
+      const collapsed = temp.cardState === "collapsed";
+      const small = temp.cardState === "mini";
+      const expanded = temp.cardState === "expanded";
       return {
-        ...temp,collapsed,small,expanded
+        ...temp,
+        collapsed,
+        small,
+        expanded,
       };
     }
     case "modal callback": {
-    const updates =  action.callback?.(state);
+      const updates = action.callback?.(state);
       return {
         ...state,
         ...updates,
       };
     }
-    case "set movie": {
-      return { ...state, movie: action.movie };
-    }
-    case "set movieDetails": {
-      return {
-        ...state,
-        movie: { ...state.movie, ...action.movie },
-        activate: action.activate,
-      };
-    }
-    case "set hovering": {
-      return { ...state, isHovering: action.isHovering };
-    }
-    case "set miniExpanded": {
-      return {
-        ...state,
-        miniExpanded: action.miniExpanded,
-      };
-    }
 
-    case "set expand": {
-      return {
-        ...state,
-        expand: action.expand,
-      };
-    }
-    case "set expanded": {
-      return {
-        ...state,
-        expanded: action.expanded,
-      };
-    }
-    case "set miniExpand": {
-      return {
-        ...state,
-        miniExpand: action.miniExpand,
-      };
-    }
-
-    case "set activate": {
-      return {
-        ...state,
-        activate: action.activate,
-      };
-    }
-    case "set activated": {
-      return {
-        ...state,
-        activated: action.activated,
-      };
-    }
-    case "set paramModal": {
-      return {
-        ...state,
-        activated: action.activated,
-        param: action.param,
-        expand: action.expand,
-      };
-    }
-    case "set enabled": {
-      return {
-        ...state,
-        enabled: action.enabled,
-      };
-    }
-
-    case "reset paramModal": {
-      return {
-        ...state,
-        activated: false,
-        param: null,
-        expand: false,
-        collapseMini:false
-
-      };
-    }
 
     case "set reset": {
-
       const temp = {
         ...state,
 
@@ -125,30 +57,17 @@ function Reducer(state, action) {
         param: null,
         mini: false,
         showMini: false,
-        cardState:null
+        cardState: null,
       };
 
-       const collapsed = temp.cardState === "collapsed";
-       const small = temp.cardState === "mini";
-       const expanded = temp.cardState === "expanded";
+      const collapsed = temp.cardState === "collapsed";
+      const small = temp.cardState === "mini";
+      const expanded = temp.cardState === "expanded";
       return {
-       ...temp,collapsed,small,expanded
-      };
-    }
-
-    case "set parent": {
-      return {
-        ...state,
-
-        parent: action.parent,
-      };
-    }
-
-    case "set param": {
-      return {
-        ...state,
-
-        param: action.param,
+        ...temp,
+        collapsed,
+        small,
+        expanded,
       };
     }
 
@@ -161,14 +80,23 @@ function Reducer(state, action) {
 function ModalProvider({ children }) {
   const [state, dispatch] = useReducer(Reducer, initialState);
 
-  
+  const stateRef = useRef(state);
+
+  stateRef.current = state;
   const value = [state, dispatch];
+
   value.state = state;
   value.dispatch = dispatch;
 
+  const _refProps = useMemo(() => {
+    const refProps = [stateRef, dispatch];
+    refProps.stateRef = stateRef;
+    refProps.dispatch = dispatch;
+    return refProps;
+  }, []);
   return (
     <ModalStateContext.Provider value={value}>
-      <ModalDispatchContext.Provider value={dispatch}>
+      <ModalDispatchContext.Provider value={_refProps}>
         {children}
       </ModalDispatchContext.Provider>
     </ModalStateContext.Provider>

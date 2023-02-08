@@ -1,47 +1,50 @@
-import React, {
-  forwardRef,
-  lazy,
-  Suspense,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import React, { forwardRef, lazy, Suspense, useCallback, useMemo } from "react";
 
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useModalState } from "../../contexts/modalContext";
 import { useMovieDetails } from "../../requests/requests";
 
-import { Modal } from "./styles";
+import { Modal, Spacer } from "./styles";
 
 import { animated } from "react-spring";
 
 import { useDevice } from "../../contexts/deviceContext.js";
 import usePrevious from "../../hooks/usePrevious";
 import ProgressiveImage, { Img } from "../cachedImage";
-import { Description } from "../Cards/styles";
+import { Description } from "../Card/styles";
+import Watch from "../watch";
 import RecommendedMovies from "./recommendedMovies";
 import SimilarMovies from "./similarMovies";
 import timeConversion, { dateFormat } from "./utils";
 import Videos from "./videos";
-
 const Youtube = lazy(() => {
   return import("../Youtube");
 });
-const TrailModal = forwardRef(
-  (
-    { style, width, footerHeight, miniHeight, fade, progress, minifade },
-    ref
-  ) => {
+
+const ModalCard = forwardRef(
+  ({ springs, mainRef, innerRef, hoverAway }, ref) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const param = parseInt(searchParams.get("mv"));
 
     const prevParam = usePrevious(param);
 
-    const [currentMovieId, setCurrentMovieId] = useState(parseInt(param));
+    const [
+      { movie, expanded: expand, card, cardState, overlay, small: mini },
+      dispatch,
+    ] = useModalState();
 
-    const [{ movie, expanded:expand, card, overlay, small:mini }, dispatch] = useModalState();
+    const {
+      opacity,
+      fade,
+      minifade,
+      progress,
+      aspectRatio,
+      footerHeight,
+      width,
+      ...mainStyles
+    } = springs;
 
     const movieId = (param ?? prevParam) || movie?.id;
 
@@ -58,8 +61,6 @@ const TrailModal = forwardRef(
         keepPreviousData: true,
       },
     });
-
-   
 
     const videoId = useMemo(() => {
       if (!movieDetails) return null;
@@ -79,38 +80,19 @@ const TrailModal = forwardRef(
       (e) => {
         e.stopPropagation();
 
-        const searchKey = searchParams.get("q");
-        setSearchParams(
-          { ...(searchKey && { q: searchKey }), mv: movie?.id },
-          {
-            state: { backgroundLocation: location, miniModal: true },
-          }
-        );
+        searchParams.set("mv", movie?.id);
+        setSearchParams(searchParams, {
+          state: { backgroundLocation: location, miniModal: true },
+        });
       },
       [location, movie?.id, searchParams, setSearchParams]
     );
 
-    const handleGenres = useCallback(
-      (id) => {
-       
-        const path = new URL(window.location.href);
+    const handleGenres = (id) => {
+      const path = new URL(window.location.href);
 
-        console.log(path, id, searchParams.toString());
-        console.log("clicked", `/genre/${id}`);
-        navigate(`${path.origin}/browse/genre/${id}`);
-
-        window.scrollTo({
-          top: 0,
-          left: 0,
-        });
-
-        if (param) {
-          searchParams.delete("mv");
-          setSearchParams(searchParams);
-        }
-      },
-      [navigate, param, searchParams, setSearchParams]
-    );
+      navigate(`/browse/genre/${id}`);
+    };
 
     const handleClose = useCallback(
       (e) => {
@@ -137,29 +119,21 @@ const TrailModal = forwardRef(
       ? `https://image.tmdb.org/t/p/w300${current?.backdropPath}`
       : null;
 
-    const handleMovieClick = useCallback(() => {
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth",
-      });
-    }, []);
-
     const { mobile, desktop } = useDevice();
 
-    const potraitFooter = (card === "potrait" && mini) || param;
     const detailFooter = card === "detail" && mini && !param;
     const opened = !!param;
     const collapsing = !param && expand;
 
     return (
       <Suspense>
-        <>
+        <Watch width={width} />
+        <Modal.Animated ref={mainRef} style={{ width, ...mainStyles }}>
           <Modal.LoadingOverlay
             visible={isFetching && param}
           ></Modal.LoadingOverlay>
 
-          <Modal.Wrapper>
+          <Modal.Wrapper mini={mini} expand={opened} collapsing={collapsing}>
             <animated.div
               style={{
                 opacity: minifade.to({
@@ -171,22 +145,32 @@ const TrailModal = forwardRef(
                 zIndex: 6,
                 pointerEvents: "none",
                 position: "absolute",
+                overflow: "hidden",
               }}
             >
-              <div style={{ width: "100%", position: "relative" }}>
+              <animated.div
+                style={{
+                  width: "100%",
+                  aspectRatio,
+                  display: "flex",
+                  alignItems: "center",
+                  position: "relative",
+                }}
+              >
                 <Img
                   style={{
                     width: "100%",
                     height: "auto",
+                    top: "unset",
                     background: "none",
                   }}
                   src={overlay}
                   alt={``}
                 />
-              </div>
+              </animated.div>
             </animated.div>
             <animated.div
-              ref={ref}
+              ref={innerRef}
               style={{
                 opacity: minifade.to({
                   range: [0, 0.5, 0.8],
@@ -200,21 +184,7 @@ const TrailModal = forwardRef(
                 flex: 1,
               }}
             >
-              <div
-                style={{
-                  position: "relative",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  aspectRatio: 16 / 9,
-                  maxHeight: "min(800px,100vh)",
-                  alignItems: "center",
-                  display: "flex",
-                  overflow: "hidden",
-                  flexBasis: "auto",
-                  flexShrink: 0,
-                }}
-              >
+              <Modal.BackDrop>
                 <ProgressiveImage
                   style={{
                     width: "100%",
@@ -228,27 +198,31 @@ const TrailModal = forwardRef(
 
                 {videoId && !collapsing && (
                   <Suspense fallback={<div></div>}>
-                    <Youtube id={videoId} light={false} play={true} />
+                    <Youtube
+                      key={videoId}
+                      id={videoId}
+                      light={false}
+                      play={true}
+                    />
                   </Suspense>
                 )}
-                {/* {
+                {
                   <>
-                    {(expand || expanded) && (
-                      <Button onClick={handleClose}>
-                        <Close style={{ fill: "white" }} />
-                      </Button>
+                    {expand && (
+                      <Modal.Button onClick={handleClose}>
+                        <Modal.Close style={{ fill: "white" }} />
+                      </Modal.Button>
                     )}
-                   
                   </>
-                } */}
-              </div>
+                }
+              </Modal.BackDrop>
 
               {
                 <Description.Content
-                  className="modal-content"
+                  className={"modal-content " }
                   desktop={desktop}
                   opened={opened}
-                   style={{ height: param ? "auto" : 0 }}
+                  style={{ height: param ? "auto" : 0 }}
                 >
                   <Description.Wrapper
                     className="modal-description"
@@ -292,7 +266,6 @@ const TrailModal = forwardRef(
                             key={i}
                             className="link"
                             onClick={() => {
-                              console.log(genre.id);
                               handleGenres(genre.id);
                             }}
                           >
@@ -314,6 +287,7 @@ const TrailModal = forwardRef(
 
               <SimilarMovies movieId={movieId} opened={opened} />
               <RecommendedMovies movieId={movieId} opened={opened} />
+            { opened && <Spacer/>}
 
               {!opened && (
                 <Modal.Footer style={{ height: footerHeight }}>
@@ -351,10 +325,15 @@ const TrailModal = forwardRef(
               )}
             </animated.div>
           </Modal.Wrapper>
-        </>
+        </Modal.Animated>
+        <Modal.BgOverlay
+          onClick={handleClose}
+          {...hoverAway()}
+          style={{ opacity }}
+        />
       </Suspense>
     );
   }
 );
 
-export default TrailModal;
+export default ModalCard;

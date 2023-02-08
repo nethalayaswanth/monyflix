@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Epic from "../Epic";
 
@@ -7,28 +7,32 @@ import { Section } from "../Section";
 import { Loader } from "../spinner";
 
 import { useInView } from "react-intersection-observer";
-import { useIsFetching } from "react-query";
-import { useParamState } from "../../contexts/paramContext";
-import usePrevious from "../../hooks/usePrevious";
+import styled from "styled-components";
+import { useScrollPosition } from "../../hooks/useScrollPosition";
+
+const Container = styled.div`
+  margin-top: calc(-1 * var(--nav-height));
+`;
 
 export default function Background() {
-  const [searchParams, setSearchParams] = useParamState();
+  // const [searchParams, setSearchParams] = useParamState();
 
-  const param = searchParams.get("mv");
+  // const param = searchParams.get("mv");
 
-  const isFetchingMovie = useIsFetching(["movie", param]);
-  const isFetchingMovieVideos = useIsFetching(["videos", param]);
+  // const isFetchingMovie = useIsFetching(["movie", param]);
+  // const isFetchingMovieVideos = useIsFetching(["videos", param]);
 
-  const fetchingParamMovieData = isFetchingMovie || isFetchingMovieVideos;
+  // const fetchingParamMovieData = isFetchingMovie || isFetchingMovieVideos;
 
-  const paramMovieDataFetched = usePrevious(fetchingParamMovieData);
+  // const paramMovieDataFetched = usePrevious(fetchingParamMovieData);
 
-  const queryEnabled = paramMovieDataFetched || !param;
+  // const queryEnabled = !fetchingParamMovieData ;
 
   const [loaderCount, setLoaderCount] = useState(0);
 
   const { ref: inViewRef } = useInView({
-    threshold: 0.5,
+    threshold: 0,
+    rootMargin: "0px 0px 350px 0px",
     onChange: (inview) => {
       if (inview) {
         setLoaderCount((c) => c + 1);
@@ -36,51 +40,37 @@ export default function Background() {
     },
   });
 
+  const containerRef = useRef();
+  useScrollPosition({
+    onScrollChange: ({ prevPos, currPos, scrolling }) => {
+      const container = containerRef.current.style;
+
+      container.pointerEvents = scrolling ? "none" : "auto";
+    },
+  });
+
   return (
-    <>
-      <Landing queryEnabled={queryEnabled} />
+    <Container ref={containerRef}>
+      <Landing />
+      <Section query="trendingMovies" title={"Trending"} />
+      <Section title={"Popular"} variables={{ type: "Popular" }} />
       <Section
-        query="trendingMovies"
-        queryEnabled={queryEnabled}
-        title={"Trending"}
-      />
-      <Section
-        query="moviesByType"
-        queryEnabled={queryEnabled}
-        title={"Popular"}
-        variables={{ type: "POPULAR" }}
-      />
-      <Section
-        query="moviesByType"
-        queryEnabled={queryEnabled}
         title={"Upcoming"}
         card={"detail"}
-        variables={{ type: "UPCOMING" }}
+        variables={{ type: "Upcoming", titlePoster: true }}
       />
 
       {loaderCount >= 1 && (
         <>
-          <Epic genres={["Romance"]} title={"Love & Romance"} />
-          <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
-            variables={{ genres: ["Drama"] }}
-            title={"Drama"}
-            whileInView
+          <Epic
+            variables={{ genres: ["Romance"],adult:false }}
+            title={"Love & Romance"}
           />
+          <Section variables={{ genres: ["Drama"] }} title={"Drama"} />
+          <Section variables={{ genres: ["Adventure"] }} title={"Adventure"} />
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
-            variables={{ genres: ["Adventure"] }}
-            title={"Adventure"}
-            whileInView
-          />
-          <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
-            variables={{ genres: ["Action"] }}
+            variables={{ genres: ["Action"], titlePoster: true }}
             title={"Action"}
-            whileInView
             card={"detail"}
           />
         </>
@@ -88,78 +78,70 @@ export default function Background() {
       {loaderCount >= 2 && (
         <>
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
-            variables={{ genres: ["ScienceFiction"] }}
-            title={"sci-fi"}
-            key={"sci-fi"}
+            variables={{ genres: ["ScienceFiction"], titlePoster: true }}
+            title={"Sci-Fi"}
+            key={"Sci-Fi"}
             card="landscape"
-            whileInView
-            titleCard
+            cardHover={false}
           />
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
             variables={{ genres: ["Comedy"] }}
             title={"Comedy"}
-            whileInView
             key={"comedy"}
           />
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
-            variables={{ genres: ["Family"] }}
+            variables={{ genres: ["Family"], titlePoster: true }}
             title={"Family"}
             key={"family"}
-            whileInView
             card={"detail"}
           />
         </>
       )}
       {loaderCount >= 3 && (
         <>
-          <Epic key={"thrillers"} genres={["Epic"]} title={"Thrillers"} />
+          <Epic
+            key={"thrillers"}
+            variables={{ genres: ["Thrillers"] }}
+            title={"Thrillers"}
+          />
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
             variables={{ genres: ["Horror"] }}
             title={"Horror"}
             key={"horror"}
-            whileInView
           />
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
-            variables={{ genres: ["Mystery", "Crime", "Thriller"] }}
+            variables={{
+              genres: ["Mystery", "Crime", "Thriller"],
+              titlePoster: true,
+            }}
             title={"Mystery"}
-            whileInView
             card={"landscape"}
             key={"mystery"}
+            cardHover={false}
           />
         </>
       )}
       {loaderCount >= 4 && (
         <>
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
+            title={"Top Rated"}
+            key={"Top Rated"}
+            variables={{ type: "Top Rated", sortBy: "Rating" }}
+          />
+          <Section
             variables={{ genres: ["History", "War"] }}
             title={"History"}
-            whileInView
             key={"history"}
           />
           <Section
-            query="moviesByGenre"
-            queryEnabled={queryEnabled}
-            variables={{ genres: ["Documentary"] }}
+            variables={{ genres: ["Documentary"], titlePoster: true }}
             title={"Documentary"}
-            whileInView
             card={"detail"}
             key={"documentary"}
           />
         </>
       )}
       {loaderCount < 5 && <Loader ref={inViewRef} />}
-    </>
+    </Container>
   );
 }

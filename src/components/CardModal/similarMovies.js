@@ -8,7 +8,7 @@ import {
 
 import Section from "../Section";
 
- const SimilarMovies = ({ movieId,opened, renderFullList }) => {
+ const SimilarMovies = ({ movieId,opened }) => {
   const similarMoviesQuery = useSimilarMovies({
     id: movieId,
     size: 4,
@@ -17,6 +17,8 @@ import Section from "../Section";
       keepPreviousData: true,
     },
   });
+
+  console.log(similarMoviesQuery)
 
   const similarMovies = useMemo(() => {
     const data = similarMoviesQuery?.data;
@@ -38,7 +40,7 @@ import Section from "../Section";
           title="More Like This"
           data={similarMovies}
           loading={similarMoviesQuery.status === "loading"}
-          hasMore={similarMoviesQuery.hasNextPage && renderFullList}
+          hasMore={similarMoviesQuery.hasNextPage }
           isFetching={similarMoviesQuery.isFetchingNextPage}
           fetchMore={similarMoviesQuery.fetchNextPage}
           card="detail"

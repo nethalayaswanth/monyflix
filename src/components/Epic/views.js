@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import radient from "../../assets/radient.png";
+import { circleGradient } from "../Landing/styles";
 
 export const Container = styled.div`
   position: relative;
@@ -56,7 +57,10 @@ export const MetaWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  z-index:5;
+  z-index: 6;
+  &::after {
+    ${circleGradient}
+  }
 
   & .flex-row {
     display: flex;
@@ -92,7 +96,7 @@ export const Gradient = styled.div`
   z-index: 1;
   background-image: url(${radient});
   background: rgba(4, 0, 0, 0.2);
-  z-index: 4;
+  z-index: 3;
 `;
 
 export const Wrapper = styled.div`

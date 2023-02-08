@@ -38,7 +38,7 @@ export const CORE_MOVIE_FIELDS = gql`
 export const MovieGenre = gql`
   ${CORE_MOVIE_FIELDS}
   query MovieGenre(
-    $genres: [String]!
+    $genres: [Int]!
     $after: Int
     $size: Int
     $page: Int
@@ -53,6 +53,7 @@ export const MovieGenre = gql`
       cursor
       hasMore
       nextPage
+      page
     }
   }
 `;
@@ -60,20 +61,33 @@ export const MovieGenre = gql`
 export const Movies = gql`
   ${CORE_MOVIE_FIELDS}
   query Movies(
-    $type: MoviesType!
+    $type: MoviesType
     $after: Int
     $size: Int
     $page: Int
     $withVideo: Boolean = false
-    $videoTypes: [VideoType] = [CLIP]
+    $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
+    $genres: [Int]
+    $sortBy: sortByType
     $withLandscapePosterPath: Boolean = false
+    $adult:Boolean
   ) {
-    movies(type: $type, after: $after, size: $size, page: $page) {
+    movies(
+      type: $type
+      after: $after
+      size: $size
+      page: $page
+      genres: $genres
+      sortBy: $sortBy
+      adult:$adult
+    ) {
       data {
         ...CoreMovieFields
       }
       cursor
       hasMore
+      nextPage
+      page
     }
   }
 `;
@@ -96,6 +110,7 @@ export const Search = gql`
       cursor
       hasMore
       nextPage
+      page
     }
   }
 `;
@@ -110,8 +125,9 @@ export const Movie = gql`
     movie(id: $id) {
       ...CoreMovieFields
       runtime
-      genres{
-id,name
+      genres {
+        id
+        name
       }
       tagline
     }
@@ -135,6 +151,8 @@ export const similarMovies = gql`
       }
       cursor
       hasMore
+      nextPage
+      page
     }
   }
 `;
@@ -155,20 +173,21 @@ export const recommendedMovies = gql`
       }
       cursor
       hasMore
+      nextPage
+      page
     }
   }
 `;
 
-
 export const latestMovie = gql`
   ${CORE_MOVIE_FIELDS}
   query latestMovie(
-    $withVideo: Boolean = false
+    $withVideo: Boolean = true
     $videoTypes: [VideoType] = [CLIP, TRAILER, TEASER]
     $withLandscapePosterPath: Boolean = true
   ) {
     latestMovie {
-      ...CoreMovieFields 
+      ...CoreMovieFields
     }
   }
 `;
@@ -189,6 +208,8 @@ export const trendingMovies = gql`
       }
       cursor
       hasMore
+      nextPage
+      page
     }
   }
 `;

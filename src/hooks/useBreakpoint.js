@@ -37,11 +37,6 @@ function useBreakpoint({
       setValue(value);
     }}
   });
-
- 
-  // useLayoutEffect(() => {
-   
-  // }, [breakPointValues, breakPoints, defaultValue, getValue, width]);
   return value;
 }
 

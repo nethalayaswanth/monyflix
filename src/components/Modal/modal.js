@@ -1,4 +1,10 @@
-import React, { memo, useCallback, useLayoutEffect, useRef } from "react";
+import React, {
+  memo,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 import {
@@ -8,7 +14,7 @@ import {
   updatedStyles,
 } from "./utils";
 
-import { animated, useSpring } from "@react-spring/web";
+import { useSpring } from "@react-spring/web";
 
 import { useHover } from "@use-gesture/react";
 
@@ -17,18 +23,10 @@ import useResizeObserver from "use-resize-observer";
 import { useModalState } from "../../contexts/modalContext";
 import ModalCard from "../CardModal";
 
+import useScrollLock from "../../hooks/useLock";
 import usePrevRender from "../../hooks/usePrevRender";
-export const MAX_WIDTH = 850;
-export const MOBILE_BREAKPOINT = 630;
-export const GAP = 10;
-export const FADE_SCALE = 0.8;
-export const FADE_TRANSLATE = 3000;
-export const PADDING_X = 16;
-export const ASPECT_RATIO = 2 / 3;
-export const MARGIN_MOBILE = 25;
-export const MARGIN_DESKTOP = 40;
 
-const Wrapper = styled.div`
+const Container = styled.div`
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -39,31 +37,27 @@ const Wrapper = styled.div`
 `;
 
 const ModalWrapper = ({}) => {
-  const portalEl = document.getElementById("root");
+  const portalEl = useMemo(() => {
+    let root = document.getElementById("root");
+    let span = document.getElementById("modal-portal");
+    // root.insertAdjacentElement("beforeend", span);
+    return root;
+  }, []);
 
+ 
   const [searchParams, setSearchParams] = useSearchParams();
 
   const param = searchParams.get("mv");
 
-  const [
-    { parent, mini, collapsed, expanded, small, showMini, expand },
-    dispatch,
-  ] = useModalState();
+  const [{ parent, expanded, small,aspectRatio, showMini }, dispatch] = useModalState();
 
   const prevSmall = usePrevRender(small);
-  // const prevCollapsed = usePrevRender(collapsed);
+
   const prevExpanded = usePrevRender(expanded);
-
-  const bind = useHover((state) => {
-    // setHovering(state.hovering);
-  });
-
   const modal = useRef();
-  const modalInner = useRef();
+  const innerRef = useRef();
 
   const bodyStyle = useRef();
-
-  const scroll = useRef();
 
   const miniRect = useRef();
 
@@ -122,22 +116,19 @@ const ModalWrapper = ({}) => {
         height: 0,
         top: 0,
         left: 0,
+        footerHeight: 0,
+        aspectRatio: aspectRatio,
         transformOrigin: "center top",
       },
-      onPause: (results, spring) => {
-        console.log("pause", results, spring);
-      },
+      onPause: (results, spring) => {},
       onRest: (results, spring) => {
         const {
           value: { progress },
         } = results;
-        console.log("rest", results, spring);
+
         if (progress === 0) {
           dispatch({
             type: "set reset",
-          });
-          requestAnimationFrame(() => {
-            unlockBody();
           });
         }
         if (progress === 1) {
@@ -161,32 +152,7 @@ const ModalWrapper = ({}) => {
     };
   });
 
-  const lockBody = useCallback(() => {
-    const main = document.getElementById("app");
-    bodyStyle.current = document.body.style;
-    const scrollY = window.scrollY;
-    scroll.current = scrollY;
-    document.body.style.overflowY = "scroll";
-    main.style.top = `-${scrollY}px`;
-    main.style.position = "fixed";
-    window.scroll({
-      top: 0,
-      left: 0,
-    });
-  }, []);
-
-  const unlockBody = useCallback(() => {
-    const main = document.getElementById("app");
-    main.style.top = "unset";
-    main.style.position = "static";
-    if (bodyStyle.current) document.body.style = bodyStyle.current;
-    if (scroll.current) {
-      window.scroll({
-        top: scroll.current,
-        left: 0,
-      });
-    }
-  }, []);
+  const { lockBody, unlockBody } = useScrollLock();
 
   const closeMini = useCallback(() => {
     const { from } = hoverStyles();
@@ -205,16 +171,17 @@ const ModalWrapper = ({}) => {
 
   const hoverAway = useHover((state) => {
     if (state.hovering && !param && !expanded) {
-      console.log("hover away");
       closeMini();
     }
   });
 
+  if (!small && !param && !expanded) {
+    closeMini();
+  }
+
   useLayoutEffect(() => {
     if (!small) return;
-
     const { from, to } = hoverStyles();
-
     if (prevSmall) api.stop(true);
     api.start({
       to: {
@@ -234,23 +201,19 @@ const ModalWrapper = ({}) => {
       }),
     });
   }, [api, hoverStyles, prevSmall, small]);
-  useLayoutEffect(() => {
-    if (!small && !param && !expanded) {
-      closeMini();
-    }
-  }, [closeMini, expanded, param, showMini, small]);
 
   useResizeObserver({
     ref: document.body,
     onResize: ({ width: screenWidth, height }) => {
       if (expanded) {
-        const { width, y: translateY } = updatedStyles({ width: screenWidth });
-        const miniTop = modal?.current?.getBoundingClientRect();
-
-        api.start({
-          to: async (animate) => {
-            await animate({ width });
-          },
+        const { width, topPadding } = updatedStyles({ width: screenWidth });
+        api.start((_, { springs: { y } }) => {
+          console.log(y);
+          return {
+            to: async (animate) => {
+              await animate({ width });
+            },
+          };
         });
       }
     },
@@ -258,14 +221,13 @@ const ModalWrapper = ({}) => {
 
   useLayoutEffect(() => {
     if (param && !expanded) {
-      console.log("expanding");
       let scrollHeight;
       if (prevSmall) {
         miniRect.current = modal?.current?.getBoundingClientRect();
-        scrollHeight = modalInner.current?.scrollHeight;
+        scrollHeight = innerRef.current?.scrollHeight;
       } else if (!prevSmall && parent) {
         miniRect.current = parent.getBoundingClientRect();
-        scrollHeight = modalInner.current?.scrollHeight;
+        scrollHeight = innerRef.current?.scrollHeight;
       }
 
       lockBody();
@@ -338,66 +300,52 @@ const ModalWrapper = ({}) => {
       dispatch({
         type: "set reset",
       });
-      requestAnimationFrame(() => {
-        unlockBody();
-      });
+      unlockBody();
+      // requestAnimationFrame(() => {
+
+      // });
     };
   }, [dispatch, unlockBody]);
 
   const full = param || expanded;
 
-  const mount = mini || full;
-
-  return createPortal(
-    <Wrapper style={{ ...(full && { height: "100%", width: "100%" }) }}>
-      <animated.div
-        ref={refCb}
-        {...bind()}
-        style={{
-          transformOrigin,
-          position: "absolute",
-          zIndex: 99999,
-          willChange: "transform position top width scaleX scaleY left",
-          top,
-          width,
-          x,
-          y,
-          scaleY,
-          scaleX,
-          height,
-          left,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <ModalCard
-          width={width}
-          progress={progress}
-          fade={fade}
-          minifade={minifade}
-          miniHeight={height}
-          footerHeight={footerHeight}
-          ref={modalInner}
-        />
-      </animated.div>
-      <animated.div
-        onClick={handleClose}
-        {...hoverAway()}
-        style={{
-          position: "fixed",
-          zIndex: 1,
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backdropFilter: "blur(2px)",
-          backgroundColor: "rgba(255, 255, 255, 0.5)",
-          opacity: opacity,
-        }}
-      />
-    </Wrapper>,
-    portalEl
+  return (
+    <>
+      {portalEl &&
+        createPortal(
+          <Container
+            id="modal-scroller"
+            style={{
+              ...(full && { height: "100%", zIndex: 1, width: "100%" }),
+            }}
+          >
+            <ModalCard
+              springs={{
+                x,
+                y,
+                width,
+                height,
+                scaleY,
+                scaleX,
+                left,
+                top,
+                transformOrigin,
+                opacity,
+                fade,
+                minifade,
+                progress,
+                footerHeight,
+                 aspectRatio,
+              }}
+              hoverAway={hoverAway}
+              spring={api}
+              mainRef={refCb}
+              innerRef={innerRef}
+            />
+          </Container>,
+          portalEl
+        )}
+    </>
   );
 };
 

@@ -10,7 +10,7 @@ const Modal= () => {
   const param = searchParams.get("mv");
 
 
-  const [{ activate, parent, collapsed,expanded,small,activated, expand }, dispatch] = useModalState();
+  const [{ parent, collapsed,expanded,small, }, dispatch] = useModalState();
 
   const mount =  parent || collapsed ||small || param || expanded 
 

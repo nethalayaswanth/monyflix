@@ -3,12 +3,13 @@ import ProgressiveImage from "../cachedImage";
 
 import { useHover } from "@use-gesture/react";
 import { useSwiper, useSwiperSlide } from "swiper/react";
-import { useDevice } from "../../contexts/deviceContext.js";
+import { useDevice } from "../../contexts/deviceContext.js.js";
 import { useModalDispatch } from "../../contexts/modalContext";
 import { useParamDispatch } from "../../contexts/paramContext";
 import { mergeRefs } from "../../utils";
 import timeConversion, { dateFormat } from "../CardModal/utils";
 import { Details } from "../Landing/Details";
+import Youtube from "../Youtube";
 import {
   AspectBox,
   Caption,
@@ -19,16 +20,16 @@ import {
   ThumbNailHover,
 } from "./styles";
 import usePrefetch from "./usePrefetch";
-import { useNavigate } from "react-router-dom";
 
-const LandscapeCard = (
-  { data: current, cardExpand = true, cardHover = true, card },
+const Card = (
+  { data: current, videoCrop, cardExpand = true, cardHover = true, card },
   ref
 ) => {
   const { mobile, desktop } = useDevice();
 
   const id = useMemo(() => {
     if (!current) return null;
+
     const videos = current.videos;
     if (!videos) return null;
     const clip = videos.clip[0];
@@ -38,17 +39,17 @@ const LandscapeCard = (
     return video ? video.key : null;
   }, [current]);
 
-  const landscapePosterPath =
-    current?.landscapePosterPath ?? current?.backdropPath;
-  const backdropPath = current?.backdropPath;
-  const posterPath = current?.posterPath;
-
   const landscape = card === "landscape";
   const potrait = card === "potrait";
   const landing = card === "landing";
   const thumbnail = card === "thumbnail";
   const detail = card === "detail";
   const epic = card === "epic";
+
+  const landscapePosterPath =
+    current?.landscapePosterPath ?? current?.backdropPath;
+  const backdropPath = current?.backdropPath;
+  const posterPath = current?.posterPath;
 
   const originalResolution =
     landscape || landing || epic ? "original" : potrait ? "w342" : "w780";
@@ -102,15 +103,6 @@ const LandscapeCard = (
     epic: titlePoster,
   };
 
-  const aspectRatio = {
-    potrait: poster,
-    thumbnail: titlePoster,
-    detail: titlePoster,
-    card: poster,
-    landscape: desktop ? 16 / 9 : 2 / 3,
-    landing: desktop ? 16 / 9 : 2 / 3,
-  };
-
   const src = bg[card];
 
   const movieId = current?.id;
@@ -119,7 +111,11 @@ const LandscapeCard = (
 
   const year = current?.releaseDate;
   const runTime = current?.runtime;
-  const showVideo = id && (landscape || landing);
+
+  const showVideo = id && desktop && (landing || landscape);
+
+  const hoverEnabled = !(landing || landscape) ? cardHover : false;
+  const expandEnabled = !landing ? cardExpand : false;
 
   const clearTimer = useCallback(() => {
     if (timeOutRef.current) {
@@ -128,11 +124,11 @@ const LandscapeCard = (
   }, []);
 
   const setTimer = useCallback(
-    (cb) => {
+    (cb, delay = 500) => {
       clearTimer();
       timeOutRef.current = setTimeout(() => {
         cb();
-      }, 100);
+      }, delay);
     },
     [clearTimer]
   );
@@ -149,9 +145,8 @@ const LandscapeCard = (
     enabled: prevFetchEnabled,
   });
 
-  const dispatch = useModalDispatch();
+  const [stateRef, dispatch] = useModalDispatch();
 
-  let navigate = useNavigate();
   const handleHovering = useCallback(
     (hovering) => {
       if (!hovering) {
@@ -159,35 +154,34 @@ const LandscapeCard = (
         return;
       }
       const showMini = () => {
+        const { height, width } = miniRef.current.getBoundingClientRect();
+
         dispatch({
           type: "set modal",
           payload: {
             movie: current,
             parent: miniRef.current,
-            // mini: true,
-            card: detail ? "detail" : "potrait",
             overlay: src?.original,
-            // showMini:true,
-            cardState:'mini'
+            cardState: "mini",
+            card: detail ? "detail" : "potrait",
+            aspectRatio: width / height,
           },
         });
       };
 
-      // if (mini) {
-      //   showMini();
-      //   return;
-      // }
+      if (stateRef.current.small) {
+        showMini();
+        return;
+      }
 
       setTimer(showMini);
     },
-    [clearTimer, current, detail, dispatch, setTimer, src?.original]
+    [clearTimer, current, detail, dispatch, setTimer, src?.original, stateRef]
   );
 
   const bind = useHover((state) => {
-    if (landing || landscape || !cardHover) return;
-    if (current && desktop) {
-      handleHovering(state.hovering);
-    }
+    if (!current || !hoverEnabled || !desktop) return;
+    handleHovering(state.hovering);
   });
 
   const setSearchParams = useParamDispatch();
@@ -200,40 +194,51 @@ const LandscapeCard = (
   const handleClick = useCallback(async () => {
     if (!current) return;
 
-    if (cardExpand) {
+    if (thumbnail) {
+      dispatch({
+        type: "set modal",
+        payload: {
+          videoId: current?.key,
+          title: title,
+        },
+      });
+      return;
+    }
+    if (expandEnabled) {
+      const { height, width } = miniRef.current.getBoundingClientRect();
       dispatch({
         type: "set modal",
         payload: {
           movie: current,
           parent: miniRef.current,
           overlay: src.original,
+          aspectRatio: width / height,
         },
       });
     } else {
-      dispatch({
-        type: "set modal",
-        callback: (state) => {
-          if (state.expand) {
-            window.scrollTo({
-              top: 0,
-              left: 0,
-              behavior: "smooth",
-            });
-          }
-        },
-      });
+      if (stateRef.current.expanded) {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth",
+        });
+      }
     }
-    const parsedUrl = new URL(window.location.href);
-    let searchParams = {  };
-    for (const [key, value] of parsedUrl.searchParams) {
-      searchParams[key] = value;
-    }
-    
+    const { searchParams } = new URL(window.location.href);
+    searchParams.set("mv", movieId);
 
-    setSearchParams({ ...searchParams, mv: movieId });
-  }, [cardExpand, current, dispatch, movieId, setSearchParams, src?.original]);
-
-  // const play = activated || expand;
+    setSearchParams(searchParams);
+  }, [
+    current,
+    dispatch,
+    expandEnabled,
+    movieId,
+    setSearchParams,
+    src.original,
+    stateRef,
+    thumbnail,
+    title,
+  ]);
 
   const slide = useSwiperSlide();
   const swiper = useSwiper();
@@ -243,11 +248,13 @@ const LandscapeCard = (
 
   const showTitlePoster = landing || landscape;
   const caption = epic || thumbnail;
+
   return (
     <CardContainer
       className={`${card}`}
       card={card}
       ref={mergeRefs(ref, prefetchRef)}
+      hoverEnabled={hoverEnabled}
     >
       <CardWrapper onClick={handleClick} {...bind()} className={"card-wrapper"}>
         <AspectBox ref={miniRefCb} className={"backdrop"}>
@@ -267,7 +274,7 @@ const LandscapeCard = (
             title={title}
             overview={overview}
             landscapePosterPath={landscapePosterPath}
-            trigger={slide.isActive}
+            trigger={slide?.isActive}
           />
         )}
         {detail && (
@@ -290,15 +297,17 @@ const LandscapeCard = (
         )}
 
         {caption && <Caption>{title}</Caption>}
-        {/* {showVideo && desktop && (
+        {slide?.isActive && showVideo && (
           <Youtube
+            key={id}
             id={id}
             light={false}
             absolute
-            play={slide.isActive}
+            crop={videoCrop}
+            play={slide?.isActive}
             onVideoEnded={onVideoEnded}
           />
-        )} */}
+        )}
         {/* <button
           style={{
             width: "100%",
@@ -315,4 +324,4 @@ const LandscapeCard = (
   );
 };
 
-export default forwardRef(LandscapeCard);
+export default forwardRef(Card);

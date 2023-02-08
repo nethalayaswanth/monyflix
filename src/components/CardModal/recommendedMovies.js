@@ -7,7 +7,7 @@ import {
 
 import Section from "../Section";
 
- const RecommendedMovies = ({ movieId, opened, renderFullList }) => {
+ const RecommendedMovies = ({ movieId, opened }) => {
    const recommendedMoviesQuery = useRecommendedMovies({
      id: movieId,
      size: 4,
@@ -39,7 +39,7 @@ import Section from "../Section";
            title="Recommended Movies"
            data={recommendedMovies}
            loading={recommendedMoviesQuery.status === "loading"}
-           hasMore={recommendedMoviesQuery.hasNextPage && renderFullList}
+           hasMore={recommendedMoviesQuery.hasNextPage }
            isFetching={recommendedMoviesQuery.isFetchingNextPage}
            fetchMore={recommendedMoviesQuery.fetchNextPage}
            card="potrait"

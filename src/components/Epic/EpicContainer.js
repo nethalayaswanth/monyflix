@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 
-import useMedia from "../../hooks/useBreakpoint";
-import { useMoviesByGenre } from "../../requests/requests";
+import { useMovies } from "../../requests/requests";
 
 import ProgressiveImage from "../cachedImage";
 import Carousel from "../Carousel";
@@ -15,9 +14,8 @@ import {
 } from "./views";
 
 import { Details } from "../Landing/Details";
-import { useDevice } from "../../contexts/deviceContext.js";
 
-export default function EpicContainer({ genres, title: header }) {
+export default function EpicContainer({ variables, title: header }) {
   const [state, dispatch] = useEpicState();
 
   const onSlideChange = useCallback(
@@ -41,7 +39,7 @@ export default function EpicContainer({ genres, title: header }) {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useMoviesByGenre({ genres, withLandscapePosterPath: true });
+  } = useMovies({ ...variables,titlePoster:true ,video:true});
 
   const movies = useMemo(() => {
     if (data) {
@@ -60,7 +58,7 @@ export default function EpicContainer({ genres, title: header }) {
   const title = movie?.title;
 
   const original = backdropPath
-    ? `https://image.tmdb.org/t/p/w780/${backdropPath}`
+    ? `https://image.tmdb.org/t/p/original/${backdropPath}`
     : null;
   const preview = backdropPath
     ? `https://image.tmdb.org/t/p/w300/${backdropPath}`
@@ -77,7 +75,6 @@ export default function EpicContainer({ genres, title: header }) {
     return clip ? clip.key : trailer ? trailer.key : teaser ? teaser.key : "";
   }, [movies, state.id]);
 
- 
   return (
     <Container>
       <div
@@ -98,12 +95,14 @@ export default function EpicContainer({ genres, title: header }) {
         <div className="flex-row">
           {movie && (
             <Details
+              subTitle={header}
               trigger={movie?.title}
               title={movie?.title}
               overview={movie?.overview}
             />
           )}
-          {id && <Youtube id={id} play={true} audio={true} />}
+          {id && <Youtube id={id} play={true} crop absolute audio={true} />}
+          <Gradient />
         </div>
       </MetaWrapper>
       <CarouselWrapper
@@ -122,10 +121,10 @@ export default function EpicContainer({ genres, title: header }) {
           card="epic"
           cardHover={false}
           onSlideChange={onSlideChange}
+          videoCrop
           endPadding={true}
         />
       </CarouselWrapper>
-      <Gradient />
     </Container>
   );
 }

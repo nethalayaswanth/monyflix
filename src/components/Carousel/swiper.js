@@ -5,16 +5,9 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import "swiper/css/virtual";
 import { Swiper as ReactSwiper } from "swiper/react";
-import { Nav } from "./views";
+import { Nav } from "./styles";
 
-import {
-  EffectFade,
-  FreeMode,
-  Keyboard,
-  Mousewheel,
-
-  Pagination,
-} from "swiper";
+import { EffectFade, FreeMode, Keyboard, Mousewheel, Pagination } from "swiper";
 
 function Index(
   {
@@ -23,8 +16,6 @@ function Index(
     dark,
     transitionEvents,
     enabled = true,
-    mobile,
-    desktop,
     SlidesPerView,
     effectFade,
     ...props
@@ -49,9 +40,8 @@ function Index(
     setPrev(instance.activeIndex > 0);
   }, []);
 
-
   const onSlideChange = (swiper) => {
-    setPrev(swiper.activeIndex!==0);
+    setPrev(swiper.activeIndex !== 0);
     setNext(!swiper.isEnd);
   };
 
@@ -62,13 +52,7 @@ function Index(
         direction={"horizontal"}
         spaceBetween={10}
         enabled={enabled}
-        modules={[
-          Mousewheel,
-          EffectFade,
-          Pagination,
-          FreeMode,
-          Keyboard,
-        ]}
+        modules={[Mousewheel, EffectFade, Pagination, FreeMode, Keyboard]}
         onSwiper={onSwiperReady}
         onSlideChange={onSlideChange}
         cssMode={true}
@@ -114,19 +98,16 @@ function Index(
         ref={nextEl}
         enable={prevEnabled}
         dark={dark}
-       
       />
       <Nav
         key="next"
         next
         ref={prevEl}
         onClick={() => {
-          
           swiper.current.slideNext();
         }}
         enable={nextEnabled}
         dark={dark}
-     
       />
     </>
   );

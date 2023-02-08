@@ -1,7 +1,5 @@
 import styled, { css } from "styled-components";
 import down from "../../assets/down.png";
-import { ReactComponent as UnMute } from "../../assets/unMute.svg";
-import { ReactComponent as Mute } from "../../assets/mute.svg";
 
 import { animated } from "react-spring";
 
@@ -28,6 +26,20 @@ export const circleGradient = css`
   background-image: var(--circle-gradient), var(--linear-gradient);
 `;
 
+export const linearG = css`
+  content: "";
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: 50px;
+  bottom: 0px;
+
+  z-index: 3;
+
+  --linear-gradient: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 10%, transparent);
+
+  background-image: var(--linear-gradient);
+`;
 export const Container = styled.div`
   position: relative;
   display: flex;
@@ -66,15 +78,6 @@ export const Wrapper = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
-
-  /* @media only screen and (max-width: 100vw) {
-    width: 100%;
-    height: calc(56.25vw);
-    min-height: 500px;
-  }
-  @media only screen and (max-width: 739px) {
-    height: calc((120vw / 0.65));
-  } */
 `;
 
 export const Gradient = styled.div`
@@ -168,6 +171,8 @@ export const VideoControls = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  transition: padding 0.56s cubic-bezier(0.52, 0.16, 0.24, 1),
+    bottom 0.56s cubic-bezier(0.52, 0.16, 0.24, 1);
 `;
 
 export const HeaderButton = styled.button`
@@ -224,6 +229,22 @@ export const Details = styled(animated.div)`
     box-sizing: content-box;
     text-align: unset;
   }
+`;
+export const textTruncate = css`
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  -webkit-line-clamp: 1;
+`;
+
+export const SubTitle = styled.div`
+${textTruncate}
+  font-size: 11px;
+  line-height: 1.18182;
+  font-weight: 400;
+  letter-spacing: 0;
 `;
 
 export const Title = styled.div`

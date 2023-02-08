@@ -38,6 +38,8 @@ const Svg = styled(Arrow)`
   content: "";
   width: 9px;
   height: 20px;
+  fill: ${({ dark }) => (dark ? `white` : `black`)};
+  visibility: ${({ visibility }) => (visibility ? "visible" : "hidden")};
 
   @media only screen and (min-width: 740px) {
     width: 13px;
@@ -76,7 +78,7 @@ export const SwiperWrapper = styled.div`
     position: relative;
     list-style: none;
     padding: 0;
-    z-index: ${({ cardHover }) => (cardHover ? 2 : 1)};
+    z-index: ${({ cardHover }) => (cardHover ? 3 : 1)};
     height: 100%;
     display: flex;
     max-height: max-content;
@@ -142,7 +144,7 @@ export const SwiperWrapper = styled.div`
   }
 
   .swiper-slide:last-child {
-    ${({ desktop, padding, margin, value, endPadding }) => {
+    ${() => {
       return css`
         margin-right: var(--swiper-padding);
       `;
@@ -161,14 +163,14 @@ export const SwiperWrapper = styled.div`
 export const Nav = forwardRef(
   ({ next, onClick, enable, visible, dark, style }, ref) => {
     return (
-      <NavButton next={next} enable={enable} ref={ref} style={{ ...style }} onClick={onClick}>
-        <Svg
-          className="controller"
-          style={{
-            fill: dark ? "white" : "black",
-            visibility: enable ? "visible" : "hidden",
-          }}
-        />
+      <NavButton
+        next={next}
+        enable={enable}
+        ref={ref}
+        style={{ ...style }}
+        onClick={onClick}
+      >
+        <Svg className="controller" dark={dark} visibility={enable} />
       </NavButton>
     );
   }

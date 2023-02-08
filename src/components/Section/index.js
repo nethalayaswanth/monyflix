@@ -35,12 +35,14 @@ export const Wrapper = memo(
     title,
     children,
     isLoading,
+    variables,
     refCb,
     ...props
   }) => {
+   
     return (
       <Container ref={refCb}>
-        <Header title={title} />
+        <Header pathVariables={variables} title={title} />
         <div style={{ position: "relative", marginBottom: "20px" }}>
           <Carousel
             data={data}
@@ -48,6 +50,7 @@ export const Wrapper = memo(
             hasMore={hasNextPage}
             isFetching={isFetchingNextPage}
             fetchMore={fetchNextPage}
+            title={title}
             {...props}
           >
             {children && children}
@@ -65,12 +68,11 @@ export default Wrapper;
 
 
 export const SectionWrapper = ({
-  query,
   children,
   variables,
-  queryEnabled,
-  whileInView,
-  titleCard,
+  queryEnabled=true,
+  whileInView=true,
+  titlePoster,
   card,
   ...props
 }) => {
@@ -80,21 +82,25 @@ export const SectionWrapper = ({
     entry,
   } = useInView({
     threshold: 0.1,
+    // rootMargin: "0px 0px 350px 0px",
     triggerOnce: true,
   });
 
-  const refCb=useCallback((node)=>{
+  const refCb = useCallback(
+    (node) => {
+      if (node) {
+        inViewRef(node);
+      }
+    },
+    [inViewRef]
+  );
 
-    if(node){
-      inViewRef(node)
-    }
-  },[inViewRef])
 
-  
-  const useQuery = useMemo(() => queryHandlers[query], [query]);
-  
-  const details=card==='detail'
-  const fetchQuery =queryEnabled ? whileInView ? inView : queryEnabled :false
+  const fetchQuery = queryEnabled
+    ? whileInView
+      ? inView
+      : queryEnabled
+    : false;
   const {
     data,
     error,
@@ -104,10 +110,8 @@ export const SectionWrapper = ({
     isFetchingNextPage,
     status,
     isLoading,
-   
-  } = useQuery({
+  } = useMovies({
     ...variables,
-    withLandscapePosterPath: details || titleCard,
     queryOptions: { enabled: !!fetchQuery },
   });
 
@@ -115,13 +119,14 @@ export const SectionWrapper = ({
     if (data) {
       var list = [];
       data.pages.forEach((page, i) => {
+        if (!page) return;
         const { data } = page;
         list = [...list, ...data];
       });
       return list;
     }
     return [];
-  }, [data]); 
+  }, [data]);
 
   return (
     <Wrapper
@@ -134,6 +139,7 @@ export const SectionWrapper = ({
         isFetchingNextPage,
         isLoading,
         status,
+        variables,
       }}
       refCb={refCb}
       card={card}

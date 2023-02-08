@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 import { animated } from "react-spring";
 import Shimmer from "../shimmer";
-import { circleGradient, Overview } from "../Landing/styles";
+import { circleGradient,linearG, Overview } from "../Landing/styles";
 import { ReactComponent as PauseRounded } from "../../assets/pauseRounded.svg";
 export const Flex = styled(animated.div)`
   box-sizing: border-box;
@@ -31,7 +31,7 @@ export const AspectBox = styled.div`
   position: relative;
   width: 100%;
   overflow: hidden;
-  margin-bottom: 8px;
+  /* margin-bottom: 8px; */
   aspect-ratio: ${({ landscape }) => (landscape ? 16 / 9 : 2 / 3)};
   box-shadow: rgb(0 0 0 / 25%) 0px 4px 7px;
   &.absolute {
@@ -75,6 +75,10 @@ export const CardWrapper = styled(Flex)`
   width: 100%;
   overflow: hidden;
 
+  .landing &.card-wrapper::after {
+    ${linearG}
+  }
+
   @media only screen and (min-width: 740px) {
     .landscape &.card-wrapper::after,
     .landing &.card-wrapper::after {
@@ -93,8 +97,6 @@ export const CardWrapper = styled(Flex)`
   }
 
   .landing &.card-wrapper {
-    /* margin-bottom: 20px;
-    margin-top: 20px; */
     .backdrop {
       max-height: 700px;
       aspect-ratio: 2/3;
@@ -116,11 +118,6 @@ export const CardContainer = styled.div`
   width: 100%;
   /* border-radius: 6px; */
   background-color: "";
-  /* &.landing,
-  &.landscape {
-    background-color: black;
-  } */
-
   ${(props) => {
     switch (props.card) {
       case "potrait":
@@ -181,6 +178,7 @@ Description.Content = styled.div`
       ? css`
           padding: 0 var(--metaData-padding);
           padding-bottom: 10px;
+          flex-grow:0;
           @media only screen and (min-width: 740px) {
             grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
           }
@@ -211,8 +209,8 @@ Description.Title = styled.div`
   .epic & {
     ${textSmall}
   }
+  margin-top: 10px;
   .modal-description & {
-    margin-top: 10px;
   }
 `;
 
@@ -222,11 +220,23 @@ Description.Overview = styled.div`
   -webkit-line-clamp:3;
   overflow: hidden;
   color: var(--secondary-color);
-  /* flex: 1; */
-  .modal-description & {
-    margin-top: 10px;
-    -webkit-line-clamp: 4;
-  }
+
+  ${({opened})=>{!opened
+    ? css`
+        .modal-description & {
+          margin-top: 10px;
+          -webkit-line-clamp: 4;
+        }
+      `
+    : css`
+        .modal-description & {
+          margin-top: 10px;
+          -webkit-line-clamp: unset;
+        }
+      `;
+
+  }}
+  
 `;
 
 Description.MetaData = styled.div`

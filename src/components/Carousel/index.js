@@ -1,17 +1,13 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { SwiperSlide } from "swiper/react";
-import { useDevice } from "../../contexts/deviceContext.js";
 
-import { useModalDispatch } from "../../contexts/modalContext";
 import useBreakpoint from "../../hooks/useBreakpoint";
-import Card from "../Cards";
-import DetailsCard from "../Cards/detailsCard";
-import ExpandCard from "../Cards/expandCard";
-import LandscapeCard from "../Cards/landscapeCard";
-import ThumbnailCard from "../Cards/thumbNailCard";
+
+import Card from "../Card";
+
+import { SwiperWrapper } from "./styles";
 import Swiper from "./swiper";
-import { SwiperWrapper } from "./views";
 
 const DEFAULT_BREAKPOINTS = [420, 480, 740, 1000, 1320, 1500];
 const DETAIL_DEFAULTVALUES = [1.5, 1.75, 3, 4, 5, 5];
@@ -45,14 +41,6 @@ const defaultBreakPointValue = {
   landscape: LANDSCAPE_DEFAULTVALUE,
   landing: LANDSCAPE_DEFAULTVALUE,
 };
-export const Cards = {
-  expand: ExpandCard,
-  thumbnail: ThumbnailCard,
-  detail: DetailsCard,
-  card: Card,
-  landscape: LandscapeCard,
-  landing: LandscapeCard,
-};
 
 export default function Carousel(options) {
   const {
@@ -60,24 +48,20 @@ export default function Carousel(options) {
     loading,
     style,
     dark,
-    epic,
     fetchMore,
     hasMore,
     isFetching,
-    movies,
-    enabled,
     children,
     margin = DEFAULTMARGIN,
     padding = DEFAULTPARENTPADDING,
     controllerWidth = DEFAULTCONTROLLERWIDTH,
-    endPadding,
+    endPadding = false,
     card = "potrait",
+    videoCrop = false,
     cardExpand = true,
-    cardHover=true,
-    noPadding,
-    effectFade,
-    onClick,
-    full,
+    cardHover = true,
+    noPadding = false,
+    effectFade = false,
     ...restOptions
   } = options;
 
@@ -87,6 +71,17 @@ export default function Carousel(options) {
     defaultValue = defaultBreakPointValue[card],
     ...props
   } = restOptions;
+
+  const cardProps = { card, videoCrop, cardExpand, cardHover };
+
+  const value = useBreakpoint({
+    breakPoints,
+    breakPointValues,
+    defaultValue,
+  });
+
+  const placeHolder = Array(8).fill(0);
+
   const swiper = useRef();
 
   const { ref: elRef } = useInView({
@@ -98,52 +93,13 @@ export default function Carousel(options) {
     },
   });
 
-
-  const { mobile, desktop } = useDevice();
-
-  const value = useBreakpoint({
-    breakPoints,
-    breakPointValues,
-    defaultValue,
-  });
-
-  const placeHolder = Array(8).fill(0);
-
-  const dispatch = useModalDispatch();
-
-  const transitionEvents = useMemo(
-    () => ({
-      onTransitionStart: () => {
-        // dispatch({ type: "set enabled", enabled: false });
-      },
-      onTransitionEnd: () => {
-        // dispatch({ type: "set enabled", enabled: true });
-      },
-      onTouchStart: () => {
-        // dispatch({ type: "set enabled", enabled: false });
-      },
-      onTouchEnd: () => {
-        // dispatch({ type: "set enabled", enabled: true });
-      },
-    }),
-    []
-  );
-
- 
-
   return (
     <>
       <SwiperWrapper
         style={{
           ...style,
           ...(noPadding && { padding: 0 }),
-
         }}
-        controllerWidth={desktop ? controllerWidth : 0}
-        mobile={mobile}
-        desktop={desktop}
-        dark={dark}
-        endPadding={endPadding}
         padding={padding}
         value={value}
         margin={margin}
@@ -151,27 +107,21 @@ export default function Carousel(options) {
       >
         <Swiper
           ref={swiper}
-          enabled={enabled}
-          mobile={mobile}
-          desktop={desktop}
           dark={dark}
           SlidesPerView={value}
-          transitionEvents={transitionEvents}
           effectFade={effectFade}
           {...props}
         >
           {!loading && data !== undefined ? (
             <>
               {data.map((current, index) => {
-                const last=index===data.length-2
+                const last = index === data.length - 2;
                 return (
                   <SwiperSlide key={`${index}`}>
-                    <LandscapeCard
-                      data={current}
-                      card={card}
-                      cardExpand={cardExpand}
-                      cardHover={cardHover}
+                    <Card
                       index={index}
+                      data={current}
+                      {...cardProps}
                       {...(last && { ref: elRef })}
                     />
                   </SwiperSlide>
@@ -179,12 +129,7 @@ export default function Carousel(options) {
               })}
               {hasMore && !loading && (
                 <SwiperSlide key={"loading"}>
-                  <LandscapeCard
-                    // ref={elRef}
-                    card={card}
-                    cardExpand={cardExpand}
-                    cardHover={cardHover}
-                  />
+                  <Card {...cardProps} />
                 </SwiperSlide>
               )}
 
@@ -202,15 +147,9 @@ export default function Carousel(options) {
             </>
           ) : (
             placeHolder.map((data, index) => {
-              const first = index === 0;
-              const last = index === placeHolder.length - 1;
               return (
-                <SwiperSlide card={card} key={index} index={index}>
-                  <LandscapeCard
-                    card={card}
-                    cardExpand={cardExpand}
-                    cardHover={cardHover}
-                  />
+                <SwiperSlide  key={index} index={index}>
+                  <Card {...cardProps} />
                 </SwiperSlide>
               );
             })

@@ -1,9 +1,7 @@
+import debounce from "lodash/debounce";
 import { useMemo, useRef, useState } from "react";
-import styled from "styled-components";
 import { useParamState } from "../../contexts/paramContext";
 import { useSearch } from "../../requests/requests";
-import LandscapeCard from "../Cards/landscapeCard";
-import debounce from "lodash/debounce";
 
 import Grid from "./grid";
 export default function Search() {
@@ -23,10 +21,15 @@ export default function Search() {
   if (key !== queryKey) {
     debounceFn();
   }
-  console.log(queryKey)
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useSearch({ key: queryKey, queryOptions: { keepPreviousData: true,enabled:queryKey&& queryKey.length!==0 } });
+    useSearch({
+      key: queryKey,
+      queryOptions: {
+        keepPreviousData: true,
+        enabled: !!queryKey && queryKey.length !== 0,
+      },
+    });
 
   const movies = useMemo(() => {
     if (data) {
@@ -48,5 +51,4 @@ export default function Search() {
   };
 
   return <Grid {...props} />;
-
 }

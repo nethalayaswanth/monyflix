@@ -10,10 +10,7 @@ export default function Epic(props) {
       fallbackRender={({ resetErrorBoundary, error }) => {
         console.warn(error);
         return (
-          <div>
-            There was an error!
-            <button onClick={() => resetErrorBoundary()}>Try again</button>
-          </div>
+          null
         );
       }}
     >
