@@ -212,6 +212,8 @@ const Navbar = () => {
   });
 
   const showFilters = location.pathname === "/discover";
+
+  
   return (
     <PinnedHeader bind={bind}>
       <NavContainer

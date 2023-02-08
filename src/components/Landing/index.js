@@ -16,6 +16,7 @@ const Landing = ({ queryEnabled }) => {
       data={data}
       card={"landing"}
       cardHover={false}
+      cardExpand={true}
       dark
       noPadding
       effectFade

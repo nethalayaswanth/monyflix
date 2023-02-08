@@ -114,8 +114,8 @@ const Card = (
 
   const showVideo = id && desktop && (landing || landscape);
 
-  const hoverEnabled = !(landing || landscape) ? cardHover : false;
-  const expandEnabled = !landing ? cardExpand : false;
+  const hoverEnabled = !(landing || landscape || epic) ? cardHover : false;
+  const expandEnabled =  cardExpand 
 
   const clearTimer = useCallback(() => {
     if (timeOutRef.current) {
