@@ -30,7 +30,7 @@ const Wrapper = styled.div`
   transition: background 300ms;
 `;
 
-export default function PinnedHeader({ children }) {
+export default function PinnedHeader({ children,bind }) {
   const [mainHeader, subHeader] = Children.toArray(children);
   const header = useRef();
   const [mainRef, { height }] = useMeasure();
@@ -96,7 +96,7 @@ export default function PinnedHeader({ children }) {
   });
 
   return (
-    <Container  style={{ height }}>
+    <Container {...bind()} style={{ height }}>
       <Wrapper style={{ top: 0, position: "relative" }} ref={header}>
         <div ref={mainRef}>{mainHeader}</div>
         {subHeader ? <div>{subHeader}</div> : null}

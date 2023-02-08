@@ -213,12 +213,11 @@ const Navbar = () => {
 
   const showFilters = location.pathname === "/discover";
   return (
-    <PinnedHeader>
+    <PinnedHeader bind={bind}>
       <NavContainer
         style={{
           backgroundColor: backgroundOpacity.to((o) => `rgba(0,0,0,${o})`),
         }}
-        {...bind()}
       >
         <NavWrapper ref={ref}>
           <Logo
@@ -233,7 +232,7 @@ const Navbar = () => {
           >
             MONYFLIX
           </Logo>
-          <Spacer/>
+          <Spacer />
           {/* <Discover>Discover</Discover> */}
           <SearchWrapper
             {...clickAwayProps}
