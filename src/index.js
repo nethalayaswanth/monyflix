@@ -10,13 +10,11 @@ import reportWebVitals from "./reportWebVitals";
 
 import { BrowserRouter } from "react-router-dom";
 import { ImagesClient, ImagesProvider } from './contexts/imageCachingContext';
+import { sendToVercelAnalytics } from "./vitals";
+
 
 const rootElement=document.getElementById("root");
-// const modalRoot=document.createElement('span').setAttribute('id','modal-root')
-// const videoRoot = document
-//   .createElement("span")
-//   .setAttribute("id", "video-root");
-// rootElement.append(modalRoot, videoRoot);
+
 const root = ReactDOM.createRoot(rootElement);
 
 const queryClient = new QueryClient();
@@ -46,4 +44,4 @@ root.render(
    
    
    
-reportWebVitals();
+reportWebVitals(sendToVercelAnalytics);
