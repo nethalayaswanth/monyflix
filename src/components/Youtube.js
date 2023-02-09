@@ -157,17 +157,17 @@ setEnd(false)
   };
 
   const onBufferEnd = (e) => {
-    console.log("ufferended");
+   
     setBuffering(false);
   };
 
   const onBuffer = (e) => {
-    console.log("buffer");
+ 
     setBuffering(true);
   };
 
   const onError = (e) => {
-    console.log("error");
+   
     setPlaying(false);
   };
 
@@ -213,7 +213,6 @@ setEnd(false)
   useEffect(() => {
     let timoutRef = timeOutRef.current;
 
-    console.log(visible)
 
     if (visible && ready && interacted && play) {
       setPlaying(true);

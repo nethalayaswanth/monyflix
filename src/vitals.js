@@ -13,7 +13,6 @@ export function sendToVercelAnalytics(metric) {
   if (!analyticsId) {
     return;
   }
-  console.log('vitals enabled')
 
   const body = {
     dsn: analyticsId,

@@ -18,7 +18,6 @@ import Section from "../Section";
     },
   });
 
-  console.log(similarMoviesQuery)
 
   const similarMovies = useMemo(() => {
     const data = similarMoviesQuery?.data;

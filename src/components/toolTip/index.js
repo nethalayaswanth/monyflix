@@ -143,7 +143,6 @@ export default function ToolTip({ children, style, button }) {
         tool: toolRef.current,
       });
 
-      console.log(finalPosition.current);
 
       api.start({
         from: {
