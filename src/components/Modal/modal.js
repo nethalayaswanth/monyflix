@@ -208,7 +208,7 @@ const ModalWrapper = ({}) => {
       if (expanded) {
         const { width, topPadding } = updatedStyles({ width: screenWidth });
         api.start((_, { springs: { y } }) => {
-          console.log(y);
+    
           return {
             to: async (animate) => {
               await animate({ width });
