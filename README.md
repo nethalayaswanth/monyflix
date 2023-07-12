@@ -4,6 +4,9 @@
 <h3 align="center">
  <a href='https://monyflix.vercel.app'>Monyflix</a>
 </h3>
+<br>
+<br>
+
 <div align="center">
  <video autoplay="true" width="396px" aspect-ratio="16/9" src="https://github.com/nethalayaswanth/monyflix/assets/55290314/00fbcfe8-a9a1-4ace-b3c4-23558c0852fd" />
 </div>
@@ -22,9 +25,10 @@
 * Modal which reacts to react change
 * animations with react-spring
 
-<div display="flex" flex-direction='row'>
-  <img width='396px'  alt='' src="https://github.com/nethalayaswanth/monyflix/assets/55290314/393f5270-33b7-4915-b3a3-4c2b5c07447f" />
-  <img width='396px' alt='' src="https://github.com/nethalayaswanth/monyflix/assets/55290314/aba2039d-887b-4015-9ee4-f76edd15933d" />
+<div style="display:flex;flex-direction:row" >
+ 
+  <img width='33.33%' alt='' src="https://github.com/nethalayaswanth/monyflix/assets/55290314/aba2039d-887b-4015-9ee4-f76edd15933d" />
+   <img  width='33.33%'  alt='' src="https://github.com/nethalayaswanth/monyflix/assets/55290314/393f5270-33b7-4915-b3a3-4c2b5c07447f" />
 </div>
 
 <br/>
@@ -55,15 +59,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 ## Contact
 
 yaswanth nethala  - yaswanthnethala@gmail.com
-
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
